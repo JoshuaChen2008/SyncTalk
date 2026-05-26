@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent 产品形态草图</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #667085;
+      --line: #d9dee8;
+      --accent: #2563eb;
+      --accent-soft: #e8f0ff;
+      --ok: #0f766e;
+      --warn: #b45309;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 34px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0; color: var(--muted); }
+
+    .hint {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .option {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .option.recommended {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .preview {
+      height: 290px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .mock {
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .mock-top {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mock-body { padding: 12px; }
+
+    .nav {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #475467;
+      font-size: 12px;
+      background: #f8fafc;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .side, .content, .tile {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+
+    .side {
+      width: 31%;
+      padding: 10px;
+      min-height: 180px;
+      font-size: 12px;
+      color: #475467;
+    }
+
+    .content {
+      flex: 1;
+      padding: 12px;
+      min-height: 180px;
+    }
+
+    .block {
+      height: 34px;
+      border-radius: 5px;
+      background: #e9eef7;
+      margin-top: 9px;
+    }
+
+    .nodes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .tile {
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      text-align: center;
+      color: #475467;
+      font-size: 12px;
+    }
+
+    .body {
+      padding: 16px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      margin-bottom: 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tradeoff {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    .tradeoff div {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfe;
+    }
+
+    strong { color: var(--text); }
+
+    .footer {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    @media (max-width: 960px) {
+      header { display: block; }
+      .hint { display: inline-flex; margin-top: 12px; white-space: normal; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Agent 开发管理产品：第一版形态选择</h1>
+        <p>先决定产品主骨架，再继续设计页面、数据模型和 agent 流程。</p>
+      </div>
+      <div class="hint">请在对话里回复：选 A / B / C，或说你想混合哪两个方向</div>
+    </header>
+
+    <section class="grid" aria-label="产品形态选项">
+      <article class="option recommended">
+        <div class="preview">
+          <div class="mock">
+            <div class="mock-top">方案 A：项目驾驶舱</div>
+            <div class="mock-body">
+              <div class="nav">项目 / Agent / 文档 / Figma / 验证 / 提交</div>
+              <div class="row">
+                <div class="side">
+                  项目列表
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                </div>
+                <div class="content">
+                  <strong>当前项目</strong>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">推荐 MVP</span>
+          <h2>A. 项目驾驶舱</h2>
+          <p>以项目为中心管理产品文档、技术文档、Figma、任务、验证和提交记录。</p>
+          <div class="tradeoff">
+            <div><strong>优点：</strong>最贴近你的文档流程，容易做出可用第一版。</div>
+            <div><strong>代价：</strong>早期流程编排能力不会特别自由。</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="option">
+        <div class="preview">
+          <div class="mock">
+            <div class="mock-top">方案 B：Agent 流程编排器</div>
+            <div class="mock-body">
+              <div class="nav">流程模板 / 节点 / 运行记录 / 权限</div>
+              <div class="nodes">
+                <div class="tile">产品文档 Agent</div>
+                <div class="tile">UI Agent</div>
+                <div class="tile">代码 Agent</div>
+                <div class="tile">测试 Agent</div>
+                <div class="tile">Review Agent</div>
+                <div class="tile">Commit Agent</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">能力更强</span>
+          <h2>B. Agent 流程编排器</h2>
+          <p>以流程节点为中心，让用户配置多个 agent 的顺序、输入、输出和验证门禁。</p>
+          <div class="tradeoff">
+            <div><strong>优点：</strong>长期想象空间大，像低代码 agent 平台。</div>
+            <div><strong>代价：</strong>第一版复杂度高，容易陷入抽象设计。</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="option">
+        <div class="preview">
+          <div class="mock">
+            <div class="mock-top">方案 C：AI 开发工作台</div>
+            <div class="mock-body">
+              <div class="nav">聊天 / 文件 / 终端 / 浏览器 / 任务</div>
+              <div class="row">
+                <div class="content">
+                  <strong>对话执行区</strong>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                </div>
+                <div class="side">
+                  运行状态
+                  <div class="block"></div>
+                  <div class="block"></div>
+                  <div class="block"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">体验直观</span>
+          <h2>C. AI 开发工作台</h2>
+          <p>像一个可视化 Codex/Claude Code，用户在页面里聊天、看文件、跑任务。</p>
+          <div class="tradeoff">
+            <div><strong>优点：</strong>用户感知强，演示效果好。</div>
+            <div><strong>代价：</strong>文件、终端、权限、安全隔离都要很早处理。</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="footer">
+      <strong>我的倾向：</strong>
+      先做 A，再逐步长出 B。也就是第一版先把“一个项目如何被 agent 管好”做扎实，再把每个阶段抽象成可配置流程。
+    </section>
+  </main>
+</body>
+</html>

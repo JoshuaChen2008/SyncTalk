@@ -1,0 +1,87 @@
+<h2>这个 agent 产品先做成什么形态？</h2>
+<p class="subtitle">先选产品主骨架。后续 UI、数据模型、agent 流程都会围绕这个选择展开。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 A：项目驾驶舱</div>
+        <div class="mockup-body">
+          <div class="mock-nav">项目 / Agent / 文档 / 验证 / 提交</div>
+          <div style="display:flex; gap:12px; margin-top:12px;">
+            <div class="mock-sidebar" style="width:28%;">
+              <div>项目列表</div>
+              <div class="placeholder" style="height:42px;">Pot 2.0</div>
+              <div class="placeholder" style="height:42px;">简历项目</div>
+              <div class="placeholder" style="height:42px;">SaaS Demo</div>
+            </div>
+            <div class="mock-content" style="flex:1;">
+              <div class="label">当前项目</div>
+              <h3>从想法到可验证交付</h3>
+              <div class="placeholder" style="height:48px;">需求文档进度</div>
+              <div class="placeholder" style="height:48px;">UI 设计同步</div>
+              <div class="placeholder" style="height:48px;">开发任务状态</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 项目驾驶舱</h3>
+      <p>以“项目”为中心管理文档、Figma、任务、验证和 commit。最适合先做 MVP。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 B：Agent 流程编排器</div>
+        <div class="mockup-body">
+          <div class="mock-nav">流程模板 / 节点 / 运行记录 / 权限</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:18px;">
+            <div class="placeholder" style="height:74px;">产品文档 Agent</div>
+            <div class="placeholder" style="height:74px;">UI Agent</div>
+            <div class="placeholder" style="height:74px;">代码 Agent</div>
+            <div class="placeholder" style="height:74px;">测试 Agent</div>
+            <div class="placeholder" style="height:74px;">Review Agent</div>
+            <div class="placeholder" style="height:74px;">Commit Agent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Agent 流程编排器</h3>
+      <p>以“流程节点”为中心，可配置多个 agent 如何协作。强大，但第一版复杂度更高。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 C：AI 开发工作台</div>
+        <div class="mockup-body">
+          <div class="mock-nav">聊天 / 文件 / 终端 / 浏览器 / 任务</div>
+          <div style="display:flex; gap:12px; margin-top:12px;">
+            <div class="mock-content" style="flex:1;">
+              <div class="placeholder" style="height:150px;">对话区：让 agent 执行任务</div>
+            </div>
+            <div class="mock-sidebar" style="width:34%;">
+              <div class="placeholder" style="height:46px;">文件变更</div>
+              <div class="placeholder" style="height:46px;">运行结果</div>
+              <div class="placeholder" style="height:46px;">待办状态</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. AI 开发工作台</h3>
+      <p>像一个轻量 Codex/Claude Code 前端。体验直观，但会很快碰到终端、文件、权限集成问题。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>我的建议</h3>
+  <p>第一版选 A：项目驾驶舱。它最贴合你文档里的流程：先管项目、规范、文档、Figma、任务、验证，再逐步升级成 B 的流程编排能力。</p>
+</div>

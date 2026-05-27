@@ -11,7 +11,9 @@ export function RegisterPage() {
           <h2 id="register-title" className="text-3xl font-extrabold text-slate-900">
             Create Your Account
           </h2>
-          <p className="mt-3 text-sm text-slate-500">Start matching with language partners today.</p>
+          <p className="mt-3 text-sm text-slate-500">
+            Start matching with language partners today.
+          </p>
         </div>
 
         <form className="mt-8 space-y-5">

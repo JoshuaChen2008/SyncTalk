@@ -1,9 +1,28 @@
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router';
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router';
 
+import { getApiErrorMessage } from '../api/auth-api';
+import { useLoginMutation } from '../api/auth-hooks';
 import { AuthShell } from './auth-shell';
 
 export function LoginPage() {
+  const navigate = useNavigate();
+  const loginMutation = useLoginMutation();
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      await loginMutation.mutateAsync({ identifier, password });
+      navigate('/app/discover');
+    } catch {
+      // The mutation error is rendered below as form-level feedback.
+    }
+  }
+
   return (
     <AuthShell>
       <section className="auth-card" aria-labelledby="login-title">
@@ -14,7 +33,16 @@ export function LoginPage() {
           <p className="mt-3 text-sm text-slate-500">Ready to dive back into the conversation?</p>
         </div>
 
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {loginMutation.isError ? (
+            <p
+              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+              role="alert"
+            >
+              {getApiErrorMessage(loginMutation.error)}
+            </p>
+          ) : null}
+
           <div>
             <label className="auth-label" htmlFor="email">
               Email Address
@@ -25,6 +53,8 @@ export function LoginPage() {
               name="email"
               placeholder="you@example.com"
               type="email"
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
             />
           </div>
 
@@ -38,6 +68,8 @@ export function LoginPage() {
               name="password"
               placeholder="••••••••"
               type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
             />
           </div>
 
@@ -56,8 +88,8 @@ export function LoginPage() {
             </a>
           </div>
 
-          <button className="auth-primary-button" type="submit">
-            <span>Sign In</span>
+          <button className="auth-primary-button" type="submit" disabled={loginMutation.isPending}>
+            <span>{loginMutation.isPending ? 'Signing In...' : 'Sign In'}</span>
             <ArrowRight aria-hidden="true" size={18} strokeWidth={2.5} />
           </button>
         </form>

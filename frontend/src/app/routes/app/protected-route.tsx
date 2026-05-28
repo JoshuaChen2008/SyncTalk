@@ -1,11 +1,19 @@
 import { Navigate, Outlet } from 'react-router';
 
-export function ProtectedRoute() {
-  // Auth 后端接入前先固定为未登录；后续会替换为 /api/auth/me 的 current user query。
-  const isAuthenticated = false;
+import { useCurrentUserQuery } from '../../../features/auth/api/auth-hooks';
 
-  if (!isAuthenticated) {
-    // 所有 /app/* 页面统一从这里拦截，避免每个业务页面重复写登录判断。
+export function ProtectedRoute() {
+  const currentUserQuery = useCurrentUserQuery();
+
+  if (currentUserQuery.isPending) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
+        <p className="text-sm font-semibold text-slate-600">Restoring session...</p>
+      </main>
+    );
+  }
+
+  if (currentUserQuery.isError || !currentUserQuery.data) {
     return <Navigate to="/auth/login" replace />;
   }
 

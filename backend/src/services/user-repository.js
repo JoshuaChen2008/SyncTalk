@@ -15,5 +15,11 @@ export function createUserRepository({ userModel = User } = {}) {
     findById(userId) {
       return userModel.findById(userId);
     },
+    updateProfile(userId, profile) {
+      return userModel.findByIdAndUpdate(userId, profile, {
+        new: true,
+        runValidators: true,
+      });
+    },
   };
 }

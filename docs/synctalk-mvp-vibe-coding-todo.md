@@ -87,21 +87,21 @@ git diff
 
 实现：
 
-- [ ] 创建 `frontend/`、`backend/`。
-- [ ] 前端初始化 Vite + React + TypeScript。
-- [ ] 后端初始化 Node.js + Express。
-- [ ] 配置 ESLint、Prettier、Vitest、React Testing Library。
-- [ ] 配置 Tailwind CSS、DaisyUI、React Router、TanStack Query、Zustand、Axios。
-- [ ] 配置 Playwright `Smoke` project，匹配 `frontend/e2e/*.smoke.spec.ts`。
-- [ ] 添加前后端 `.env.example`。
-- [ ] 添加后端 health endpoint 和最小登录页 smoke。
+- [x] 创建 `frontend/`、`backend/`。
+- [x] 前端初始化 Vite + React + TypeScript。
+- [x] 后端初始化 Node.js + Express。
+- [x] 配置 ESLint、Prettier、Vitest、React Testing Library。
+- [x] 配置 Tailwind CSS、DaisyUI、React Router、TanStack Query、Zustand、Axios。
+- [x] 配置 Playwright `Smoke` project，匹配 `frontend/e2e/*.smoke.spec.ts`。
+- [x] 添加前后端 `.env.example`。
+- [x] 添加后端 health endpoint 和最小登录页 smoke。
 
 验收：
 
-- [ ] 前端 dev server 可启动。
-- [ ] 后端 health endpoint 可响应。
-- [ ] `/auth/login` 可渲染。
-- [ ] 通用完成检查点通过。
+- [x] 前端 dev server 可启动。
+- [x] 后端 health endpoint 可响应。
+- [x] `/auth/login` 可渲染。
+- [x] 通用完成检查点通过。
 
 学习：入口文件、路由入口、测试入口、Vite/Express 基础启动流程。
 
@@ -113,21 +113,21 @@ git diff
 
 实现：
 
-- [ ] 后端实现 `register/login/logout/me`。
-- [ ] 密码哈希存储，JWT 写入 HttpOnly Cookie。
-- [ ] 添加鉴权中间件和受保护 API。
-- [ ] 前端实现登录页、注册页、当前用户 query、受保护路由。
-- [ ] Axios 开启 `withCredentials`。
+- [x] 后端实现 `register/login/logout/me`。
+- [x] 密码哈希存储，JWT 写入 HttpOnly Cookie。
+- [x] 添加鉴权中间件和受保护 API。
+- [x] 前端实现登录页、注册页、当前用户 query、受保护路由。
+- [x] Axios 开启 `withCredentials`。
 
 验收：
 
-- [ ] 手动注册、退出、重新登录。
-- [ ] 刷新页面后登录态恢复。
-- [ ] 清除 Cookie 后访问 `/app/*` 回到登录页。
-- [ ] 错误密码有清晰提示。
-- [ ] 通用完成检查点通过。
+- [x] 手动注册、退出、重新登录。
+- [x] 刷新页面后登录态恢复。
+- [x] 清除 Cookie 后访问 `/app/*` 回到登录页。
+- [x] 错误密码有清晰提示。
+- [x] 通用完成检查点通过。
 
-学习：HttpOnly Cookie vs localStorage、CORS credentials、`/api/auth/me`、受保护路由。
+学习：HttpOnly Cookie vs localStorage、CORS credentials (浏览器跨域请求时，是否允许携带“身份凭证”)、`/api/auth/me`、受保护路由。
 
 可选 commit：`feat(auth): add cookie based authentication`
 

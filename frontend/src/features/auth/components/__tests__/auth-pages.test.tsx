@@ -129,9 +129,35 @@ describe('router auth boundary', () => {
   });
 
   it('restores a logged-in user from /auth/me and allows protected routes', async () => {
-    vi.spyOn(apiClient, 'get').mockResolvedValue({
-      data: { user: { id: 'user-1', username: 'mei', email: 'mei@example.com' } },
-    } as Awaited<ReturnType<typeof apiClient.get>>);
+    vi.spyOn(apiClient, 'get').mockImplementation(async (url) => {
+      if (url === '/auth/me') {
+        return {
+          data: { user: { id: 'user-1', username: 'mei', email: 'mei@example.com' } },
+        } as Awaited<ReturnType<typeof apiClient.get>>;
+      }
+
+      if (url === '/profile/me') {
+        return {
+          data: {
+            profile: {
+              id: 'user-1',
+              username: 'mei',
+              email: 'mei@example.com',
+              avatar: '',
+              nativeLanguage: 'Japanese',
+              targetLanguage: 'English',
+              languageLevel: 'B1',
+              learningGoal: 'Daily conversation',
+              bio: '',
+              timezone: 'Asia/Tokyo',
+              isProfileComplete: true,
+            },
+          },
+        } as Awaited<ReturnType<typeof apiClient.get>>;
+      }
+
+      throw new Error(`Unexpected GET ${url}`);
+    });
     const router = createMemoryRouter(routes, {
       initialEntries: ['/app/discover'],
     });

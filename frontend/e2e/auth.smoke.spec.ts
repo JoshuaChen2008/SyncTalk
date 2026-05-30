@@ -24,7 +24,7 @@ test.describe('auth smoke', () => {
   });
 
   test('renders the profile form for a signed-in user', async ({ page }) => {
-    await page.route('http://127.0.0.1:8000/api/auth/me', async (route) => {
+    await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({
@@ -32,7 +32,7 @@ test.describe('auth smoke', () => {
         }),
       });
     });
-    await page.route('http://127.0.0.1:8000/api/profile/me', async (route) => {
+    await page.route('**/api/profile/me', async (route) => {
       await route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({

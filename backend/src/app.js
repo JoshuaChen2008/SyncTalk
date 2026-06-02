@@ -5,13 +5,16 @@ import express from 'express';
 import { env } from './config/env.js';
 import { authService as defaultAuthService } from './services/auth-service.js';
 import { profileService as defaultProfileService } from './services/profile-service.js';
+import { usersService as defaultUsersService } from './services/users-service.js';
 import { createAuthRouter } from './routes/auth.js';
 import { healthRouter } from './routes/health.js';
 import { createProfileRouter } from './routes/profile.js';
+import { createUsersRouter } from './routes/users.js';
 
 export function createApp({
   authService = defaultAuthService,
   profileService = defaultProfileService,
+  usersService = defaultUsersService,
 } = {}) {
   const app = express();
 
@@ -27,6 +30,7 @@ export function createApp({
   app.use(healthRouter);
   app.use('/api/auth', createAuthRouter(authService));
   app.use('/api/profile', createProfileRouter(authService, profileService));
+  app.use('/api/users', createUsersRouter(authService, usersService));
 
   app.use((_req, res) => {
     res.status(404).json({ error: 'Not found' });

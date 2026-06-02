@@ -15,6 +15,39 @@ export function createUserRepository({ userModel = User } = {}) {
     findById(userId) {
       return userModel.findById(userId);
     },
+    findDiscoverableUsers(userId) {
+      return userModel
+        .find({
+          _id: { $ne: userId },
+          nativeLanguage: { $ne: '' },
+          targetLanguage: { $ne: '' },
+          languageLevel: { $ne: '' },
+          learningGoal: { $ne: '' },
+          timezone: { $ne: '' },
+        })
+        .sort({ username: 1 });
+    },
+    searchDiscoverableUsers(userId, query) {
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(escapedQuery, 'i');
+
+      return userModel
+        .find({
+          _id: { $ne: userId },
+          nativeLanguage: { $ne: '' },
+          targetLanguage: { $ne: '' },
+          languageLevel: { $ne: '' },
+          learningGoal: { $ne: '' },
+          timezone: { $ne: '' },
+          $or: [
+            { username: pattern },
+            { nativeLanguage: pattern },
+            { targetLanguage: pattern },
+            { bio: pattern },
+          ],
+        })
+        .sort({ username: 1 });
+    },
     updateProfile(userId, profile) {
       return userModel.findByIdAndUpdate(userId, profile, {
         new: true,

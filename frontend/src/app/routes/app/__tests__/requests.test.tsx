@@ -86,6 +86,12 @@ function mockProtectedRequests({
       } as Awaited<ReturnType<typeof apiClient.get>>;
     }
 
+    if (url === '/notifications') {
+      return { data: { notifications: [], unreadCount: 0 } } as Awaited<
+        ReturnType<typeof apiClient.get>
+      >;
+    }
+
     if (url === '/friends/requests') {
       return { data: { receivedRequests, sentRequests } } as Awaited<ReturnType<typeof apiClient.get>>;
     }

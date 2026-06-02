@@ -1,4 +1,5 @@
 import { relationshipRepository as defaultRelationshipRepository } from './relationship-repository.js';
+import { notificationsService as defaultNotificationsService } from './notifications-service.js';
 import { createUserRepository } from './user-repository.js';
 import { createHttpError } from '../utils/http-error.js';
 
@@ -67,6 +68,7 @@ function getSortedUserIds(firstUserId, secondUserId) {
 export function createFriendsService({
   userRepository = createUserRepository(),
   relationshipRepository = defaultRelationshipRepository,
+  notificationsService = defaultNotificationsService,
 } = {}) {
   return {
     async sendFriendRequest(userId, receiverId) {
@@ -102,6 +104,10 @@ export function createFriendsService({
       }
 
       const request = await relationshipRepository.createFriendRequest({
+        senderId: userId,
+        receiverId: normalizedReceiverId,
+      });
+      await notificationsService.createFriendRequestNotification({
         senderId: userId,
         receiverId: normalizedReceiverId,
       });
@@ -161,6 +167,10 @@ export function createFriendsService({
         result.friendship =
           existingFriendship ??
           (await relationshipRepository.createFriendship(userAId, userBId));
+        await notificationsService.createFriendAcceptedNotification({
+          accepterId: userId,
+          senderId: toId(request.senderId),
+        });
       }
 
       return result;

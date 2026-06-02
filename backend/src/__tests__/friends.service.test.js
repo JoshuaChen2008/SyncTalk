@@ -31,6 +31,7 @@ function createRequest(overrides = {}) {
 function createService({
   userRepository: userRepositoryOverrides = {},
   relationshipRepository: relationshipRepositoryOverrides = {},
+  notificationsService: notificationsServiceOverrides = {},
 } = {}) {
   const userRepository = {
     findById: vi.fn(async () => createUser()),
@@ -57,17 +58,23 @@ function createService({
     deleteFriendshipBetween: vi.fn(async () => ({ deletedCount: 1 })),
     ...relationshipRepositoryOverrides,
   };
+  const notificationsService = {
+    createFriendRequestNotification: vi.fn(async () => undefined),
+    createFriendAcceptedNotification: vi.fn(async () => undefined),
+    ...notificationsServiceOverrides,
+  };
 
   return {
-    service: createFriendsService({ userRepository, relationshipRepository }),
+    service: createFriendsService({ userRepository, relationshipRepository, notificationsService }),
     userRepository,
     relationshipRepository,
+    notificationsService,
   };
 }
 
 describe('friends service', () => {
   it('sends a pending friend request to an existing stranger', async () => {
-    const { service, userRepository, relationshipRepository } = createService();
+    const { service, userRepository, relationshipRepository, notificationsService } = createService();
 
     const result = await service.sendFriendRequest('user-1', 'user-2');
 
@@ -75,6 +82,10 @@ describe('friends service', () => {
     expect(relationshipRepository.findPendingRequestBetween).toHaveBeenCalledWith('user-1', 'user-2');
     expect(relationshipRepository.findFriendshipBetween).toHaveBeenCalledWith('user-1', 'user-2');
     expect(relationshipRepository.createFriendRequest).toHaveBeenCalledWith({
+      senderId: 'user-1',
+      receiverId: 'user-2',
+    });
+    expect(notificationsService.createFriendRequestNotification).toHaveBeenCalledWith({
       senderId: 'user-1',
       receiverId: 'user-2',
     });
@@ -125,7 +136,7 @@ describe('friends service', () => {
   });
 
   it('accepts a received request and creates a sorted friendship', async () => {
-    const { service, relationshipRepository } = createService({
+    const { service, relationshipRepository, notificationsService } = createService({
       relationshipRepository: {
         findRequestById: vi.fn(async () =>
           createRequest({ id: 'request-1', senderId: 'user-z', receiverId: 'user-a' }),
@@ -137,17 +148,22 @@ describe('friends service', () => {
 
     expect(relationshipRepository.updateRequestStatus).toHaveBeenCalledWith('request-1', 'accepted');
     expect(relationshipRepository.createFriendship).toHaveBeenCalledWith('user-a', 'user-z');
+    expect(notificationsService.createFriendAcceptedNotification).toHaveBeenCalledWith({
+      accepterId: 'user-a',
+      senderId: 'user-z',
+    });
     expect(result.request).toMatchObject({ id: 'request-1', status: 'accepted' });
     expect(result.friendship).toMatchObject({ userAId: 'user-a', userBId: 'user-z' });
   });
 
   it('rejects a received request without creating a friendship', async () => {
-    const { service, relationshipRepository } = createService();
+    const { service, relationshipRepository, notificationsService } = createService();
 
     const result = await service.respondToFriendRequest('user-1', 'request-1', 'reject');
 
     expect(relationshipRepository.updateRequestStatus).toHaveBeenCalledWith('request-1', 'rejected');
     expect(relationshipRepository.createFriendship).not.toHaveBeenCalled();
+    expect(notificationsService.createFriendAcceptedNotification).not.toHaveBeenCalled();
     expect(result.request).toMatchObject({ id: 'request-1', status: 'rejected' });
   });
 

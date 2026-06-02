@@ -56,6 +56,12 @@ function mockProtectedAppGet({ friends = [], friendsError }: { friends?: unknown
       } as Awaited<ReturnType<typeof apiClient.get>>;
     }
 
+    if (url === '/notifications') {
+      return { data: { notifications: [], unreadCount: 0 } } as Awaited<
+        ReturnType<typeof apiClient.get>
+      >;
+    }
+
     if (url === '/friends') {
       if (friendsError) {
         throw friendsError;

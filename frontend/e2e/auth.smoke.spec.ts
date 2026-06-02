@@ -99,6 +99,15 @@ test.describe('auth smoke', () => {
         }),
       });
     });
+    await page.route('**/api/notifications', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          notifications: [],
+          unreadCount: 0,
+        }),
+      });
+    });
 
     await page.goto('/app/discover');
 

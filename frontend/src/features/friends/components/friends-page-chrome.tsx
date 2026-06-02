@@ -1,7 +1,8 @@
-import { Search, UserCircle } from 'lucide-react';
+import { Bell, Search, UserCircle } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { Link, NavLink } from 'react-router';
 
+import { useNotificationsQuery } from '../../notifications/api/notifications-hooks';
 import profileCollage1 from '../../../assets/synctalk/profile-collage-1.png';
 import profileCollage3 from '../../../assets/synctalk/profile-collage-3.png';
 import profileCollage5 from '../../../assets/synctalk/profile-collage-5.png';
@@ -11,12 +12,16 @@ const pageNavItems = [
   { to: '/app/discover', label: 'Discover' },
   { to: '/app/friends', label: 'Friends' },
   { to: '/app/requests', label: 'Requests' },
+  { to: '/app/notifications', label: 'Notifications' },
 ];
 
 export const featureCardClass =
   'rounded-lg border border-white/75 bg-white/88 shadow-[0_22px_56px_rgb(79_70_229_/_12%)] backdrop-blur-2xl';
 
 export function FriendsFeatureTopNav() {
+  const notificationsQuery = useNotificationsQuery();
+  const unreadCount = notificationsQuery.data?.unreadCount ?? 0;
+
   return (
     <header className="relative z-10 flex min-h-16 items-center justify-between gap-4 border-b border-indigo-100/80 bg-white/72 px-4 backdrop-blur-2xl sm:px-8">
       <Link className="text-3xl font-black tracking-normal text-[#4f46e5]" to="/app/discover">
@@ -40,6 +45,14 @@ export function FriendsFeatureTopNav() {
             to={item.to}
           >
             {item.label}
+            {item.to === '/app/notifications' && unreadCount > 0 ? (
+              <span
+                aria-label={`${unreadCount} unread`}
+                className="ml-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#fbbf24] px-1.5 text-xs font-black text-slate-950"
+              >
+                {unreadCount}
+              </span>
+            ) : null}
           </NavLink>
         ))}
       </nav>
@@ -52,6 +65,13 @@ export function FriendsFeatureTopNav() {
         >
           <Search aria-hidden="true" size={22} />
         </button>
+        <Link
+          aria-label="Notifications"
+          className="grid h-10 w-10 cursor-pointer place-items-center rounded-lg transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"
+          to="/app/notifications"
+        >
+          <Bell aria-hidden="true" size={22} />
+        </Link>
         <button
           aria-label="Profile"
           className="grid h-10 w-10 cursor-pointer place-items-center rounded-lg transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"

@@ -5,6 +5,7 @@ import { ProtectedRoute } from './routes/app/protected-route';
 import { LoginPage } from '../features/auth/components/login-page';
 import { FriendsPage } from '../features/friends/components/friends-page';
 import { RequestsPage } from '../features/friends/components/requests-page';
+import { NotificationsPage } from '../features/notifications/components/notifications-page';
 import { RegisterPage } from '../features/auth/components/register-page';
 import { ProfilePage } from '../features/profile/components/profile-page';
 
@@ -37,6 +38,10 @@ export const routes: RouteObject[] = [
       {
         path: 'requests',
         element: <RequestsPage />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsPage />,
       },
       {
         path: 'profile',

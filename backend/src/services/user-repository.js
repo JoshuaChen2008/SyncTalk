@@ -15,6 +15,9 @@ export function createUserRepository({ userModel = User } = {}) {
     findById(userId) {
       return userModel.findById(userId);
     },
+    findByIds(userIds) {
+      return userModel.find({ _id: { $in: userIds } });
+    },
     findDiscoverableUsers(userId) {
       return userModel
         .find({

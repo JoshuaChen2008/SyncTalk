@@ -96,7 +96,8 @@ function ProfileTopNav() {
       </Link>
       <nav className="profile-nav-links" aria-label="Profile navigation">
         <Link to="/app/discover">Discover</Link>
-        <span>Friends</span>
+        <Link to="/app/friends">Friends</Link>
+        <Link to="/app/requests">Requests</Link>
         <span>Messages</span>
       </nav>
       <button className="profile-icon-button" type="button" aria-label="Profile menu">

@@ -5,6 +5,11 @@ function toId(value) {
   return String(value);
 }
 
+function getSortedFriendshipPair(firstUserId, secondUserId) {
+  const [userAId, userBId] = [toId(firstUserId), toId(secondUserId)].sort();
+  return { userAId, userBId };
+}
+
 export function createRelationshipRepository({
   friendRequestModel = FriendRequest,
   friendshipModel = Friendship,
@@ -59,6 +64,53 @@ export function createRelationshipRepository({
       }
 
       return statuses;
+    },
+    findPendingRequestBetween(userId, candidateId) {
+      return friendRequestModel
+        .findOne({
+          status: 'pending',
+          $or: [
+            { senderId: userId, receiverId: candidateId },
+            { senderId: candidateId, receiverId: userId },
+          ],
+        })
+        .lean();
+    },
+    findFriendshipBetween(userId, candidateId) {
+      return friendshipModel.findOne(getSortedFriendshipPair(userId, candidateId)).lean();
+    },
+    async createFriendRequest(request) {
+      const createdRequest = await friendRequestModel.create(request);
+      return createdRequest.toJSON();
+    },
+    findReceivedRequests(userId) {
+      return friendRequestModel.find({ receiverId: userId, status: 'pending' }).sort({ createdAt: -1 }).lean();
+    },
+    findSentRequests(userId) {
+      return friendRequestModel.find({ senderId: userId, status: 'pending' }).sort({ createdAt: -1 }).lean();
+    },
+    findRequestById(requestId) {
+      return friendRequestModel.findById(requestId).lean();
+    },
+    updateRequestStatus(requestId, status) {
+      return friendRequestModel.findByIdAndUpdate(requestId, { status }, { new: true }).lean();
+    },
+    async createFriendship(firstUserId, secondUserId) {
+      const createdFriendship = await friendshipModel.create(
+        getSortedFriendshipPair(firstUserId, secondUserId),
+      );
+      return createdFriendship.toJSON();
+    },
+    findFriendshipsForUser(userId) {
+      return friendshipModel
+        .find({
+          $or: [{ userAId: userId }, { userBId: userId }],
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+    },
+    deleteFriendshipBetween(userId, friendId) {
+      return friendshipModel.deleteOne(getSortedFriendshipPair(userId, friendId));
     },
   };
 }

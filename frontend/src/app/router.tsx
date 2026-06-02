@@ -3,6 +3,8 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { DiscoverPage } from './routes/app/discover';
 import { ProtectedRoute } from './routes/app/protected-route';
 import { LoginPage } from '../features/auth/components/login-page';
+import { FriendsPage } from '../features/friends/components/friends-page';
+import { RequestsPage } from '../features/friends/components/requests-page';
 import { RegisterPage } from '../features/auth/components/register-page';
 import { ProfilePage } from '../features/profile/components/profile-page';
 
@@ -27,6 +29,14 @@ export const routes: RouteObject[] = [
       {
         path: 'discover',
         element: <DiscoverPage />,
+      },
+      {
+        path: 'friends',
+        element: <FriendsPage />,
+      },
+      {
+        path: 'requests',
+        element: <RequestsPage />,
       },
       {
         path: 'profile',

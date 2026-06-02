@@ -7,9 +7,11 @@ import {
   MapPin,
   Search,
   Sparkles,
+  UserPlus,
   UserRoundCheck,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { Link } from 'react-router';
 
 import profileCollage1 from '../../../assets/synctalk/profile-collage-1.png';
 import profileCollage3 from '../../../assets/synctalk/profile-collage-3.png';
@@ -24,6 +26,9 @@ import {
   useSearchUsersQuery,
 } from '../../../features/discovery/api/discovery-hooks';
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
+import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
+import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
+import { AppNav } from './app-nav';
 
 const relationshipLabels: Record<RelationshipStatus, string> = {
   stranger: 'Available',
@@ -82,7 +87,17 @@ function withDevelopmentDemoUsers(
   return mergedUsers;
 }
 
-function DiscoveryUserCard({ user }: { user: DiscoveryUser }) {
+function DiscoveryUserCard({
+  isSending,
+  onSendRequest,
+  user,
+}: {
+  isSending: boolean;
+  onSendRequest: (user: DiscoveryUser) => void;
+  user: DiscoveryUser;
+}) {
+  const canSendRequest = user.relationshipStatus === 'stranger';
+
   return (
     <article
       className={`group overflow-hidden rounded-lg ${glassPanel} transition-transform duration-200 hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
@@ -107,14 +122,45 @@ function DiscoveryUserCard({ user }: { user: DiscoveryUser }) {
             {user.bio ? <p className="mt-4 text-sm leading-6 text-slate-700">{user.bio}</p> : null}
           </div>
 
-          <span
-            className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-black backdrop-blur-xl ${relationshipTone(
-              user.relationshipStatus,
-            )}`}
-          >
-            <UserRoundCheck aria-hidden="true" size={17} />
-            {relationshipLabels[user.relationshipStatus]}
-          </span>
+          <div className="flex shrink-0 flex-col gap-3">
+            <span
+              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-black backdrop-blur-xl ${relationshipTone(
+                user.relationshipStatus,
+              )}`}
+            >
+              <UserRoundCheck aria-hidden="true" size={17} />
+              {relationshipLabels[user.relationshipStatus]}
+            </span>
+            {user.relationshipStatus === 'request_received' ? (
+              <Link
+                aria-label={`Review request from ${user.username}`}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#4f46e5] px-4 text-sm font-black text-white shadow-[0_12px_24px_rgb(79_70_229_/_22%)] transition hover:bg-[#4338ca] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"
+                to="/app/requests"
+              >
+                <UserPlus aria-hidden="true" size={17} />
+                Review request
+              </Link>
+            ) : (
+              <button
+                aria-label={
+                  canSendRequest
+                    ? `Send request to ${user.username}`
+                    : `${relationshipLabels[user.relationshipStatus]} with ${user.username}`
+                }
+                className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#4f46e5] px-4 text-sm font-black text-white shadow-[0_12px_24px_rgb(79_70_229_/_22%)] transition hover:bg-[#4338ca] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none motion-reduce:transition-none"
+                disabled={!canSendRequest || isSending}
+                type="button"
+                onClick={() => onSendRequest(user)}
+              >
+                <UserPlus aria-hidden="true" size={17} />
+                {isSending
+                  ? 'Sending...'
+                  : canSendRequest
+                    ? 'Send request'
+                    : 'Unavailable'}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -153,17 +199,21 @@ function DiscoveryUserCard({ user }: { user: DiscoveryUser }) {
 }
 
 function ResultsState({
-  isPending,
-  isError,
   error,
-  users,
+  isError,
+  isPending,
   isSearch,
+  onSendRequest,
+  sendingUserId,
+  users,
 }: {
-  isPending: boolean;
-  isError: boolean;
   error: unknown;
-  users: DiscoveryUser[] | undefined;
+  isError: boolean;
+  isPending: boolean;
   isSearch: boolean;
+  onSendRequest: (user: DiscoveryUser) => void;
+  sendingUserId: string;
+  users: DiscoveryUser[] | undefined;
 }) {
   if (isPending) {
     return (
@@ -211,7 +261,12 @@ function ResultsState({
       aria-label={isSearch ? 'Search results' : 'Recommended partners'}
     >
       {users.map((user) => (
-        <DiscoveryUserCard key={user.id} user={user} />
+        <DiscoveryUserCard
+          isSending={sendingUserId === user.id}
+          key={user.id}
+          user={user}
+          onSendRequest={onSendRequest}
+        />
       ))}
     </section>
   );
@@ -219,21 +274,35 @@ function ResultsState({
 
 export function DiscoverPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [requestFeedback, setRequestFeedback] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const normalizedSearchTerm = searchTerm.trim();
   const isSearch = normalizedSearchTerm.length > 0;
   const recommendationsQuery = useRecommendationsQuery({ enabled: !isSearch });
   const searchQuery = useSearchUsersQuery(normalizedSearchTerm, { enabled: isSearch });
   const activeQuery = isSearch ? searchQuery : recommendationsQuery;
+  const sendFriendRequestMutation = useSendFriendRequestMutation();
   const visibleUsers = withDevelopmentDemoUsers(activeQuery.data, {
     isSearch,
     searchTerm: normalizedSearchTerm,
   });
 
+  async function handleSendRequest(user: DiscoveryUser) {
+    setRequestFeedback('');
+
+    try {
+      await sendFriendRequestMutation.mutateAsync(user.id);
+      setRequestFeedback(`Request sent to ${user.username}`);
+    } catch {
+      // The mutation error is rendered below.
+    }
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#eef2ff] px-4 py-5 text-slate-950 sm:px-8">
       <div className="pointer-events-none fixed inset-0 opacity-50 [background-image:linear-gradient(#c7d2fe_1px,transparent_1px),linear-gradient(90deg,#c7d2fe_1px,transparent_1px)] [background-size:32px_32px]" />
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav />
         <header className={`grid overflow-hidden rounded-lg ${glassPanel} lg:grid-cols-[1.1fr_0.9fr]`}>
           <section className="flex min-h-[21rem] flex-col justify-between gap-8 bg-[#4f46e5]/70 p-6 text-white backdrop-blur-2xl sm:p-8">
             <div className="flex items-center gap-3">
@@ -348,11 +417,29 @@ export function DiscoverPage() {
           </div>
         </section>
 
+        {requestFeedback ? (
+          <p className={`rounded-lg p-4 text-sm font-black text-emerald-950 ${glassPanel}`} role="status">
+            {requestFeedback}
+          </p>
+        ) : null}
+
+        {sendFriendRequestMutation.isError ? (
+          <p className={`rounded-lg p-4 text-sm font-black text-red-950 ${glassPanel}`} role="alert">
+            {getFriendsApiErrorMessage(sendFriendRequestMutation.error)}
+          </p>
+        ) : null}
+
         <ResultsState
           error={activeQuery.error}
           isError={activeQuery.isError}
           isPending={activeQuery.isPending}
           isSearch={isSearch}
+          onSendRequest={handleSendRequest}
+          sendingUserId={
+            sendFriendRequestMutation.isPending
+              ? (sendFriendRequestMutation.variables as string | undefined) ?? ''
+              : ''
+          }
           users={visibleUsers}
         />
       </div>

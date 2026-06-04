@@ -196,12 +196,12 @@ git diff
 
 验收：
 
-- [ ] 两个账号走通“发请求 -> 接受 -> 双方好友列表更新”。
-- [ ] 拒绝请求不会成为好友。
-- [ ] 重复请求被阻止。
-- [ ] 移除好友后双方列表更新。
-- [ ] 刷新后好友状态正确。
-- [ ] 通用完成检查点通过。
+- [x] 两个账号走通“发请求 -> 接受 -> 双方好友列表更新”。
+- [x] 拒绝请求不会成为好友。
+- [x] 重复请求被阻止。
+- [x] 移除好友后双方列表更新。
+- [x] 刷新后好友状态正确。
+- [x] 通用完成检查点通过。
 
 学习：FriendRequest vs Friendship、排序保存好友关系、重复关系防护、query invalidation。
 
@@ -221,13 +221,23 @@ git diff
 
 验收：
 
-- [ ] 手动触发好友请求通知。
-- [ ] 手动触发请求接受通知。
-- [ ] 未读数量正确变化。
-- [ ] 标记已读后刷新仍保持已读。
+- [x] 手动触发好友请求通知。
+- [x] 手动触发请求接受通知。
+- [x] 未读数量正确变化。
+- [x] 标记已读后刷新仍保持已读。
 - [x] 通用完成检查点通过。
 
 学习：业务事件聚合、metadata 跳转、未读数计算、通知与好友模块联动。
+
+学习复盘记录（2026-06-05）：
+
+- 业务目标：验证好友请求、接受/拒绝、好友列表、移除好友，以及好友请求/接受产生的站内通知闭环。
+- 主流程：Discover 发送请求 -> Friends mutation -> `/api/friends/requests` -> FriendsService/RelationshipRepository -> NotificationService -> Requests/Friends/Notifications query 刷新 UI。
+- 状态归属：表单和搜索输入是 React local state；好友、请求、通知和未读数是 TanStack Query；好友关系、请求、通知持久化在 MongoDB；本模块未接入 Stream。
+- 关键文件：`frontend/src/app/routes/app/discover.tsx`、`frontend/src/features/friends/components/requests-page.tsx`、`frontend/src/features/friends/components/friends-page.tsx`、`frontend/src/features/notifications/components/notifications-page.tsx`、`backend/src/services/friends-service.js`、`backend/src/services/notifications-service.js`。
+- 学到的 3 点：重复 pending 请求由后端返回 409 防护；接受请求时创建排序后的 Friendship；通知 metadata 只允许安全目标跳转。
+- 手动验收结果：使用 3 个本地临时账号跑通 A 发请求给 B、B 接受、双方刷新后好友列表更新；C 请求被 A 拒绝且不成好友；重复 pending 请求被阻止；A/B 移除好友后双方列表刷新为空；好友请求和接受通知均可触发、打开目标、标记已读并刷新保持。
+- 后续优化：后续进入 Chat 前，可补一个真实服务级 E2E 脚本，避免手动验收依赖当前本地 CORS/端口配置。
 
 可选 commit：`feat(notifications): add in-app notifications`
 

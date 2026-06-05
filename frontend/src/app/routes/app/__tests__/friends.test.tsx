@@ -28,12 +28,15 @@ function renderFriendsRoute(initialEntry = '/app/friends') {
   );
 }
 
-function mockProtectedAppGet({ friends = [], friendsError }: { friends?: unknown[]; friendsError?: unknown } = {}) {
+function mockProtectedAppGet({
+  friends = [],
+  friendsError,
+}: { friends?: unknown[]; friendsError?: unknown } = {}) {
   return vi.spyOn(apiClient, 'get').mockImplementation(async (url) => {
     if (url === '/auth/me') {
-      return { data: { user: { id: 'user-1', username: 'mei', email: 'mei@example.com' } } } as Awaited<
-        ReturnType<typeof apiClient.get>
-      >;
+      return {
+        data: { user: { id: 'user-1', username: 'mei', email: 'mei@example.com' } },
+      } as Awaited<ReturnType<typeof apiClient.get>>;
     }
 
     if (url === '/profile/me') {
@@ -101,19 +104,32 @@ describe('friends page', () => {
 
     renderFriendsRoute();
 
-    expect(await screen.findByRole('heading', { name: /your language friends/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /your language friends/i }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/1 friend ready/i)).toBeInTheDocument();
+    expect(screen.getByText(/showing 1 of 1/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(
       'href',
       '/app/discover',
     );
-    expect(screen.getByRole('link', { name: /^friends$/i })).toHaveAttribute('href', '/app/friends');
+    expect(screen.getByRole('link', { name: /^friends$/i })).toHaveAttribute(
+      'href',
+      '/app/friends',
+    );
     expect(screen.getByRole('link', { name: /^requests$/i })).toHaveAttribute(
       'href',
       '/app/requests',
     );
     expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /chat with sam/i })).toHaveAttribute('href', '/app/chat/user-2');
-    expect(screen.getByRole('link', { name: /call sam/i })).toHaveAttribute('href', '/app/call/user-2');
+    expect(screen.getByRole('link', { name: /chat with sam/i })).toHaveAttribute(
+      'href',
+      '/app/chat/user-2',
+    );
+    expect(screen.getByRole('link', { name: /call sam/i })).toHaveAttribute(
+      'href',
+      '/app/call/user-2',
+    );
     expect(screen.getByRole('button', { name: /remove sam/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /find more language partners/i })).toHaveAttribute(
       'href',
@@ -124,7 +140,12 @@ describe('friends page', () => {
   it('filters friends by search text', async () => {
     mockProtectedAppGet({
       friends: [
-        mockFriend({ id: 'user-2', username: 'sam', nativeLanguage: 'English', bio: 'Coffee chats welcome.' }),
+        mockFriend({
+          id: 'user-2',
+          username: 'sam',
+          nativeLanguage: 'English',
+          bio: 'Coffee chats welcome.',
+        }),
         mockFriend({
           friendshipId: 'friendship-2',
           id: 'user-3',
@@ -139,10 +160,14 @@ describe('friends page', () => {
 
     renderFriendsRoute();
 
-    await userEvent.type(await screen.findByRole('searchbox', { name: /search friends/i }), 'korean');
+    await userEvent.type(
+      await screen.findByRole('searchbox', { name: /search friends/i }),
+      'korean',
+    );
 
     expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/showing 1 of 2/i)).toBeInTheDocument();
   });
 
   it('shows a filtered empty state when no friends match the search', async () => {
@@ -150,7 +175,10 @@ describe('friends page', () => {
 
     renderFriendsRoute();
 
-    await userEvent.type(await screen.findByRole('searchbox', { name: /search friends/i }), 'mandarin');
+    await userEvent.type(
+      await screen.findByRole('searchbox', { name: /search friends/i }),
+      'mandarin',
+    );
 
     expect(await screen.findByText(/no friends match your search/i)).toBeInTheDocument();
   });
@@ -162,7 +190,9 @@ describe('friends page', () => {
     expect(await screen.findByText(/no friends yet/i)).toBeInTheDocument();
 
     vi.restoreAllMocks();
-    mockProtectedAppGet({ friendsError: { response: { data: { error: 'Could not load friends' } } } });
+    mockProtectedAppGet({
+      friendsError: { response: { data: { error: 'Could not load friends' } } },
+    });
     renderFriendsRoute();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/could not load friends/i);
@@ -172,7 +202,9 @@ describe('friends page', () => {
     mockProtectedAppGet({ friends: [mockFriend()] });
     const deleteSpy = vi
       .spyOn(apiClient, 'delete')
-      .mockResolvedValue({ data: { removed: true } } as Awaited<ReturnType<typeof apiClient.delete>>);
+      .mockResolvedValue({ data: { removed: true } } as Awaited<
+        ReturnType<typeof apiClient.delete>
+      >);
 
     renderFriendsRoute();
 

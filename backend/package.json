@@ -19,7 +19,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.6.2"
+    "mongoose": "^9.6.2",
+    "stream-chat": "^9.44.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

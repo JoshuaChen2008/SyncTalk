@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 
+import { ChatPage } from '../features/chat/components/chat-page';
 import { DiscoverPage } from './routes/app/discover';
 import { ProtectedRoute } from './routes/app/protected-route';
 import { LoginPage } from '../features/auth/components/login-page';
@@ -34,6 +35,10 @@ export const routes: RouteObject[] = [
       {
         path: 'friends',
         element: <FriendsPage />,
+      },
+      {
+        path: 'chat/:friendId',
+        element: <ChatPage />,
       },
       {
         path: 'requests',

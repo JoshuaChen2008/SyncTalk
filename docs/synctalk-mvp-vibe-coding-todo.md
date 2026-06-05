@@ -247,21 +247,31 @@ git diff
 
 实现：
 
-- [ ] 后端签发 Stream Chat token。
-- [ ] 实现 `GET /api/chat/channel/:friendId`，先校验好友关系。
-- [ ] 频道 ID 使用两个用户 ID 排序拼接。
-- [ ] 前端初始化 Stream Chat client。
-- [ ] 实现 `/app/chat/:friendId`，包含好友信息、消息列表、输入框和错误状态。
-- [ ] 禁止空消息，非好友显示无权限。
+- [x] 后端签发 Stream Chat token。
+- [x] 实现 `GET /api/chat/channel/:friendId`，先校验好友关系。
+- [x] 频道 ID 使用两个用户 ID 排序拼接。
+- [x] 前端初始化 Stream Chat client。
+- [x] 实现 `/app/chat/:friendId`，包含好友信息、消息列表、输入框和错误状态。
+- [x] 禁止空消息，非好友显示无权限。
 
 验收：
 
 - [ ] 两个好友账号进入同一聊天频道。
 - [ ] A 发消息，B 实时收到；B 回复，A 实时收到。
-- [ ] 非好友不能进入聊天。
-- [ ] 通用完成检查点通过。
+- [x] 非好友不能进入聊天。
+- [x] 通用完成检查点通过。
 
 学习：Stream token 后端签发、频道 ID 稳定性、Stream 与业务后端的职责边界。
+
+学习复盘记录（2026-06-05）：
+
+- 业务目标：让已成为好友的语言伙伴进入固定一对一 Stream Chat 频道，并阻止非好友访问聊天页。
+- 主流程：Friends 点击 Chat -> `/app/chat/:friendId` -> Chat token/channel queries -> `/api/chat/token` 和 `/api/chat/channel/:friendId` -> ChatService 校验 Friendship -> Stream Chat token/channel -> Stream Chat React UI 渲染消息列表和输入框。
+- 状态归属：路由参数和临时连接错误是 React local state；chat token 和 channel 信息是 TanStack Query；好友关系保存在 MongoDB；消息历史、实时消息和频道状态归属 Stream。
+- 关键文件：`backend/src/services/chat-service.js`、`backend/src/routes/chat.js`、`frontend/src/features/chat/components/chat-page.tsx`、`frontend/src/features/chat/api/chat-hooks.ts`、`frontend/e2e/auth.smoke.spec.ts`。
+- 学到的 3 点：Stream Chat token 只能由后端用 secret 签发；一对一频道 ID 使用排序后的两个用户 ID 保持稳定；非好友权限必须在业务后端先拦截，前端只展示无权限状态。
+- 手动验收结果：自动验证覆盖 token/channel service、route、前端 loading/success/403 状态和 Playwright 非好友 403 smoke；两个真实好友账号实时互发消息仍需在有效 Stream key/secret 和可用网络下做双浏览器手动验收。
+- 后续优化：进入 App Shell 后可补一个专门的 Chat smoke 文件，并在具备真实 Stream 环境时记录双账号实时收发验收。
 
 可选 commit：`feat(chat): add one-on-one chat session`
 

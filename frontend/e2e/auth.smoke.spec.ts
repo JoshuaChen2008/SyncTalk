@@ -117,4 +117,71 @@ test.describe('auth smoke', () => {
     await expect(page.getByText(/already friends/i)).toBeVisible();
     await expect(page.getByLabel(/search partners/i)).toBeVisible();
   });
+
+  test('shows a permission error when a signed-in user opens chat with a non-friend', async ({
+    page,
+  }) => {
+    await page.route('**/api/auth/me', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: { id: 'user-1', username: 'mei', email: 'mei@example.com' },
+        }),
+      });
+    });
+    await page.route('**/api/profile/me', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          profile: {
+            id: 'user-1',
+            username: 'mei',
+            email: 'mei@example.com',
+            avatar: '',
+            nativeLanguage: 'Japanese',
+            targetLanguage: 'English',
+            languageLevel: 'B1',
+            learningGoal: 'Daily conversation',
+            bio: 'Coffee chats welcome.',
+            timezone: 'Asia/Tokyo',
+            isProfileComplete: true,
+          },
+        }),
+      });
+    });
+    await page.route('**/api/notifications', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          notifications: [],
+          unreadCount: 0,
+        }),
+      });
+    });
+    await page.route('**/api/chat/token', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          token: 'stream-token',
+          user: { id: 'user-1', username: 'mei', avatar: '' },
+        }),
+      });
+    });
+    await page.route('**/api/chat/channel/user-2', async (route) => {
+      await route.fulfill({
+        status: 403,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Only friends can chat' }),
+      });
+    });
+
+    await page.goto('/app/chat/user-2');
+
+    await expect(page.getByRole('heading', { name: /chat unavailable/i })).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText(/only friends can chat/i);
+    await expect(page.getByRole('link', { name: /back to friends/i })).toHaveAttribute(
+      'href',
+      '/app/friends',
+    );
+  });
 });

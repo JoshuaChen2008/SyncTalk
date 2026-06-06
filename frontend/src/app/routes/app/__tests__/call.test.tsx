@@ -7,7 +7,8 @@ import type { ReactNode } from 'react';
 import { routes } from '../../../router';
 import { apiClient } from '../../../../lib/api-client';
 
-const { createMockVideoClient, mockCalls, mockVideoClients } = vi.hoisted(() => {
+const { createMockVideoClient, mockCalls, mockCameraToggle, mockMicrophoneToggle, mockVideoClients } =
+  vi.hoisted(() => {
   const mockCalls: Array<{
     join: ReturnType<typeof vi.fn>;
     leave: ReturnType<typeof vi.fn>;
@@ -17,26 +18,28 @@ const { createMockVideoClient, mockCalls, mockVideoClients } = vi.hoisted(() => 
     disconnectUser: ReturnType<typeof vi.fn>;
   }> = [];
 
-  return {
-    mockCalls,
-    mockVideoClients,
-    createMockVideoClient: vi.fn(() => {
-      const mockCall = {
-        join: vi.fn(async () => undefined),
-        leave: vi.fn(async () => undefined),
-      };
-      const mockVideoClient = {
-        call: vi.fn(() => mockCall),
-        disconnectUser: vi.fn(async () => undefined),
-      };
+    return {
+      mockCalls,
+      mockCameraToggle: vi.fn(),
+      mockMicrophoneToggle: vi.fn(),
+      mockVideoClients,
+      createMockVideoClient: vi.fn(() => {
+        const mockCall = {
+          join: vi.fn(async () => undefined),
+          leave: vi.fn(async () => undefined),
+        };
+        const mockVideoClient = {
+          call: vi.fn(() => mockCall),
+          disconnectUser: vi.fn(async () => undefined),
+        };
 
-      mockCalls.push(mockCall);
-      mockVideoClients.push(mockVideoClient);
+        mockCalls.push(mockCall);
+        mockVideoClients.push(mockVideoClient);
 
-      return mockVideoClient;
-    }),
-  };
-});
+        return mockVideoClient;
+      }),
+    };
+  });
 
 vi.mock('@stream-io/video-client', () => ({
   StreamVideoClient: createMockVideoClient,
@@ -56,6 +59,8 @@ vi.mock('@stream-io/video-react-sdk', () => ({
   ),
   StreamVideoClient: createMockVideoClient,
   useCallStateHooks: () => ({
+    useCameraState: () => ({ camera: { toggle: mockCameraToggle }, isMute: false }),
+    useMicrophoneState: () => ({ microphone: { toggle: mockMicrophoneToggle }, isMute: false }),
     useParticipants: () => [{ userId: 'user-1' }, { userId: 'user-2' }],
   }),
 }));
@@ -158,6 +163,8 @@ function mockProtectedCall({
 beforeEach(() => {
   vi.stubEnv('VITE_STREAM_API_KEY', 'test-stream-key');
   mockCalls.length = 0;
+  mockCameraToggle.mockClear();
+  mockMicrophoneToggle.mockClear();
   mockVideoClients.length = 0;
 });
 
@@ -189,6 +196,18 @@ describe('call page', () => {
       'href',
       '/app/chat/user-2',
     );
+  });
+
+  it('renders microphone and camera controls for an active call', async () => {
+    mockProtectedCall();
+
+    renderCallRoute();
+
+    fireEvent.click(await screen.findByRole('button', { name: /turn off microphone/i }));
+    fireEvent.click(screen.getByRole('button', { name: /turn off camera/i }));
+
+    expect(mockMicrophoneToggle).toHaveBeenCalled();
+    expect(mockCameraToggle).toHaveBeenCalled();
   });
 
   it('leaves the active call and disconnects the video client from the Stream controls', async () => {

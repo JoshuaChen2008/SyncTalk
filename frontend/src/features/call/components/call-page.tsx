@@ -9,7 +9,7 @@ import {
 } from '@stream-io/video-react-sdk';
 import type { Call } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
-import { ArrowLeft, MessageCircle, Phone, ShieldAlert, Video } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Mic, MicOff, Phone, ShieldAlert, Video, VideoOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -78,6 +78,49 @@ function CallPresenceStatus({
         ? `Live with ${remoteParticipantCount} partner${remoteParticipantCount === 1 ? '' : 's'}`
         : `Waiting for ${friendName} to join or rejoin`}
     </p>
+  );
+}
+
+function CallMediaControls() {
+  const { useCameraState, useMicrophoneState } = useCallStateHooks();
+  const { microphone, isMute: isMicrophoneMuted } = useMicrophoneState();
+  const { camera, isMute: isCameraMuted } = useCameraState();
+  const mediaButtonClass =
+    'grid h-11 w-11 place-items-center rounded-lg border border-white/15 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 motion-reduce:transition-none';
+
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <button
+        aria-label={isMicrophoneMuted ? 'Turn on microphone' : 'Turn off microphone'}
+        className={mediaButtonClass}
+        onClick={() => {
+          void microphone.toggle();
+        }}
+        title={isMicrophoneMuted ? 'Turn on microphone' : 'Turn off microphone'}
+        type="button"
+      >
+        {isMicrophoneMuted ? (
+          <MicOff aria-hidden="true" size={19} />
+        ) : (
+          <Mic aria-hidden="true" size={19} />
+        )}
+      </button>
+      <button
+        aria-label={isCameraMuted ? 'Turn on camera' : 'Turn off camera'}
+        className={mediaButtonClass}
+        onClick={() => {
+          void camera.toggle();
+        }}
+        title={isCameraMuted ? 'Turn on camera' : 'Turn off camera'}
+        type="button"
+      >
+        {isCameraMuted ? (
+          <VideoOff aria-hidden="true" size={19} />
+        ) : (
+          <Video aria-hidden="true" size={19} />
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -196,7 +239,8 @@ function StreamCallPanel({
                 currentUserId={tokenData.user.id}
                 friendName={sessionData.friend.username}
               />
-              <div className="border-t border-white/10 bg-slate-900/90 px-4 py-4">
+              <div className="flex flex-wrap items-center justify-center gap-3 border-t border-white/10 bg-slate-900/90 px-4 py-4">
+                <CallMediaControls />
                 <CallControls onLeave={handleLeave} />
               </div>
             </StreamTheme>

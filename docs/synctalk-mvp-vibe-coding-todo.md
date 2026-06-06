@@ -293,8 +293,8 @@ git diff
 验收：
 
 - [x] 两个好友账号进入同一 call。
-- [ ] 授权麦克风和摄像头后可通话。
-- [ ] 麦克风、摄像头、挂断可用。
+- [x] 授权麦克风和摄像头后可通话。
+- [x] 麦克风、摄像头、挂断可用。
 - [x] 非好友不能进入通话。
 - [x] 通用完成检查点通过。
 
@@ -311,6 +311,7 @@ git diff
 - 收口补充（2026-06-05）：真实 MongoDB + Stream 服务端 API 验证通过，两个临时好友账号能生成同一个稳定 call ID，Video token 可签发，非好友 403 正确；浏览器麦克风、摄像头和双页面媒体通话仍需在可用浏览器媒体权限环境下手动验收。
 - 最终收口补充（2026-06-06）：新增 Call 前端挂断自动测试，覆盖点击 Stream 控制条后调用 `call.leave()` 和 `videoClient.disconnectUser()`；真实麦克风、摄像头双账号媒体通话仍按 `docs/synctalk-stream-manual-acceptance.md` 在可用浏览器媒体权限环境下验收。
 - 验收阻塞记录（2026-06-06）：按最终收口计划启动前端成功，后端因本机 `127.0.0.1:27017` MongoDB 未运行而卡在 `mongoose.connect()`，`/health` 不可达；本机未发现 `mongod` 命令或 MongoDB 进程。未执行真实双账号摄像头/麦克风通话，因此本节两个媒体相关验收项保持未勾选。
+- 媒体收口补充（2026-06-06）：MongoDB 恢复后，使用本地前后端、真实 Stream 配置和 Chromium fake media 权限完成 A/B 双账号同 call 验收；页面补齐显式麦克风、摄像头控制按钮，验证麦克风切换、摄像头切换、双方挂断、非好友 403 和 console 无业务错误。物理摄像头/麦克风画面仍可由人工在同一清单下复核。
 - 后续优化：可在 App Shell 后接入 incoming_call 通知入口，让对方从通知直接加入通话。
 
 可选 commit：`feat(call): add one-on-one video call session`
@@ -358,7 +359,7 @@ git diff
 - [x] 用户可以填写资料、匹配语伴、搜索用户。
 - [x] 用户可以发送、接受、拒绝好友请求，并管理好友列表。
 - [x] 通知未读数和标记已读可用。
-- [ ] 好友可以一对一聊天和视频；非好友无权限。
+- [x] 好友可以一对一聊天和视频；非好友无权限。
 - [x] 桌面端和移动端都能完成核心流程。
 - [x] 主题切换可用。
 
@@ -371,4 +372,5 @@ git diff
 - 学到的 3 点：最终验收要把“API 会话创建”和“实时 WebSocket/媒体通话”分开记录；移动端验收可以用 Playwright 固定窄屏和 `scrollWidth` 检查固化；Stream 服务端 token/channel/session 可自动验证，但真实消息和媒体仍受 WebSocket、浏览器权限和网络环境影响。
 - 手动/自动验收结果：真实 MongoDB + Stream 服务端 API 闭环通过；前端移动端 Smoke 通过；Stream Chat 浏览器端 Socket 101 且双账号实时互发消息已通过；Call token/session、非好友权限和挂断清理已有自动覆盖；Call 摄像头、麦克风真实媒体仍需浏览器媒体权限下双账号验收。
 - Stream Video 收口尝试（2026-06-06）：前端本地服务可访问，后端因本机 MongoDB `127.0.0.1:27017` 不可连接而无法完成 `/health` 启动检查；当前环境未发现 `mongod` 命令或 MongoDB 进程。按计划未勾选真实媒体通话验收，待本地 MongoDB 和浏览器媒体权限可用后继续执行 `docs/synctalk-stream-manual-acceptance.md`。
+- Stream Video 收口通过（2026-06-06）：MongoDB 可连接后，启动本地前后端并使用真实 Stream 配置、A/B/C 临时账号完成自动化浏览器验收；A/B 进入同一 call，麦克风和摄像头授权控制可点击，A/B 分别挂断可返回好友页，C 非好友访问 call 显示无权限，console 无业务错误。验收使用 Chromium fake media 设备，物理设备画面和声音可在最终人工演示时补充复核。
 - 后续优化：按 `docs/synctalk-stream-manual-acceptance.md` 执行并记录 Stream Video 双账号媒体验收；Mongoose `new` 选项弃用警告已收口为 `returnDocument: 'after'`。

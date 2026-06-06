@@ -2,12 +2,6 @@ import { Rocket, UserCircle } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
-import profileCollage1 from '../../../assets/synctalk/profile-collage-1.png';
-import profileCollage2 from '../../../assets/synctalk/profile-collage-2.png';
-import profileCollage3 from '../../../assets/synctalk/profile-collage-3.png';
-import profileCollage4 from '../../../assets/synctalk/profile-collage-4.png';
-import profileCollage5 from '../../../assets/synctalk/profile-collage-5.png';
-import profileCollage6 from '../../../assets/synctalk/profile-collage-6.png';
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
 import { getProfileApiErrorMessage, type ProfileInput } from '../api/profile-api';
@@ -45,15 +39,6 @@ const emptyProfileInput: ProfileInput = {
   timezone: '',
 };
 
-const collageImages = [
-  { src: profileCollage1, className: 'profile-collage-item profile-collage-item-1' },
-  { src: profileCollage2, className: 'profile-collage-item profile-collage-item-2' },
-  { src: profileCollage3, className: 'profile-collage-item profile-collage-item-3' },
-  { src: profileCollage4, className: 'profile-collage-item profile-collage-item-4' },
-  { src: profileCollage5, className: 'profile-collage-item profile-collage-item-5' },
-  { src: profileCollage6, className: 'profile-collage-item profile-collage-item-6' },
-];
-
 function SelectField({
   id,
   label,
@@ -71,11 +56,11 @@ function SelectField({
 
   return (
     <div>
-      <label className="profile-label" htmlFor={id}>
+      <label className="label-gamified" htmlFor={id}>
         {label}
       </label>
       <select
-        className="profile-select"
+        className="input-gamified w-full"
         id={id}
         name={id}
         value={value}
@@ -96,31 +81,20 @@ function ProfileTopNav() {
   const { t } = useTranslation();
 
   return (
-    <header className="profile-top-nav">
-      <Link className="profile-brand-link" to="/app/profile">
+    <header className="relative z-10 flex h-16 items-center justify-between border-b-2 border-cloud-gray bg-snow-white px-4 sm:px-12">
+      <Link className="font-feather text-heading-sm text-duo-green" to="/app/profile">
         SyncTalk
       </Link>
-      <nav className="profile-nav-links" aria-label={t('profile.nav.label')}>
-        <Link to="/app/discover">{t('profile.nav.discover')}</Link>
-        <Link to="/app/friends">{t('profile.nav.friends')}</Link>
-        <Link to="/app/requests">{t('profile.nav.requests')}</Link>
-        <span>{t('profile.nav.messages')}</span>
+      <nav className="hidden items-center gap-8 text-sm font-bold text-graphite sm:flex" aria-label={t('profile.nav.label')}>
+        <Link className="hover:text-sky-blue transition-colors" to="/app/discover">{t('profile.nav.discover')}</Link>
+        <Link className="hover:text-sky-blue transition-colors" to="/app/friends">{t('profile.nav.friends')}</Link>
+        <Link className="hover:text-sky-blue transition-colors" to="/app/requests">{t('profile.nav.requests')}</Link>
+        <span className="text-silver">{t('profile.nav.messages')}</span>
       </nav>
-      <button className="profile-icon-button" type="button" aria-label={t('profile.menu')}>
-        <UserCircle aria-hidden="true" size={22} strokeWidth={2.2} />
+      <button className="grid h-10 w-10 place-items-center rounded-xl bg-transparent text-graphite hover:bg-cloud-gray transition-colors border-none cursor-pointer" type="button" aria-label={t('profile.menu')}>
+        <UserCircle aria-hidden="true" size={24} strokeWidth={2.5} />
       </button>
     </header>
-  );
-}
-
-function ProfileBackground() {
-  return (
-    <div className="profile-background" aria-hidden="true">
-      <div className="profile-background-lines" />
-      {collageImages.map((image) => (
-        <img alt="" className={image.className} key={image.src} src={image.src} />
-      ))}
-    </div>
   );
 }
 
@@ -166,48 +140,49 @@ export function ProfilePage() {
 
   if (profileQuery.isPending) {
     return (
-      <main className="profile-page-shell">
-        <p className="profile-status-text">{t('profile.loading')}</p>
+      <main className="min-h-screen bg-snow-white flex items-center justify-center">
+        <p className="text-sm font-bold text-graphite">{t('profile.loading')}</p>
       </main>
     );
   }
 
   if (profileQuery.isError) {
     return (
-      <main className="profile-page-shell">
-        <section className="profile-error-panel">
-          <h1 className="text-2xl font-bold">{t('profile.unavailable')}</h1>
-          <p className="mt-2 text-sm">{getProfileApiErrorMessage(profileQuery.error)}</p>
+      <main className="min-h-screen bg-snow-white p-8">
+        <section className="mx-auto max-w-2xl rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-6 text-[#991b1b]">
+          <h1 className="text-heading-sm font-feather">{t('profile.unavailable')}</h1>
+          <p className="mt-2 text-sm font-bold">{getProfileApiErrorMessage(profileQuery.error)}</p>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="profile-page-shell">
-      <ProfileBackground />
+    <main className="min-h-screen bg-snow-white text-almost-black">
       <ProfileTopNav />
 
-      <section className="profile-content-canvas" aria-labelledby="profile-title">
-        <form className="profile-glass-card" onSubmit={handleSubmit}>
-          <div className="profile-heading">
-            <h1 id="profile-title">{t('profile.title')}</h1>
-            <p>{t('profile.description')}</p>
+      <section className="relative z-10 flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 sm:p-8 lg:p-12" aria-labelledby="profile-title">
+        <form className="w-full max-w-3xl card-gamified" onSubmit={handleSubmit}>
+          <div className="mb-10 text-center">
+            <h1 id="profile-title" className="text-heading font-feather text-almost-black">
+              {t('profile.title')}
+            </h1>
+            <p className="mt-2 text-body font-bold text-graphite">{t('profile.description')}</p>
           </div>
 
           {updateProfileMutation.isError ? (
-            <p className="profile-alert profile-alert-error" role="alert">
+            <p className="mb-6 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-bold text-[#b91c1c]" role="alert">
               {getProfileApiErrorMessage(updateProfileMutation.error)}
             </p>
           ) : null}
 
           {!profileQuery.data.isProfileComplete ? (
-            <p className="profile-alert profile-alert-info">
+            <p className="mb-6 rounded-xl border-2 border-sky-blue bg-sky-blue/10 px-4 py-3 text-sm font-bold text-sky-blue">
               {t('profile.incomplete')}
             </p>
           ) : null}
 
-          <div className="profile-form-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <SelectField
               id="nativeLanguage"
               label={t('profile.nativeLanguage')}
@@ -224,18 +199,18 @@ export function ProfilePage() {
             />
           </div>
 
-          <fieldset className="profile-choice-section" aria-labelledby="profile-level-label">
-            <legend id="profile-level-label" className="profile-label">
+          <fieldset className="mb-8" aria-labelledby="profile-level-label">
+            <legend id="profile-level-label" className="label-gamified">
               {t('profile.currentLevel')}
             </legend>
-            <div className="profile-level-options">
+            <div className="flex flex-wrap gap-3 mt-2">
               {levelOptions.map((option) => (
                 <button
-                  className={
+                  className={`min-h-[3rem] rounded-xl border-2 px-5 text-body font-bold transition-colors cursor-pointer ${
                     form.languageLevel === option.value
-                      ? 'profile-level-pill profile-level-pill-active'
-                      : 'profile-level-pill'
-                  }
+                      ? 'border-sky-blue bg-sky-blue/10 text-sky-blue'
+                      : 'border-cloud-gray bg-snow-white text-graphite hover:border-sky-blue/50'
+                  }`}
                   key={option.value}
                   type="button"
                   aria-pressed={form.languageLevel === option.value}
@@ -247,18 +222,18 @@ export function ProfilePage() {
             </div>
           </fieldset>
 
-          <fieldset className="profile-choice-section" aria-labelledby="profile-goal-label">
-            <legend id="profile-goal-label" className="profile-label">
+          <fieldset className="mb-8" aria-labelledby="profile-goal-label">
+            <legend id="profile-goal-label" className="label-gamified">
               {t('profile.learningGoals')}
             </legend>
-            <div className="profile-goal-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               {goalOptions.map((option) => (
                 <label
-                  className={
+                  className={`flex min-h-[3.75rem] cursor-pointer items-center gap-3 rounded-xl border-2 p-4 text-body font-bold transition-colors ${
                     form.learningGoal === option.value
-                      ? 'profile-goal-card profile-goal-card-active'
-                      : 'profile-goal-card'
-                  }
+                      ? 'border-sky-blue bg-sky-blue/10 text-sky-blue'
+                      : 'border-cloud-gray bg-snow-white text-graphite hover:border-sky-blue/50'
+                  }`}
                   key={option.value}
                 >
                   <input
@@ -269,14 +244,16 @@ export function ProfilePage() {
                     checked={form.learningGoal === option.value}
                     onChange={(event) => updateField('learningGoal', event.target.value)}
                   />
-                  <span aria-hidden="true" className="profile-goal-check" />
+                  <span aria-hidden="true" className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${form.learningGoal === option.value ? 'border-sky-blue bg-sky-blue' : 'border-cloud-gray bg-snow-white'}`}>
+                    {form.learningGoal === option.value && <div className="h-2 w-2 rounded-sm bg-white" />}
+                  </span>
                   <span>{translateDisplayValue(locale, option.label)}</span>
                 </label>
               ))}
             </div>
           </fieldset>
 
-          <div className="profile-form-grid profile-form-grid-narrow">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <SelectField
               id="timezone"
               label={t('profile.timezone')}
@@ -286,12 +263,12 @@ export function ProfilePage() {
             />
           </div>
 
-          <div>
-            <label className="profile-label" htmlFor="bio">
+          <div className="mb-10">
+            <label className="label-gamified" htmlFor="bio">
               {t('profile.shortBio')}
             </label>
             <textarea
-              className="profile-textarea"
+              className="input-gamified h-32 py-3 resize-y"
               id="bio"
               name="bio"
               placeholder={t('profile.bioPlaceholder')}
@@ -300,14 +277,14 @@ export function ProfilePage() {
             />
           </div>
 
-          <div className="profile-submit-row">
+          <div className="flex justify-center border-t-2 border-cloud-gray pt-8">
             <button
-              className="profile-finish-button"
+              className="btn-primary min-w-[12rem]"
               type="submit"
               disabled={updateProfileMutation.isPending}
             >
-              <span>{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
-              <Rocket aria-hidden="true" size={18} strokeWidth={2.2} />
+              <span className="mr-2">{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
+              <Rocket aria-hidden="true" size={20} strokeWidth={2.5} />
             </button>
           </div>
         </form>

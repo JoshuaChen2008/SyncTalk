@@ -28,18 +28,18 @@ export function RegisterPage() {
 
   return (
     <AuthShell>
-      <section className="auth-card" aria-labelledby="register-title">
+      <section className="card-gamified" aria-labelledby="register-title">
         <div className="text-center">
-          <h2 id="register-title" className="text-3xl font-extrabold text-slate-900">
+          <h2 id="register-title" className="text-heading font-feather text-almost-black">
             {t('auth.register.title')}
           </h2>
-          <p className="mt-3 text-sm text-slate-500">{t('auth.register.description')}</p>
+          <p className="mt-3 text-sm font-bold text-graphite">{t('auth.register.description')}</p>
         </div>
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
           {registerMutation.isError ? (
             <p
-              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+              className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-bold text-[#b91c1c]"
               role="alert"
             >
               {getApiErrorMessage(registerMutation.error)}
@@ -47,11 +47,11 @@ export function RegisterPage() {
           ) : null}
 
           <div>
-            <label className="auth-label" htmlFor="username">
+            <label className="label-gamified" htmlFor="username">
               {t('auth.register.username')}
             </label>
             <input
-              className="auth-input"
+              className="input-gamified"
               id="username"
               name="username"
               placeholder="synctalker"
@@ -62,11 +62,11 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label className="auth-label" htmlFor="email">
+            <label className="label-gamified" htmlFor="email">
               {t('auth.register.email')}
             </label>
             <input
-              className="auth-input"
+              className="input-gamified"
               id="email"
               name="email"
               placeholder="you@example.com"
@@ -77,11 +77,11 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label className="auth-label" htmlFor="password">
+            <label className="label-gamified" htmlFor="password">
               {t('auth.register.password')}
             </label>
             <input
-              className="auth-input"
+              className="input-gamified"
               id="password"
               name="password"
               placeholder={t('auth.register.passwordPlaceholder')}
@@ -92,20 +92,20 @@ export function RegisterPage() {
           </div>
 
           <button
-            className="auth-primary-button"
+            className="btn-primary w-full"
             type="submit"
             disabled={registerMutation.isPending}
           >
             <span>
               {registerMutation.isPending ? t('auth.register.pending') : t('auth.register.submit')}
             </span>
-            <ArrowRight aria-hidden="true" size={18} strokeWidth={2.5} />
+            <ArrowRight className="ml-2" aria-hidden="true" size={18} strokeWidth={3} />
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
+        <p className="mt-8 text-center text-sm font-bold text-graphite">
           {t('auth.register.existingPrefix')}{' '}
-          <Link className="font-semibold text-indigo-600 hover:text-indigo-500" to="/auth/login">
+          <Link className="text-sky-blue hover:text-sky-blue/80" to="/auth/login">
             {t('auth.register.signInInstead')}
           </Link>
         </p>

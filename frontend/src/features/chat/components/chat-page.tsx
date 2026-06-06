@@ -9,7 +9,6 @@ import 'stream-chat-react/dist/css/index.css';
 import {
   featureCardClass,
   FriendsFeatureBackground,
-  FriendsFeatureTopNav,
   HeroGlassPanel,
 } from '../../friends/components/friends-page-chrome';
 import { getChatApiErrorMessage, type ChatChannel, type ChatToken } from '../api/chat-api';
@@ -148,7 +147,6 @@ export function ChatPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#f7f6ff] text-slate-950">
-      <FriendsFeatureTopNav />
       <FriendsFeatureBackground />
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-8">

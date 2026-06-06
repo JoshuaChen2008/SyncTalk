@@ -171,7 +171,7 @@ git diff
 
 验收：
 
-- [ ] 至少两个互补语言账号能看到合理推荐。
+- [x] 至少两个互补语言账号能看到合理推荐。
 - [x] 搜索用户名、语言、简介可用。
 - [x] 自己不可添加。
 - [x] 已发送请求状态正确。
@@ -256,8 +256,8 @@ git diff
 
 验收：
 
-- [ ] 两个好友账号进入同一聊天频道。
-- [ ] A 发消息，B 实时收到；B 回复，A 实时收到。
+- [x] 两个好友账号进入同一聊天频道。
+- [x] A 发消息，B 实时收到；B 回复，A 实时收到。
 - [x] 非好友不能进入聊天。
 - [x] 通用完成检查点通过。
 
@@ -271,6 +271,7 @@ git diff
 - 关键文件：`backend/src/services/chat-service.js`、`backend/src/routes/chat.js`、`frontend/src/features/chat/components/chat-page.tsx`、`frontend/src/features/chat/api/chat-hooks.ts`、`frontend/e2e/auth.smoke.spec.ts`。
 - 学到的 3 点：Stream Chat token 只能由后端用 secret 签发；一对一频道 ID 使用排序后的两个用户 ID 保持稳定；非好友权限必须在业务后端先拦截，前端只展示无权限状态。
 - 手动验收结果：自动验证覆盖 token/channel service、route、前端 loading/success/403 状态和 Playwright 非好友 403 smoke；两个真实好友账号实时互发消息仍需在有效 Stream key/secret 和可用网络下做双浏览器手动验收。
+- 收口补充（2026-06-05）：真实 MongoDB + Stream 服务端 API 验证通过，两个临时好友账号能创建同一个稳定频道 ID，Chat token 可签发，非好友 403 正确；浏览器端 Socket 显示 101，功能测试确认 A/B 双账号实时互发消息通过，Chat 可以验收。
 - 后续优化：进入 App Shell 后可补一个专门的 Chat smoke 文件，并在具备真实 Stream 环境时记录双账号实时收发验收。
 
 可选 commit：`feat(chat): add one-on-one chat session`
@@ -281,23 +282,35 @@ git diff
 
 实现：
 
-- [ ] 后端签发 Stream Video token。
-- [ ] 实现 `GET /api/call/session/:friendId`，先校验好友关系。
-- [ ] call ID 使用两个用户 ID 排序拼接。
-- [ ] 前端初始化 Stream Video client。
-- [ ] 实现 `/app/call/:friendId`。
-- [ ] 展示等待、加入中、通话中、对方离开、设备错误、连接错误。
-- [ ] 支持麦克风、摄像头、挂断。
+- [x] 后端签发 Stream Video token。
+- [x] 实现 `GET /api/call/session/:friendId`，先校验好友关系。
+- [x] call ID 使用两个用户 ID 排序拼接。
+- [x] 前端初始化 Stream Video client。
+- [x] 实现 `/app/call/:friendId`。
+- [x] 展示等待、加入中、通话中、对方离开、设备错误、连接错误。
+- [x] 支持麦克风、摄像头、挂断。
 
 验收：
 
-- [ ] 两个好友账号进入同一 call。
+- [x] 两个好友账号进入同一 call。
 - [ ] 授权麦克风和摄像头后可通话。
 - [ ] 麦克风、摄像头、挂断可用。
-- [ ] 非好友不能进入通话。
-- [ ] 通用完成检查点通过。
+- [x] 非好友不能进入通话。
+- [x] 通用完成检查点通过。
 
 学习：Stream Video token、媒体权限失败状态、call ID 稳定性、手动验证边界。
+
+学习复盘记录（2026-06-05）：
+
+- 业务目标：让已成为好友的语言伙伴进入固定一对一 Stream Video call，并阻止非好友访问通话页。
+- 主流程：Friends 点击 Call -> `/app/call/:friendId` -> Call token/session queries -> `/api/call/token` 和 `/api/call/session/:friendId` -> CallService 校验 Friendship -> Stream Video token/call -> Stream Video React UI 渲染通话布局和控制条。
+- 状态归属：路由参数、加入中、连接错误和离开状态是 React local state；call token 和 session 是 TanStack Query；好友关系保存在 MongoDB；通话媒体、参与者和实时状态归属 Stream。
+- 关键文件：`backend/src/services/call-service.js`、`backend/src/routes/call.js`、`frontend/src/features/call/components/call-page.tsx`、`frontend/src/features/call/api/call-hooks.ts`、`frontend/e2e/auth.smoke.spec.ts`。
+- 学到的 3 点：Stream Video token 由后端 `@stream-io/node-sdk` 签发；一对一 call ID 使用排序后的两个用户 ID 保持稳定；设备权限错误和非好友权限错误要分开展示。
+- 手动验收结果：自动验证覆盖 token/session service、route、前端 loading/success/403/缺少 key 状态和 Playwright 非好友 403 smoke；两个真实好友账号同 call、麦克风、摄像头和挂断仍需在有效 Stream key/secret、浏览器媒体权限和可用网络下做双浏览器手动验收。
+- 收口补充（2026-06-05）：真实 MongoDB + Stream 服务端 API 验证通过，两个临时好友账号能生成同一个稳定 call ID，Video token 可签发，非好友 403 正确；浏览器麦克风、摄像头和双页面媒体通话仍需在可用浏览器媒体权限环境下手动验收。
+- 最终收口补充（2026-06-06）：新增 Call 前端挂断自动测试，覆盖点击 Stream 控制条后调用 `call.leave()` 和 `videoClient.disconnectUser()`；真实麦克风、摄像头双账号媒体通话仍按 `docs/synctalk-stream-manual-acceptance.md` 在可用浏览器媒体权限环境下验收。
+- 后续优化：可在 App Shell 后接入 incoming_call 通知入口，让对方从通知直接加入通话。
 
 可选 commit：`feat(call): add one-on-one video call session`
 
@@ -307,32 +320,53 @@ git diff
 
 实现：
 
-- [ ] 添加桌面侧边栏和移动导航。
-- [ ] 添加通知入口。
-- [ ] 实现 `/app/settings`。
-- [ ] 使用 Zustand 管理主题，并本地持久化。
-- [ ] 设置页展示当前用户和退出登录。
-- [ ] 所有核心页面具备 loading、empty、error 状态。
+- [x] 添加桌面侧边栏和移动导航。
+- [x] 添加通知入口。
+- [x] 实现 `/app/settings`。
+- [x] 使用 Zustand 管理主题，并本地持久化。
+- [x] 设置页展示当前用户和退出登录。
+- [x] 所有核心页面具备 loading、empty、error 状态。
 
 验收：
 
-- [ ] 桌面端能导航所有主页面。
-- [ ] 移动端能导航所有主页面。
-- [ ] 主题切换后刷新仍保留。
-- [ ] 设置页退出后不能访问 `/app/*`。
-- [ ] 无明显文字溢出、遮挡、横向滚动。
-- [ ] 通用完成检查点通过。
+- [x] 桌面端能导航所有主页面。
+- [x] 移动端能导航所有主页面。
+- [x] 主题切换后刷新仍保留。
+- [x] 设置页退出后不能访问 `/app/*`。
+- [x] 无明显文字溢出、遮挡、横向滚动。
+- [x] 通用完成检查点通过。
 
 学习：App Shell 职责、Zustand UI 状态、响应式主流程、UI 状态与服务端状态分工。
+
+学习复盘记录（2026-06-05）：
+
+- 业务目标：把分散在各页面里的导航收敛成统一 `/app/*` 应用壳，并补齐设置页、主题切换和退出登录。
+- 主流程：ProtectedRoute 校验登录和资料完整性 -> AppShell 渲染桌面侧栏/移动底栏 -> 子路由 Outlet 渲染 Discover/Friends/Requests/Notifications/Profile/Chat/Call/Settings。
+- 状态归属：主题是 Zustand UI 状态并持久化到 localStorage；当前用户和通知未读数是 TanStack Query；退出登录通过 auth mutation 调用后端并导航到登录页。
+- 关键文件：`frontend/src/app/routes/app/app-shell.tsx`、`frontend/src/features/settings/components/settings-page.tsx`、`frontend/src/stores/theme-store.ts`、`frontend/src/app/router.tsx`、`frontend/e2e/auth.smoke.spec.ts`。
+- 学到的 3 点：React Router 嵌套路由用布局组件和 Outlet 承载共享 shell；Zustand persist 默认使用 localStorage，可用 partialize 只保存主题字段；桌面和移动导航同时存在时要避免重复 aria 名称干扰测试和读屏。
+- 手动验收结果：自动测试覆盖导航链接、未读 badge、设置页用户信息、主题持久化和 logout；移动端真实浏览器布局、文字溢出和最终 Smoke 重跑仍需在本地验证权限可用时完成。
+- 收口补充（2026-06-05）：新增 Playwright 移动端 Smoke，覆盖 `/app/discover`、`/app/friends`、`/app/requests`、`/app/notifications`、`/app/profile`、`/app/settings`、`/app/chat/:friendId`、`/app/call/:friendId` 的 390px 窄屏可达性、移动底部导航、横向溢出和非预期 console error。
+- 后续优化：后续可把页面背景和内容容器抽成更轻的共享 chrome，进一步减少 Discover/Friends/Chat/Call 的视觉重复代码。
 
 可选 commit：`feat(app): add responsive shell and settings`
 
 ## 5. 最终验收
 
-- [ ] 用户可以注册、登录、退出，刷新后恢复登录态。
-- [ ] 用户可以填写资料、匹配语伴、搜索用户。
-- [ ] 用户可以发送、接受、拒绝好友请求，并管理好友列表。
-- [ ] 通知未读数和标记已读可用。
+- [x] 用户可以注册、登录、退出，刷新后恢复登录态。
+- [x] 用户可以填写资料、匹配语伴、搜索用户。
+- [x] 用户可以发送、接受、拒绝好友请求，并管理好友列表。
+- [x] 通知未读数和标记已读可用。
 - [ ] 好友可以一对一聊天和视频；非好友无权限。
-- [ ] 桌面端和移动端都能完成核心流程。
-- [ ] 主题切换可用。
+- [x] 桌面端和移动端都能完成核心流程。
+- [x] 主题切换可用。
+
+最终学习复盘记录（2026-06-05）：
+
+- 业务目标：收口 SyncTalk MVP 的语言学习社交闭环，确认用户能从账号、资料、匹配、好友、通知一路走到 Chat/Call 权限与会话创建。
+- 主流程：用户注册/登录 -> Profile 保存资料 -> Discover 推荐/搜索 -> Friends 请求/接受/拒绝/移除 -> Notifications 未读/已读 -> Chat token/channel 与 Call token/session -> App Shell 桌面/移动导航。
+- 状态归属：表单输入归 React local state；用户、资料、推荐、好友、通知、Chat/Call 会话归 TanStack Query；主题归 Zustand + localStorage；用户、关系、通知归 MongoDB；消息和媒体实时状态归 Stream。
+- 关键文件：`frontend/e2e/auth.smoke.spec.ts`、`frontend/src/app/routes/app/app-shell.tsx`、`frontend/src/features/chat/components/chat-page.tsx`、`frontend/src/features/call/components/call-page.tsx`、`backend/src/services/chat-service.js`、`backend/src/services/call-service.js`。
+- 学到的 3 点：最终验收要把“API 会话创建”和“实时 WebSocket/媒体通话”分开记录；移动端验收可以用 Playwright 固定窄屏和 `scrollWidth` 检查固化；Stream 服务端 token/channel/session 可自动验证，但真实消息和媒体仍受 WebSocket、浏览器权限和网络环境影响。
+- 手动/自动验收结果：真实 MongoDB + Stream 服务端 API 闭环通过；前端移动端 Smoke 通过；Stream Chat 浏览器端 Socket 101 且双账号实时互发消息已通过；Call token/session、非好友权限和挂断清理已有自动覆盖；Call 摄像头、麦克风真实媒体仍需浏览器媒体权限下双账号验收。
+- 后续优化：按 `docs/synctalk-stream-manual-acceptance.md` 执行并记录 Stream Video 双账号媒体验收；Mongoose `new` 选项弃用警告已收口为 `returnDocument: 'after'`。

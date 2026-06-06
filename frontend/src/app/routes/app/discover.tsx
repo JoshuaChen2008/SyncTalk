@@ -28,7 +28,6 @@ import {
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
-import { AppNav } from './app-nav';
 
 const relationshipLabels: Record<RelationshipStatus, string> = {
   stranger: 'Available',
@@ -302,7 +301,6 @@ export function DiscoverPage() {
     <main className="min-h-screen overflow-hidden bg-[#eef2ff] px-4 py-5 text-slate-950 sm:px-8">
       <div className="pointer-events-none fixed inset-0 opacity-50 [background-image:linear-gradient(#c7d2fe_1px,transparent_1px),linear-gradient(90deg,#c7d2fe_1px,transparent_1px)] [background-size:32px_32px]" />
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav />
         <header className={`grid overflow-hidden rounded-lg ${glassPanel} lg:grid-cols-[1.1fr_0.9fr]`}>
           <section className="flex min-h-[21rem] flex-col justify-between gap-8 bg-[#4f46e5]/70 p-6 text-white backdrop-blur-2xl sm:p-8">
             <div className="flex items-center gap-3">

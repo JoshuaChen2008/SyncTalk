@@ -93,7 +93,9 @@ export function createRelationshipRepository({
       return friendRequestModel.findById(requestId).lean();
     },
     updateRequestStatus(requestId, status) {
-      return friendRequestModel.findByIdAndUpdate(requestId, { status }, { new: true }).lean();
+      return friendRequestModel
+        .findByIdAndUpdate(requestId, { status }, { returnDocument: 'after' })
+        .lean();
     },
     async createFriendship(firstUserId, secondUserId) {
       const createdFriendship = await friendshipModel.create(

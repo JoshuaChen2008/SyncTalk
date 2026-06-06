@@ -17,7 +17,7 @@ export function createNotificationsRepository({ notificationModel = Notification
         .findOneAndUpdate(
           { _id: notificationId, userId },
           { readAt: new Date() },
-          { new: true },
+          { returnDocument: 'after' },
         )
         .lean();
     },

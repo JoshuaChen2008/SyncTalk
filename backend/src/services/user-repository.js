@@ -53,7 +53,7 @@ export function createUserRepository({ userModel = User } = {}) {
     },
     updateProfile(userId, profile) {
       return userModel.findByIdAndUpdate(userId, profile, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
     },

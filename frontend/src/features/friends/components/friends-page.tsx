@@ -16,7 +16,6 @@ import { Link } from 'react-router';
 import {
   featureCardClass,
   FriendsFeatureBackground,
-  FriendsFeatureTopNav,
   HeroGlassPanel,
 } from './friends-page-chrome';
 import { getFriendsApiErrorMessage, type Friend } from '../api/friends-api';
@@ -258,7 +257,6 @@ export function FriendsPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#eef2ff] text-slate-950">
-      <FriendsFeatureTopNav />
       <FriendsFeatureBackground />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-8 lg:py-10">

@@ -118,7 +118,7 @@ describe('notifications page', () => {
 
     expect(await screen.findByRole('heading', { name: /notifications/i })).toBeInTheDocument();
     expect(await screen.findByText(/sam sent you a friend request/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /notifications 2 unread/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /^notifications 2 unread$/i })).toHaveAttribute(
       'href',
       '/app/notifications',
     );

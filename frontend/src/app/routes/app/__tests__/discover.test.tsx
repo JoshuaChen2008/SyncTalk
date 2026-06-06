@@ -110,7 +110,7 @@ describe('discover page', () => {
     renderDiscoverRoute();
 
     expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /friend requests/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /^requests$/i })).toHaveAttribute(
       'href',
       '/app/requests',
     );

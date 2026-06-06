@@ -1,6 +1,9 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 
+import { CallPage } from '../features/call/components/call-page';
 import { ChatPage } from '../features/chat/components/chat-page';
+import { SettingsPage } from '../features/settings/components/settings-page';
+import { AppShell } from './routes/app/app-shell';
 import { DiscoverPage } from './routes/app/discover';
 import { ProtectedRoute } from './routes/app/protected-route';
 import { LoginPage } from '../features/auth/components/login-page';
@@ -29,28 +32,45 @@ export const routes: RouteObject[] = [
     element: <ProtectedRoute />,
     children: [
       {
-        path: 'discover',
-        element: <DiscoverPage />,
-      },
-      {
-        path: 'friends',
-        element: <FriendsPage />,
-      },
-      {
-        path: 'chat/:friendId',
-        element: <ChatPage />,
-      },
-      {
-        path: 'requests',
-        element: <RequestsPage />,
-      },
-      {
-        path: 'notifications',
-        element: <NotificationsPage />,
-      },
-      {
-        path: 'profile',
-        element: <ProfilePage />,
+        element: <AppShell />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/app/discover" replace />,
+          },
+          {
+            path: 'discover',
+            element: <DiscoverPage />,
+          },
+          {
+            path: 'friends',
+            element: <FriendsPage />,
+          },
+          {
+            path: 'chat/:friendId',
+            element: <ChatPage />,
+          },
+          {
+            path: 'call/:friendId',
+            element: <CallPage />,
+          },
+          {
+            path: 'requests',
+            element: <RequestsPage />,
+          },
+          {
+            path: 'notifications',
+            element: <NotificationsPage />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
+          },
+          {
+            path: 'settings',
+            element: <SettingsPage />,
+          },
+        ],
       },
     ],
   },

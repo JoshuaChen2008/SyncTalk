@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type ChatUser = {
   id: string;
@@ -43,5 +44,5 @@ export function getChatApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Could not load chat. Please try again.';
+  return t('chat.error.fallback');
 }

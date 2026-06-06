@@ -2,11 +2,13 @@ import { ArrowRight } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { useTranslation } from '../../../i18n/i18n-store';
 import { getApiErrorMessage } from '../api/auth-api';
 import { useLoginMutation } from '../api/auth-hooks';
 import { AuthShell } from './auth-shell';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
   const [identifier, setIdentifier] = useState('');
@@ -28,9 +30,9 @@ export function LoginPage() {
       <section className="auth-card" aria-labelledby="login-title">
         <div className="text-center">
           <h2 id="login-title" className="text-3xl font-extrabold text-slate-900">
-            Welcome Back!
+            {t('auth.login.title')}
           </h2>
-          <p className="mt-3 text-sm text-slate-500">Ready to dive back into the conversation?</p>
+          <p className="mt-3 text-sm text-slate-500">{t('auth.login.description')}</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -45,7 +47,7 @@ export function LoginPage() {
 
           <div>
             <label className="auth-label" htmlFor="email">
-              Email Address
+              {t('auth.login.email')}
             </label>
             <input
               className="auth-input"
@@ -60,7 +62,7 @@ export function LoginPage() {
 
           <div>
             <label className="auth-label" htmlFor="password">
-              Password
+              {t('auth.login.password')}
             </label>
             <input
               className="auth-input"
@@ -81,23 +83,23 @@ export function LoginPage() {
                 name="remember"
                 type="checkbox"
               />
-              Remember me
+              {t('auth.login.remember')}
             </label>
             <a className="font-semibold text-indigo-600 hover:text-indigo-500" href="/auth/login">
-              Forgot password?
+              {t('auth.login.forgot')}
             </a>
           </div>
 
           <button className="auth-primary-button" type="submit" disabled={loginMutation.isPending}>
-            <span>{loginMutation.isPending ? 'Signing In...' : 'Sign In'}</span>
+            <span>{loginMutation.isPending ? t('auth.login.pending') : t('auth.login.submit')}</span>
             <ArrowRight aria-hidden="true" size={18} strokeWidth={2.5} />
           </button>
         </form>
 
         <p className="mt-8 text-center text-sm text-slate-500">
-          New to SyncTalk?{' '}
+          {t('auth.login.newPrefix')}{' '}
           <Link className="font-semibold text-indigo-600 hover:text-indigo-500" to="/auth/register">
-            Create a free account
+            {t('auth.login.createAccount')}
           </Link>
         </p>
       </section>

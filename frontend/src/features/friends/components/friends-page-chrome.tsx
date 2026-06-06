@@ -8,6 +8,40 @@ import profileCollage6 from '../../../assets/synctalk/profile-collage-6.png';
 export const featureCardClass =
   'rounded-lg border border-white/70 bg-white/72 shadow-[0_24px_60px_rgb(49_46_129_/_13%)] backdrop-blur-2xl';
 
+export const discoverGlassPanel =
+  'border border-white/65 bg-white/36 shadow-[0_24px_70px_rgb(49_46_129_/_16%)] backdrop-blur-2xl';
+
+export function DiscoverStyleBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 opacity-50 [background-image:linear-gradient(#c7d2fe_1px,transparent_1px),linear-gradient(90deg,#c7d2fe_1px,transparent_1px)] [background-size:32px_32px]"
+    />
+  );
+}
+
+export function DiscoverStyleVisualPanel() {
+  return (
+    <section className="relative hidden min-h-[21rem] bg-[#fbbf24]/48 p-5 backdrop-blur-2xl lg:block">
+      <img
+        alt=""
+        className="absolute left-8 top-10 h-40 w-64 rotate-[-5deg] rounded-lg border border-white/70 object-cover shadow-[0_20px_48px_rgb(15_23_42_/_24%)]"
+        src={profileCollage1}
+      />
+      <img
+        alt=""
+        className="absolute bottom-10 right-8 h-44 w-72 rotate-[4deg] rounded-lg border border-white/70 object-cover shadow-[0_20px_48px_rgb(15_23_42_/_24%)]"
+        src={profileCollage3}
+      />
+      <img
+        alt=""
+        className="absolute bottom-8 left-14 h-28 w-48 rotate-[-2deg] rounded-lg border border-white/70 object-cover shadow-[0_18px_42px_rgb(15_23_42_/_22%)]"
+        src={profileCollage6}
+      />
+    </section>
+  );
+}
+
 export function FriendsFeatureBackground() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">

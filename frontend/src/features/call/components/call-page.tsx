@@ -19,6 +19,7 @@ import {
   FriendsFeatureBackground,
   HeroGlassPanel,
 } from '../../friends/components/friends-page-chrome';
+import { useTranslation } from '../../../i18n/i18n-store';
 import { getCallApiErrorMessage, type CallSession, type CallToken } from '../api/call-api';
 import { useCallSessionQuery, useCallTokenQuery } from '../api/call-hooks';
 
@@ -41,19 +42,21 @@ function CallStatePanel({
 }
 
 function CallErrorPanel({ message }: { message: string }) {
+  const { t } = useTranslation();
+
   return (
     <CallStatePanel role="alert">
       <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-700">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
-      <h2 className="mt-5 text-2xl font-black text-slate-950">Call unavailable</h2>
+      <h2 className="mt-5 text-2xl font-black text-slate-950">{t('call.unavailable')}</h2>
       <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
       <Link
         className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-black text-[#4f46e5] transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 motion-reduce:transition-none"
         to="/app/friends"
       >
         <ArrowLeft aria-hidden="true" size={17} />
-        Back to friends
+        {t('call.backToFriends')}
       </Link>
     </CallStatePanel>
   );
@@ -66,6 +69,7 @@ function CallPresenceStatus({
   friendName: string;
   currentUserId: string;
 }) {
+  const { t } = useTranslation();
   const { useParticipants } = useCallStateHooks();
   const participants = useParticipants();
   const remoteParticipantCount = participants.filter(
@@ -75,28 +79,35 @@ function CallPresenceStatus({
   return (
     <p className="border-t border-white/10 bg-slate-900/90 px-4 py-3 text-sm font-black text-teal-100">
       {remoteParticipantCount > 0
-        ? `Live with ${remoteParticipantCount} partner${remoteParticipantCount === 1 ? '' : 's'}`
-        : `Waiting for ${friendName} to join or rejoin`}
+        ? t('call.liveWith', {
+            count: remoteParticipantCount,
+            plural: remoteParticipantCount === 1 ? '' : 's',
+          })
+        : t('call.waitingFor', { name: friendName })}
     </p>
   );
 }
 
 function CallMediaControls() {
+  const { t } = useTranslation();
   const { useCameraState, useMicrophoneState } = useCallStateHooks();
   const { microphone, isMute: isMicrophoneMuted } = useMicrophoneState();
   const { camera, isMute: isCameraMuted } = useCameraState();
   const mediaButtonClass =
     'grid h-11 w-11 place-items-center rounded-lg border border-white/15 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 motion-reduce:transition-none';
 
+  const microphoneLabel = isMicrophoneMuted ? t('call.turnOnMic') : t('call.turnOffMic');
+  const cameraLabel = isCameraMuted ? t('call.turnOnCamera') : t('call.turnOffCamera');
+
   return (
     <div className="flex items-center justify-center gap-3">
       <button
-        aria-label={isMicrophoneMuted ? 'Turn on microphone' : 'Turn off microphone'}
+        aria-label={microphoneLabel}
         className={mediaButtonClass}
         onClick={() => {
           void microphone.toggle();
         }}
-        title={isMicrophoneMuted ? 'Turn on microphone' : 'Turn off microphone'}
+        title={microphoneLabel}
         type="button"
       >
         {isMicrophoneMuted ? (
@@ -106,12 +117,12 @@ function CallMediaControls() {
         )}
       </button>
       <button
-        aria-label={isCameraMuted ? 'Turn on camera' : 'Turn off camera'}
+        aria-label={cameraLabel}
         className={mediaButtonClass}
         onClick={() => {
           void camera.toggle();
         }}
-        title={isCameraMuted ? 'Turn on camera' : 'Turn off camera'}
+        title={cameraLabel}
         type="button"
       >
         {isCameraMuted ? (
@@ -133,6 +144,7 @@ function StreamCallPanel({
   streamApiKey: string;
   tokenData: CallToken;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
   const [activeCall, setActiveCall] = useState<Call | null>(null);
@@ -169,7 +181,7 @@ function StreamCallPanel({
       } catch {
         if (isActive) {
           setConnectionError(
-            'Video call could not be joined. Please check camera and microphone permissions, then try again.',
+            t('call.joinError'),
           );
         }
       } finally {
@@ -186,7 +198,7 @@ function StreamCallPanel({
       void nextCall.leave().catch(() => undefined);
       void nextClient.disconnectUser().catch(() => undefined);
     };
-  }, [sessionData.callId, sessionData.callType, streamApiKey, tokenData]);
+  }, [sessionData.callId, sessionData.callType, streamApiKey, t, tokenData]);
 
   async function handleLeave() {
     try {
@@ -204,7 +216,7 @@ function StreamCallPanel({
   if (!videoClient || !activeCall || isJoining || !isJoined) {
     return (
       <CallStatePanel role="status">
-        <p className="text-sm font-black text-slate-700">Joining call...</p>
+        <p className="text-sm font-black text-slate-700">{t('call.joining')}</p>
       </CallStatePanel>
     );
   }
@@ -214,10 +226,10 @@ function StreamCallPanel({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100 bg-white/80 px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-teal-700">
-            Call {sessionData.callId}
+            {t('call.callLabel', { id: sessionData.callId })}
           </p>
           <p className="mt-1 text-sm font-bold text-slate-600">
-            Practice live with {sessionData.friend.username}
+            {t('call.practiceWith', { name: sessionData.friend.username })}
           </p>
         </div>
         <Link
@@ -225,7 +237,7 @@ function StreamCallPanel({
           to={`/app/chat/${sessionData.friend.id}`}
         >
           <MessageCircle aria-hidden="true" size={16} />
-          Back to chat
+          {t('call.backToChat')}
         </Link>
       </div>
       <div className="min-h-[34rem] bg-slate-950 text-white">
@@ -252,6 +264,7 @@ function StreamCallPanel({
 }
 
 export function CallPage() {
+  const { t } = useTranslation();
   const { friendId = '' } = useParams();
   const streamApiKey = getStreamApiKey();
   const tokenQuery = useCallTokenQuery();
@@ -267,24 +280,26 @@ export function CallPage() {
         <HeroGlassPanel>
           <p className="inline-flex items-center gap-2 rounded-lg bg-white/74 px-3 py-1.5 text-sm font-black text-teal-700 shadow-sm backdrop-blur-xl">
             <Phone aria-hidden="true" size={16} />
-            Call
+            {t('call.badge')}
           </p>
           <h1 className="mt-4 max-w-4xl text-5xl font-black leading-none tracking-normal text-slate-950 sm:text-6xl">
-            {sessionQuery.data ? `Call with ${sessionQuery.data.friend.username}` : 'Call'}
+            {sessionQuery.data
+              ? t('call.hero.titleWithName', { name: sessionQuery.data.friend.username })
+              : t('call.hero.title')}
           </h1>
           <p className="mt-4 max-w-3xl text-base font-bold leading-7 text-slate-600">
-            Meet one-on-one with your accepted language partner in a stable shared video room.
+            {t('call.hero.description')}
           </p>
         </HeroGlassPanel>
 
-        {!streamApiKey ? <CallErrorPanel message="Stream Video key is missing." /> : null}
+        {!streamApiKey ? <CallErrorPanel message={t('call.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
           <CallStatePanel role="status">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal-100 text-teal-700">
               <Video aria-hidden="true" size={26} />
             </div>
-            <p className="mt-5 text-sm font-black text-slate-700">Loading call...</p>
+            <p className="mt-5 text-sm font-black text-slate-700">{t('call.loading')}</p>
           </CallStatePanel>
         ) : null}
 

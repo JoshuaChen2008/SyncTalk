@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type CallUser = {
   id: string;
@@ -44,5 +45,5 @@ export function getCallApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Could not load call. Please try again.';
+  return t('call.error.fallback');
 }

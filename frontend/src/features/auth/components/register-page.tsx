@@ -2,11 +2,13 @@ import { ArrowRight } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { useTranslation } from '../../../i18n/i18n-store';
 import { getApiErrorMessage } from '../api/auth-api';
 import { useRegisterMutation } from '../api/auth-hooks';
 import { AuthShell } from './auth-shell';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const registerMutation = useRegisterMutation();
   const [username, setUsername] = useState('');
@@ -29,11 +31,9 @@ export function RegisterPage() {
       <section className="auth-card" aria-labelledby="register-title">
         <div className="text-center">
           <h2 id="register-title" className="text-3xl font-extrabold text-slate-900">
-            Create Your Account
+            {t('auth.register.title')}
           </h2>
-          <p className="mt-3 text-sm text-slate-500">
-            Start matching with language partners today.
-          </p>
+          <p className="mt-3 text-sm text-slate-500">{t('auth.register.description')}</p>
         </div>
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
@@ -48,7 +48,7 @@ export function RegisterPage() {
 
           <div>
             <label className="auth-label" htmlFor="username">
-              Username
+              {t('auth.register.username')}
             </label>
             <input
               className="auth-input"
@@ -63,7 +63,7 @@ export function RegisterPage() {
 
           <div>
             <label className="auth-label" htmlFor="email">
-              Email Address
+              {t('auth.register.email')}
             </label>
             <input
               className="auth-input"
@@ -78,13 +78,13 @@ export function RegisterPage() {
 
           <div>
             <label className="auth-label" htmlFor="password">
-              Password
+              {t('auth.register.password')}
             </label>
             <input
               className="auth-input"
               id="password"
               name="password"
-              placeholder="At least 8 characters"
+              placeholder={t('auth.register.passwordPlaceholder')}
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -96,15 +96,17 @@ export function RegisterPage() {
             type="submit"
             disabled={registerMutation.isPending}
           >
-            <span>{registerMutation.isPending ? 'Creating...' : 'Create Account'}</span>
+            <span>
+              {registerMutation.isPending ? t('auth.register.pending') : t('auth.register.submit')}
+            </span>
             <ArrowRight aria-hidden="true" size={18} strokeWidth={2.5} />
           </button>
         </form>
 
         <p className="mt-8 text-center text-sm text-slate-500">
-          Already have an account?{' '}
+          {t('auth.register.existingPrefix')}{' '}
           <Link className="font-semibold text-indigo-600 hover:text-indigo-500" to="/auth/login">
-            Sign in instead
+            {t('auth.register.signInInstead')}
           </Link>
         </p>
       </section>

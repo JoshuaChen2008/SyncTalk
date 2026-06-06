@@ -11,6 +11,7 @@ import {
   FriendsFeatureBackground,
   HeroGlassPanel,
 } from '../../friends/components/friends-page-chrome';
+import { useTranslation } from '../../../i18n/i18n-store';
 import { getChatApiErrorMessage, type ChatChannel, type ChatToken } from '../api/chat-api';
 import { useChatChannelQuery, useChatTokenQuery } from '../api/chat-hooks';
 
@@ -33,19 +34,21 @@ function ChatStatePanel({
 }
 
 function ChatErrorPanel({ message }: { message: string }) {
+  const { t } = useTranslation();
+
   return (
     <ChatStatePanel role="alert">
       <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-700">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
-      <h2 className="mt-5 text-2xl font-black text-slate-950">Chat unavailable</h2>
+      <h2 className="mt-5 text-2xl font-black text-slate-950">{t('chat.unavailable')}</h2>
       <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
       <Link
         className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-black text-[#4f46e5] transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 motion-reduce:transition-none"
         to="/app/friends"
       >
         <ArrowLeft aria-hidden="true" size={17} />
-        Back to friends
+        {t('chat.backToFriends')}
       </Link>
     </ChatStatePanel>
   );
@@ -60,6 +63,7 @@ function StreamChatPanel({
   streamApiKey: string;
   tokenData: ChatToken;
 }) {
+  const { t } = useTranslation();
   const [streamChannel, setStreamChannel] = useState<StreamChannel | null>(null);
   const [channelError, setChannelError] = useState('');
   const client = useCreateChatClient({
@@ -91,7 +95,7 @@ function StreamChatPanel({
         }
       } catch {
         if (isActive) {
-          setChannelError('Chat channel could not be loaded. Please try again.');
+          setChannelError(t('chat.channelError'));
         }
       }
     }
@@ -102,7 +106,7 @@ function StreamChatPanel({
       isActive = false;
       setStreamChannel(null);
     };
-  }, [channelData.channelId, client]);
+  }, [channelData.channelId, client, t]);
 
   if (channelError) {
     return <ChatErrorPanel message={channelError} />;
@@ -111,7 +115,7 @@ function StreamChatPanel({
   if (!client || !streamChannel) {
     return (
       <ChatStatePanel role="status">
-        <p className="text-sm font-black text-slate-700">Connecting chat...</p>
+        <p className="text-sm font-black text-slate-700">{t('chat.connecting')}</p>
       </ChatStatePanel>
     );
   }
@@ -120,7 +124,7 @@ function StreamChatPanel({
     <section className={`${featureCardClass} overflow-hidden`}>
       <div className="border-b border-indigo-100 bg-white/80 px-5 py-4">
         <p className="text-xs font-black uppercase tracking-normal text-[#4f46e5]">
-          Channel {channelData.channelId}
+          {t('chat.channelLabel', { id: channelData.channelId })}
         </p>
       </div>
       <div className="min-h-[34rem] bg-white">
@@ -138,6 +142,7 @@ function StreamChatPanel({
 }
 
 export function ChatPage() {
+  const { t } = useTranslation();
   const { friendId = '' } = useParams();
   const streamApiKey = getStreamApiKey();
   const tokenQuery = useChatTokenQuery();
@@ -153,21 +158,23 @@ export function ChatPage() {
         <HeroGlassPanel>
           <p className="inline-flex items-center gap-2 rounded-lg bg-white/74 px-3 py-1.5 text-sm font-black text-[#4f46e5] shadow-sm backdrop-blur-xl">
             <MessageCircle aria-hidden="true" size={16} />
-            Chat
+            {t('chat.badge')}
           </p>
           <h1 className="mt-4 max-w-4xl text-5xl font-black leading-none tracking-normal text-slate-950 sm:text-6xl">
-            {channelQuery.data ? `Chat with ${channelQuery.data.friend.username}` : 'Chat'}
+            {channelQuery.data
+              ? t('chat.hero.titleWithName', { name: channelQuery.data.friend.username })
+              : t('chat.hero.title')}
           </h1>
           <p className="mt-4 max-w-3xl text-base font-bold leading-7 text-slate-600">
-            Practice one-on-one with your accepted language partner in a stable shared channel.
+            {t('chat.hero.description')}
           </p>
         </HeroGlassPanel>
 
-        {!streamApiKey ? <ChatErrorPanel message="Stream Chat key is missing." /> : null}
+        {!streamApiKey ? <ChatErrorPanel message={t('chat.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
           <ChatStatePanel role="status">
-            <p className="text-sm font-black text-slate-700">Loading chat...</p>
+            <p className="text-sm font-black text-slate-700">{t('chat.loading')}</p>
           </ChatStatePanel>
         ) : null}
 

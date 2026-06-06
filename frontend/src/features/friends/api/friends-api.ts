@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type FriendUser = {
   id: string;
@@ -94,5 +95,5 @@ export function getFriendsApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Could not load friends. Please try again.';
+  return t('friends.error.fallback');
 }

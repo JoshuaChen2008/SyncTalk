@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type RelationshipStatus = 'stranger' | 'request_sent' | 'request_received' | 'friend';
 
@@ -48,5 +49,5 @@ export function getDiscoveryApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Could not load language partners. Please try again.';
+  return t('discover.error.fallback');
 }

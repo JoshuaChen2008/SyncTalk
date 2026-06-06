@@ -11,78 +11,96 @@ import { Link, NavLink, Outlet } from 'react-router';
 
 import { useCurrentUserQuery } from '../../../features/auth/api/auth-hooks';
 import { useNotificationsQuery } from '../../../features/notifications/api/notifications-hooks';
+import { useTranslation } from '../../../i18n/i18n-store';
+import { LanguageToggle } from '../../../i18n/language-toggle';
 import { applyAppTheme, useThemeStore } from '../../../stores/theme-store';
 
 const navItems = [
-  { to: '/app/discover', label: 'Discover', icon: Compass },
-  { to: '/app/friends', label: 'Friends', icon: UsersRound },
-  { to: '/app/requests', label: 'Requests', icon: Inbox },
-  { to: '/app/notifications', label: 'Notifications', icon: Bell },
-  { to: '/app/settings', label: 'Settings', icon: Settings },
-];
+  { to: '/app/discover', labelKey: 'app.nav.discover', icon: Compass },
+  { to: '/app/friends', labelKey: 'app.nav.friends', icon: UsersRound },
+  { to: '/app/requests', labelKey: 'app.nav.requests', icon: Inbox },
+  { to: '/app/notifications', labelKey: 'app.nav.notifications', icon: Bell },
+  { to: '/app/settings', labelKey: 'app.nav.settings', icon: Settings },
+] as const;
 
-function getNavLabel(label: string, unreadCount: number) {
-  if (label === 'Notifications' && unreadCount > 0) {
-    return `${label} ${unreadCount} unread`;
+function getNavLabel({
+  isNotifications,
+  label,
+  t,
+  unreadCount,
+}: {
+  isNotifications: boolean;
+  label: string;
+  t: ReturnType<typeof useTranslation>['t'];
+  unreadCount: number;
+}) {
+  if (isNotifications && unreadCount > 0) {
+    return t('app.nav.unread', { count: unreadCount, label });
   }
 
   return label;
 }
 
 function AppShellNav({ variant }: { variant: 'desktop' | 'mobile' }) {
+  const { t } = useTranslation();
   const notificationsQuery = useNotificationsQuery();
   const unreadCount = notificationsQuery.data?.unreadCount ?? 0;
   const isDesktop = variant === 'desktop';
 
   return (
     <nav
-      aria-label={isDesktop ? 'Primary app navigation' : 'Mobile app navigation'}
+      aria-label={isDesktop ? t('app.nav.primary') : t('app.nav.mobile')}
       className={
         isDesktop
           ? 'hidden flex-col gap-2 lg:flex'
           : 'fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-lg border border-white/70 bg-white/88 p-1.5 shadow-[0_20px_60px_rgb(15_23_42_/_18%)] backdrop-blur-2xl lg:hidden'
       }
     >
-      {navItems.map(({ icon: Icon, label, to }) => (
-        <NavLink
-          aria-label={
-            isDesktop ? getNavLabel(label, unreadCount) : `${getNavLabel(label, unreadCount)} tab`
-          }
-          className={({ isActive }) =>
-            isDesktop
-              ? `flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
-                  isActive
-                    ? 'bg-[#4f46e5] text-white shadow-[0_14px_30px_rgb(79_70_229_/_20%)]'
-                    : 'text-slate-700 hover:bg-white/82 hover:text-slate-950'
-                }`
-              : `relative grid min-h-12 place-items-center rounded-lg text-slate-700 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
-                  isActive ? 'bg-[#4f46e5] text-white' : 'hover:bg-indigo-50'
-                }`
-          }
-          key={to}
-          to={to}
-        >
-          <Icon aria-hidden="true" size={isDesktop ? 18 : 20} />
-          {isDesktop ? <span>{label}</span> : <span className="sr-only">{label}</span>}
-          {label === 'Notifications' && unreadCount > 0 ? (
-            <span
-              aria-hidden="true"
-              className={
-                isDesktop
-                  ? 'ml-auto inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#fbbf24] px-1.5 text-xs font-black text-slate-950'
-                  : 'absolute right-1 top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[#fbbf24] px-1 text-[0.65rem] font-black text-slate-950'
-              }
-            >
-              {unreadCount}
-            </span>
-          ) : null}
-        </NavLink>
-      ))}
+      {navItems.map(({ icon: Icon, labelKey, to }) => {
+        const label = t(labelKey);
+        const isNotifications = labelKey === 'app.nav.notifications';
+        const navLabel = getNavLabel({ isNotifications, label, t, unreadCount });
+
+        return (
+          <NavLink
+            aria-label={isDesktop ? navLabel : t('app.nav.mobileTab', { label: navLabel })}
+            className={({ isActive }) =>
+              isDesktop
+                ? `flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
+                    isActive
+                      ? 'bg-[#4f46e5] text-white shadow-[0_14px_30px_rgb(79_70_229_/_20%)]'
+                      : 'text-slate-700 hover:bg-white/82 hover:text-slate-950'
+                  }`
+                : `relative grid min-h-12 place-items-center rounded-lg text-slate-700 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
+                    isActive ? 'bg-[#4f46e5] text-white' : 'hover:bg-indigo-50'
+                  }`
+            }
+            key={to}
+            to={to}
+          >
+            <Icon aria-hidden="true" size={isDesktop ? 18 : 20} />
+            {isDesktop ? <span>{label}</span> : <span className="sr-only">{label}</span>}
+            {isNotifications && unreadCount > 0 ? (
+              <span
+                aria-hidden="true"
+                className={
+                  isDesktop
+                    ? 'ml-auto inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#fbbf24] px-1.5 text-xs font-black text-slate-950'
+                    : 'absolute right-1 top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[#fbbf24] px-1 text-[0.65rem] font-black text-slate-950'
+                }
+              >
+                {unreadCount}
+              </span>
+            ) : null}
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }
 
 export function AppShell() {
+  const { t } = useTranslation();
   const currentUserQuery = useCurrentUserQuery();
   const theme = useThemeStore((state) => state.theme);
   const currentUser = currentUserQuery.data;
@@ -117,15 +135,19 @@ export function AppShell() {
             SyncTalk
           </Link>
           <p className={`mt-2 text-sm font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-            Language practice workspace
+            {t('app.brand.tagline')}
           </p>
 
           <div className="mt-8">
             <AppShellNav variant="desktop" />
           </div>
 
+          <div className="mt-auto">
+            <LanguageToggle />
+          </div>
+
           <Link
-            className={`mt-auto flex min-h-14 items-center gap-3 rounded-lg border px-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
+            className={`mt-3 flex min-h-14 items-center gap-3 rounded-lg border px-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
               isDark
                 ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800'
                 : 'border-indigo-100 bg-white text-slate-700 hover:bg-indigo-50'
@@ -137,10 +159,10 @@ export function AppShell() {
             </span>
             <span className="min-w-0">
               <span className={`block truncate ${isDark ? 'text-white' : 'text-slate-950'}`}>
-                {currentUser?.username ?? 'User'}
+                {currentUser?.username ?? t('app.user.fallback')}
               </span>
               <span className={`block truncate text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                {currentUser?.email ?? 'Settings'}
+                {currentUser?.email ?? t('app.user.emailFallback')}
               </span>
             </span>
           </Link>
@@ -155,13 +177,16 @@ export function AppShell() {
             <Link className="text-2xl font-black text-[#4648d4]" to="/app/discover">
               SyncTalk
             </Link>
-            <Link
-              aria-label="Open settings"
-              className="grid h-10 w-10 place-items-center rounded-lg bg-white/60 text-[#4f46e5] transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"
-              to="/app/settings"
-            >
-              <Settings aria-hidden="true" size={21} />
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageToggle compact />
+              <Link
+                aria-label={t('app.settings.open')}
+                className="grid h-10 w-10 place-items-center rounded-lg bg-white/60 text-[#4f46e5] transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"
+                to="/app/settings"
+              >
+                <Settings aria-hidden="true" size={21} />
+              </Link>
+            </div>
           </header>
 
           <Outlet />

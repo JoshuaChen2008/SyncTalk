@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type NotificationType =
   | 'friend_request'
@@ -52,5 +53,5 @@ export function getNotificationsApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Could not load notifications. Please try again.';
+  return t('notifications.error.fallback');
 }

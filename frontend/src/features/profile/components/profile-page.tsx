@@ -8,6 +8,8 @@ import profileCollage3 from '../../../assets/synctalk/profile-collage-3.png';
 import profileCollage4 from '../../../assets/synctalk/profile-collage-4.png';
 import profileCollage5 from '../../../assets/synctalk/profile-collage-5.png';
 import profileCollage6 from '../../../assets/synctalk/profile-collage-6.png';
+import { translateDisplayValue } from '../../../i18n/format';
+import { useTranslation } from '../../../i18n/i18n-store';
 import { getProfileApiErrorMessage, type ProfileInput } from '../api/profile-api';
 import { useMyProfileQuery, useUpdateMyProfileMutation } from '../api/profile-hooks';
 
@@ -65,6 +67,8 @@ function SelectField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { locale, t } = useTranslation();
+
   return (
     <div>
       <label className="profile-label" htmlFor={id}>
@@ -77,10 +81,10 @@ function SelectField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">Select {label.toLowerCase()}</option>
+        <option value="">{t('profile.select', { label: label.toLowerCase() })}</option>
         {options.map((option) => (
           <option key={option} value={option}>
-            {option}
+            {translateDisplayValue(locale, option)}
           </option>
         ))}
       </select>
@@ -89,18 +93,20 @@ function SelectField({
 }
 
 function ProfileTopNav() {
+  const { t } = useTranslation();
+
   return (
     <header className="profile-top-nav">
       <Link className="profile-brand-link" to="/app/profile">
         SyncTalk
       </Link>
-      <nav className="profile-nav-links" aria-label="Profile navigation">
-        <Link to="/app/discover">Discover</Link>
-        <Link to="/app/friends">Friends</Link>
-        <Link to="/app/requests">Requests</Link>
-        <span>Messages</span>
+      <nav className="profile-nav-links" aria-label={t('profile.nav.label')}>
+        <Link to="/app/discover">{t('profile.nav.discover')}</Link>
+        <Link to="/app/friends">{t('profile.nav.friends')}</Link>
+        <Link to="/app/requests">{t('profile.nav.requests')}</Link>
+        <span>{t('profile.nav.messages')}</span>
       </nav>
-      <button className="profile-icon-button" type="button" aria-label="Profile menu">
+      <button className="profile-icon-button" type="button" aria-label={t('profile.menu')}>
         <UserCircle aria-hidden="true" size={22} strokeWidth={2.2} />
       </button>
     </header>
@@ -119,6 +125,7 @@ function ProfileBackground() {
 }
 
 export function ProfilePage() {
+  const { locale, t } = useTranslation();
   const navigate = useNavigate();
   const profileQuery = useMyProfileQuery();
   const updateProfileMutation = useUpdateMyProfileMutation();
@@ -160,7 +167,7 @@ export function ProfilePage() {
   if (profileQuery.isPending) {
     return (
       <main className="profile-page-shell">
-        <p className="profile-status-text">Loading profile...</p>
+        <p className="profile-status-text">{t('profile.loading')}</p>
       </main>
     );
   }
@@ -169,7 +176,7 @@ export function ProfilePage() {
     return (
       <main className="profile-page-shell">
         <section className="profile-error-panel">
-          <h1 className="text-2xl font-bold">Profile unavailable</h1>
+          <h1 className="text-2xl font-bold">{t('profile.unavailable')}</h1>
           <p className="mt-2 text-sm">{getProfileApiErrorMessage(profileQuery.error)}</p>
         </section>
       </main>
@@ -184,8 +191,8 @@ export function ProfilePage() {
       <section className="profile-content-canvas" aria-labelledby="profile-title">
         <form className="profile-glass-card" onSubmit={handleSubmit}>
           <div className="profile-heading">
-            <h1 id="profile-title">Complete Your Profile</h1>
-            <p>Help us tailor your learning experience by setting up your linguistic identity.</p>
+            <h1 id="profile-title">{t('profile.title')}</h1>
+            <p>{t('profile.description')}</p>
           </div>
 
           {updateProfileMutation.isError ? (
@@ -196,21 +203,21 @@ export function ProfilePage() {
 
           {!profileQuery.data.isProfileComplete ? (
             <p className="profile-alert profile-alert-info">
-              Finish these fields once, then you can start discovering language partners.
+              {t('profile.incomplete')}
             </p>
           ) : null}
 
           <div className="profile-form-grid">
             <SelectField
               id="nativeLanguage"
-              label="Native Language"
+              label={t('profile.nativeLanguage')}
               options={languageOptions}
               value={form.nativeLanguage}
               onChange={(value) => updateField('nativeLanguage', value)}
             />
             <SelectField
               id="targetLanguage"
-              label="Target Language"
+              label={t('profile.targetLanguage')}
               options={languageOptions}
               value={form.targetLanguage}
               onChange={(value) => updateField('targetLanguage', value)}
@@ -219,7 +226,7 @@ export function ProfilePage() {
 
           <fieldset className="profile-choice-section" aria-labelledby="profile-level-label">
             <legend id="profile-level-label" className="profile-label">
-              Current Level
+              {t('profile.currentLevel')}
             </legend>
             <div className="profile-level-options">
               {levelOptions.map((option) => (
@@ -234,7 +241,7 @@ export function ProfilePage() {
                   aria-pressed={form.languageLevel === option.value}
                   onClick={() => updateField('languageLevel', option.value)}
                 >
-                  {option.label}
+                  {translateDisplayValue(locale, option.label)}
                 </button>
               ))}
             </div>
@@ -242,7 +249,7 @@ export function ProfilePage() {
 
           <fieldset className="profile-choice-section" aria-labelledby="profile-goal-label">
             <legend id="profile-goal-label" className="profile-label">
-              Learning Goals
+              {t('profile.learningGoals')}
             </legend>
             <div className="profile-goal-grid">
               {goalOptions.map((option) => (
@@ -263,7 +270,7 @@ export function ProfilePage() {
                     onChange={(event) => updateField('learningGoal', event.target.value)}
                   />
                   <span aria-hidden="true" className="profile-goal-check" />
-                  <span>{option.label}</span>
+                  <span>{translateDisplayValue(locale, option.label)}</span>
                 </label>
               ))}
             </div>
@@ -272,7 +279,7 @@ export function ProfilePage() {
           <div className="profile-form-grid profile-form-grid-narrow">
             <SelectField
               id="timezone"
-              label="Timezone"
+              label={t('profile.timezone')}
               options={timezoneOptions}
               value={form.timezone}
               onChange={(value) => updateField('timezone', value)}
@@ -281,13 +288,13 @@ export function ProfilePage() {
 
           <div>
             <label className="profile-label" htmlFor="bio">
-              Short Bio
+              {t('profile.shortBio')}
             </label>
             <textarea
               className="profile-textarea"
               id="bio"
               name="bio"
-              placeholder="Tell us a bit about your language journey..."
+              placeholder={t('profile.bioPlaceholder')}
               value={form.bio}
               onChange={(event) => updateField('bio', event.target.value)}
             />
@@ -299,7 +306,7 @@ export function ProfilePage() {
               type="submit"
               disabled={updateProfileMutation.isPending}
             >
-              <span>{updateProfileMutation.isPending ? 'Saving...' : 'Finish Setup'}</span>
+              <span>{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
               <Rocket aria-hidden="true" size={18} strokeWidth={2.2} />
             </button>
           </div>

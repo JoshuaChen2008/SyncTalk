@@ -28,16 +28,25 @@ import {
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
-
-const relationshipLabels: Record<RelationshipStatus, string> = {
-  stranger: 'Available',
-  request_sent: 'Request sent',
-  request_received: 'Reply pending',
-  friend: 'Already friends',
-};
+import { translateDisplayValue } from '../../../i18n/format';
+import { useTranslation } from '../../../i18n/i18n-store';
 
 const glassPanel =
   'border border-white/65 bg-white/36 shadow-[0_24px_70px_rgb(49_46_129_/_16%)] backdrop-blur-2xl';
+
+function getRelationshipLabel(
+  status: RelationshipStatus,
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  const relationshipLabels: Record<RelationshipStatus, string> = {
+    stranger: t('discover.relationship.available'),
+    request_sent: t('discover.relationship.requestSent'),
+    request_received: t('discover.relationship.replyPending'),
+    friend: t('discover.relationship.alreadyFriends'),
+  };
+
+  return relationshipLabels[status];
+}
 
 function relationshipTone(status: RelationshipStatus) {
   if (status === 'friend') {
@@ -95,7 +104,9 @@ function DiscoveryUserCard({
   onSendRequest: (user: DiscoveryUser) => void;
   user: DiscoveryUser;
 }) {
+  const { locale, t } = useTranslation();
   const canSendRequest = user.relationshipStatus === 'stranger';
+  const relationshipLabel = getRelationshipLabel(user.relationshipStatus, t);
 
   return (
     <article
@@ -128,23 +139,26 @@ function DiscoveryUserCard({
               )}`}
             >
               <UserRoundCheck aria-hidden="true" size={17} />
-              {relationshipLabels[user.relationshipStatus]}
+              {relationshipLabel}
             </span>
             {user.relationshipStatus === 'request_received' ? (
               <Link
-                aria-label={`Review request from ${user.username}`}
+                aria-label={t('discover.reviewRequestFrom', { name: user.username })}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#4f46e5] px-4 text-sm font-black text-white shadow-[0_12px_24px_rgb(79_70_229_/_22%)] transition hover:bg-[#4338ca] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none"
                 to="/app/requests"
               >
                 <UserPlus aria-hidden="true" size={17} />
-                Review request
+                {t('discover.reviewRequest')}
               </Link>
             ) : (
               <button
                 aria-label={
                   canSendRequest
-                    ? `Send request to ${user.username}`
-                    : `${relationshipLabels[user.relationshipStatus]} with ${user.username}`
+                    ? t('discover.sendRequestTo', { name: user.username })
+                    : t('discover.relationshipWith', {
+                        name: user.username,
+                        status: relationshipLabel,
+                      })
                 }
                 className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#4f46e5] px-4 text-sm font-black text-white shadow-[0_12px_24px_rgb(79_70_229_/_22%)] transition hover:bg-[#4338ca] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none motion-reduce:transition-none"
                 disabled={!canSendRequest || isSending}
@@ -153,10 +167,10 @@ function DiscoveryUserCard({
               >
                 <UserPlus aria-hidden="true" size={17} />
                 {isSending
-                  ? 'Sending...'
+                  ? t('discover.sending')
                   : canSendRequest
-                    ? 'Send request'
-                    : 'Unavailable'}
+                    ? t('discover.sendRequest')
+                    : t('discover.unavailable')}
               </button>
             )}
           </div>
@@ -164,15 +178,21 @@ function DiscoveryUserCard({
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-white/60 bg-indigo-50/70 p-3 backdrop-blur-xl">
-            <p className="text-xs font-black uppercase text-indigo-900">Native</p>
-            <p className="mt-1 font-black text-slate-950">{user.nativeLanguage}</p>
+            <p className="text-xs font-black uppercase text-indigo-900">{t('discover.native')}</p>
+            <p className="mt-1 font-black text-slate-950">
+              {translateDisplayValue(locale, user.nativeLanguage)}
+            </p>
           </div>
           <div className="rounded-lg border border-white/60 bg-emerald-50/70 p-3 backdrop-blur-xl">
-            <p className="text-xs font-black uppercase text-emerald-900">Learning</p>
-            <p className="mt-1 font-black text-slate-950">{user.targetLanguage}</p>
+            <p className="text-xs font-black uppercase text-emerald-900">
+              {t('discover.learning')}
+            </p>
+            <p className="mt-1 font-black text-slate-950">
+              {translateDisplayValue(locale, user.targetLanguage)}
+            </p>
           </div>
           <div className="rounded-lg border border-white/60 bg-orange-50/70 p-3 backdrop-blur-xl">
-            <p className="text-xs font-black uppercase text-orange-900">Level</p>
+            <p className="text-xs font-black uppercase text-orange-900">{t('discover.level')}</p>
             <p className="mt-1 font-black text-slate-950">{user.languageLevel}</p>
           </div>
         </div>
@@ -189,7 +209,7 @@ function DiscoveryUserCard({
           ))}
           <span className="inline-flex items-center gap-2 rounded-lg border border-white/70 bg-white/64 px-3 py-1.5 text-xs font-black text-slate-700 backdrop-blur-xl">
             <Clock aria-hidden="true" size={14} />
-            {user.learningGoal}
+            {translateDisplayValue(locale, user.learningGoal)}
           </span>
         </div>
       </div>
@@ -214,12 +234,14 @@ function ResultsState({
   sendingUserId: string;
   users: DiscoveryUser[] | undefined;
 }) {
+  const { t } = useTranslation();
+
   if (isPending) {
     return (
       <section className={`rounded-lg p-6 text-sm font-black text-slate-700 ${glassPanel}`}>
         <span className="inline-flex items-center gap-2">
           <Sparkles aria-hidden="true" size={16} />
-          Loading language partners...
+          {t('discover.loading')}
         </span>
       </section>
     );
@@ -243,12 +265,12 @@ function ResultsState({
           <Globe2 aria-hidden="true" size={24} />
         </div>
         <h2 className="mt-5 text-xl font-black text-slate-950">
-          {isSearch ? 'No search results found' : 'No partners found yet'}
+          {isSearch ? t('discover.noSearchTitle') : t('discover.noPartnersTitle')}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm font-bold leading-6 text-slate-600">
           {isSearch
-            ? 'Try another username, language, or bio keyword.'
-            : 'Complete profiles with complementary languages will appear here.'}
+            ? t('discover.noSearchDescription')
+            : t('discover.noPartnersDescription')}
         </p>
       </section>
     );
@@ -257,7 +279,7 @@ function ResultsState({
   return (
     <section
       className="grid gap-5 lg:grid-cols-2"
-      aria-label={isSearch ? 'Search results' : 'Recommended partners'}
+      aria-label={isSearch ? t('discover.results.search') : t('discover.results.recommended')}
     >
       {users.map((user) => (
         <DiscoveryUserCard
@@ -272,6 +294,7 @@ function ResultsState({
 }
 
 export function DiscoverPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -291,7 +314,7 @@ export function DiscoverPage() {
 
     try {
       await sendFriendRequestMutation.mutateAsync(user.id);
-      setRequestFeedback(`Request sent to ${user.username}`);
+      setRequestFeedback(t('discover.requestSentTo', { name: user.username }));
     } catch {
       // The mutation error is rendered below.
     }
@@ -313,18 +336,18 @@ export function DiscoverPage() {
             <div>
               <p className="inline-flex items-center gap-2 rounded-lg border border-white/55 bg-white/18 px-3 py-1.5 text-sm font-black backdrop-blur-xl">
                 <Sparkles aria-hidden="true" size={16} />
-                Partner discovery
+                {t('discover.badge')}
               </p>
               <h1 className="mt-4 max-w-3xl text-5xl font-black leading-none tracking-normal sm:text-6xl">
-                Discover Partners
+                {t('discover.title')}
               </h1>
               <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-indigo-50">
-                Match by language, goal, level, and timezone without losing the human texture.
+                {t('discover.description')}
               </p>
             </div>
 
             <label className="relative block w-full max-w-xl">
-              <span className="sr-only">Search partners</span>
+              <span className="sr-only">{t('discover.search.sr')}</span>
               <Search
                 aria-hidden="true"
                 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
@@ -333,7 +356,7 @@ export function DiscoverPage() {
               <input
                 ref={searchInputRef}
                 className="min-h-14 w-full rounded-lg border border-white/75 bg-white/74 py-3 pl-12 pr-4 text-base font-black text-slate-950 outline-none shadow-[0_18px_50px_rgb(15_23_42_/_22%)] backdrop-blur-2xl transition focus:border-white focus:ring-4 focus:ring-white/35"
-                placeholder="Search username, language, or bio"
+                placeholder={t('discover.search.placeholder')}
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -341,7 +364,7 @@ export function DiscoverPage() {
             </label>
 
             <div
-              aria-label="Discovery view"
+              aria-label={t('discover.view.label')}
               className="inline-flex w-full max-w-sm rounded-lg border border-white/60 bg-white/20 p-1 shadow-[0_14px_34px_rgb(15_23_42_/_18%)] backdrop-blur-2xl"
               role="group"
             >
@@ -356,7 +379,7 @@ export function DiscoverPage() {
                 onClick={() => setSearchTerm('')}
               >
                 <Sparkles aria-hidden="true" size={16} />
-                Recommended
+                {t('discover.view.recommended')}
               </button>
               <button
                 aria-pressed={isSearch}
@@ -369,7 +392,7 @@ export function DiscoverPage() {
                 onClick={() => searchInputRef.current?.focus()}
               >
                 <Search aria-hidden="true" size={16} />
-                Search
+                {t('discover.view.search')}
               </button>
             </div>
           </section>
@@ -392,7 +415,7 @@ export function DiscoverPage() {
             />
             <div className="absolute left-8 bottom-44 flex items-center gap-2 rounded-lg border border-white/70 bg-[#22c55e]/62 px-4 py-3 text-sm font-black text-slate-950 shadow-[0_16px_34px_rgb(34_197_94_/_24%)] backdrop-blur-2xl">
               <BadgeCheck aria-hidden="true" size={18} />
-              Status-aware matches
+              {t('discover.visual.status')}
             </div>
             <div className="absolute right-10 top-24 grid h-16 w-16 place-items-center rounded-lg border border-white/70 bg-[#fb7185]/66 text-slate-950 shadow-[0_16px_34px_rgb(251_113_133_/_26%)] backdrop-blur-2xl">
               <ArrowUpRight aria-hidden="true" size={28} />
@@ -402,16 +425,22 @@ export function DiscoverPage() {
 
         <section className="grid gap-4 md:grid-cols-3">
           <div className={`rounded-lg p-4 ${glassPanel}`}>
-            <p className="text-xs font-black uppercase text-slate-500">Matching logic</p>
-            <p className="mt-1 text-lg font-black">Language first</p>
+            <p className="text-xs font-black uppercase text-slate-500">
+              {t('discover.stat.logicLabel')}
+            </p>
+            <p className="mt-1 text-lg font-black">{t('discover.stat.logicValue')}</p>
           </div>
           <div className={`rounded-lg p-4 ${glassPanel}`}>
-            <p className="text-xs font-black uppercase text-slate-500">Relationship state</p>
-            <p className="mt-1 text-lg font-black">No duplicate actions</p>
+            <p className="text-xs font-black uppercase text-slate-500">
+              {t('discover.stat.stateLabel')}
+            </p>
+            <p className="mt-1 text-lg font-black">{t('discover.stat.stateValue')}</p>
           </div>
           <div className={`rounded-lg p-4 ${glassPanel}`}>
-            <p className="text-xs font-black uppercase text-slate-500">Search fields</p>
-            <p className="mt-1 text-lg font-black">Name, language, bio</p>
+            <p className="text-xs font-black uppercase text-slate-500">
+              {t('discover.stat.searchLabel')}
+            </p>
+            <p className="mt-1 text-lg font-black">{t('discover.stat.searchValue')}</p>
           </div>
         </section>
 

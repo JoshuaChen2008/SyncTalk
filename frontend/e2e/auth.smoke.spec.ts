@@ -9,6 +9,12 @@ test.describe('auth smoke', () => {
     await expect(page.getByRole('heading', { name: /synctalk/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible();
     await expect(page.getByLabel(/email address/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /switch language to chinese/i }).click();
+    await expect(page.getByRole('heading', { name: '欢迎回来！' })).toBeVisible();
+
+    await page.getByRole('button', { name: '切换到英文' }).click();
+    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible();
   });
 
   test('redirects protected app pages to login', async ({ page }) => {
@@ -178,6 +184,15 @@ test.describe('auth smoke', () => {
       'dark',
     );
 
+    await page.getByRole('button', { name: /switch language to chinese/i }).first().click();
+    await expect(page.getByRole('heading', { name: '设置' })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole('heading', { name: '设置' })).toBeVisible();
+
+    await page.getByRole('button', { name: '切换到英文' }).first().click();
+    await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
+
     await page.getByRole('button', { name: /log out/i }).click();
 
     await expect(page).toHaveURL(/\/auth\/login/);
@@ -330,6 +345,12 @@ test.describe('auth smoke', () => {
     });
 
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        'synctalk-locale',
+        JSON.stringify({ state: { locale: 'zh-CN' }, version: 0 }),
+      );
+    });
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({
         contentType: 'application/json',
@@ -442,20 +463,20 @@ test.describe('auth smoke', () => {
     });
 
     const pages = [
-      { path: '/app/discover', heading: /discover partners/i },
-      { path: '/app/friends', heading: /your language friends/i },
-      { path: '/app/requests', heading: /friend requests/i },
-      { path: '/app/notifications', heading: /^notifications$/i },
-      { path: '/app/profile', heading: /complete your profile/i },
-      { path: '/app/settings', heading: /^settings$/i },
-      { path: '/app/chat/user-2', heading: /chat unavailable/i },
-      { path: '/app/call/user-2', heading: /call unavailable/i },
+      { path: '/app/discover', heading: '发现伙伴' },
+      { path: '/app/friends', heading: '你的语言好友' },
+      { path: '/app/requests', heading: '好友请求' },
+      { path: '/app/notifications', heading: '通知' },
+      { path: '/app/profile', heading: '完善你的资料' },
+      { path: '/app/settings', heading: '设置' },
+      { path: '/app/chat/user-2', heading: '聊天不可用' },
+      { path: '/app/call/user-2', heading: '通话不可用' },
     ];
 
     for (const appPage of pages) {
       await page.goto(appPage.path);
       await expect(page.getByRole('heading', { name: appPage.heading })).toBeVisible();
-      await expect(page.getByLabel(/mobile app navigation/i)).toBeVisible();
+      await expect(page.getByLabel('移动端应用导航')).toBeVisible();
 
       const hasHorizontalOverflow = await page.evaluate(
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -463,14 +484,11 @@ test.describe('auth smoke', () => {
       expect(hasHorizontalOverflow).toBe(false);
     }
 
-    await expect(page.getByLabel(/discover tab/i)).toHaveAttribute('href', '/app/discover');
-    await expect(page.getByLabel(/friends tab/i)).toHaveAttribute('href', '/app/friends');
-    await expect(page.getByLabel(/requests tab/i)).toHaveAttribute('href', '/app/requests');
-    await expect(page.getByLabel(/notifications tab/i)).toHaveAttribute(
-      'href',
-      '/app/notifications',
-    );
-    await expect(page.getByLabel(/settings tab/i)).toHaveAttribute('href', '/app/settings');
+    await expect(page.getByLabel('发现 标签')).toHaveAttribute('href', '/app/discover');
+    await expect(page.getByLabel('好友 标签')).toHaveAttribute('href', '/app/friends');
+    await expect(page.getByLabel('请求 标签')).toHaveAttribute('href', '/app/requests');
+    await expect(page.getByLabel('通知 标签')).toHaveAttribute('href', '/app/notifications');
+    await expect(page.getByLabel('设置 标签')).toHaveAttribute('href', '/app/settings');
     expect(consoleErrors).toEqual([]);
   });
 });

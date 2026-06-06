@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type Profile = {
   id: string;
@@ -53,5 +54,5 @@ export function getProfileApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Something went wrong. Please try again.';
+  return t('auth.error.fallback');
 }

@@ -2,6 +2,13 @@ import { LogOut, Moon, Settings, Sun, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { useCurrentUserQuery, useLogoutMutation } from '../../auth/api/auth-hooks';
+import {
+  discoverGlassPanel,
+  DiscoverStyleBackground,
+  DiscoverStyleVisualPanel,
+} from '../../friends/components/friends-page-chrome';
+import { useTranslation } from '../../../i18n/i18n-store';
+import { LanguageToggle } from '../../../i18n/language-toggle';
 import { useThemeStore, type AppTheme } from '../../../stores/theme-store';
 
 function getThemeButtonClass(isActive: boolean) {
@@ -13,6 +20,7 @@ function getThemeButtonClass(isActive: boolean) {
 }
 
 export function SettingsPage() {
+  const { locale, t } = useTranslation();
   const navigate = useNavigate();
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
@@ -20,12 +28,9 @@ export function SettingsPage() {
   const setTheme = useThemeStore((state) => state.setTheme);
   const currentUser = currentUserQuery.data;
   const isDark = theme === 'dark';
-  const heroPanelClass = isDark
-    ? 'rounded-lg border border-slate-700 bg-slate-900/78 p-6 shadow-[0_24px_70px_rgb(0_0_0_/_20%)] backdrop-blur-2xl sm:p-8'
-    : 'rounded-lg border border-white/70 bg-white/62 p-6 shadow-[0_24px_70px_rgb(49_46_129_/_12%)] backdrop-blur-2xl sm:p-8';
   const cardClass = isDark
     ? 'rounded-lg border border-slate-700 bg-slate-900/82 p-6 shadow-[0_24px_60px_rgb(0_0_0_/_18%)] backdrop-blur-2xl'
-    : 'rounded-lg border border-white/70 bg-white/72 p-6 shadow-[0_24px_60px_rgb(49_46_129_/_13%)] backdrop-blur-2xl';
+    : `${discoverGlassPanel} rounded-lg p-6`;
 
   async function handleLogout() {
     await logoutMutation.mutateAsync();
@@ -37,31 +42,47 @@ export function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-8 sm:px-8 lg:py-10">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <section className={heroPanelClass}>
-          <p className="inline-flex items-center gap-2 rounded-lg bg-white/74 px-3 py-1.5 text-sm font-black text-[#4f46e5] shadow-sm backdrop-blur-xl">
-            <Settings aria-hidden="true" size={16} />
-            Settings
-          </p>
-          <h1
-            className={`mt-4 max-w-4xl text-5xl font-black leading-none tracking-normal sm:text-6xl ${
-              isDark ? 'text-white' : 'text-slate-950'
-            }`}
-          >
-            Settings
-          </h1>
-          <p
-            className={`mt-4 max-w-3xl text-base font-bold leading-7 ${
-              isDark ? 'text-slate-300' : 'text-slate-600'
-            }`}
-          >
-            Manage your account session and keep the workspace comfortable for focused language
-            practice.
-          </p>
-        </section>
+    <main className="min-h-screen overflow-hidden bg-[#eef2ff] px-4 py-5 text-slate-950 sm:px-8">
+      <DiscoverStyleBackground />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <header className={`grid overflow-hidden rounded-lg ${discoverGlassPanel} lg:grid-cols-[1.1fr_0.9fr]`}>
+          <section className="flex min-h-[21rem] flex-col justify-between gap-8 bg-[#4f46e5]/70 p-6 text-white backdrop-blur-2xl sm:p-8">
+            <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-lg border border-white/70 bg-[#22c55e]/72 text-slate-950 shadow-[0_14px_28px_rgb(34_197_94_/_28%)] backdrop-blur-xl">
+                <Settings aria-hidden="true" size={20} />
+              </span>
+              <span className="text-sm font-black uppercase tracking-normal">
+                {t('settings.title')}
+              </span>
+            </div>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-lg border border-white/55 bg-white/18 px-3 py-1.5 text-sm font-black backdrop-blur-xl">
+                <UserCircle aria-hidden="true" size={16} />
+                {t('settings.badge')}
+              </p>
+              <h1 className="mt-4 max-w-3xl text-5xl font-black leading-none tracking-normal sm:text-6xl">
+                {t('settings.title')}
+              </h1>
+              <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-indigo-50">
+                {t('settings.description')}
+              </p>
+            </div>
+
+            <div className="grid max-w-xl gap-3 text-sm font-black text-slate-950 sm:grid-cols-2">
+              <p className="rounded-lg border border-white/60 bg-white/78 px-4 py-3 shadow-[0_10px_24px_rgb(15_23_42_/_12%)] backdrop-blur-xl">
+                <span className="block text-2xl">{currentUser?.username ?? t('app.user.fallback')}</span>
+                {t('settings.signedIn')}
+              </p>
+              <p className="rounded-lg border border-white/60 bg-white/24 px-4 py-3 text-white backdrop-blur-xl">
+                {t('settings.themeSaved')}
+              </p>
+            </div>
+          </section>
+          <DiscoverStyleVisualPanel />
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-3">
           <article className={cardClass}>
             <div className="flex items-center gap-4">
               <div className="grid h-16 w-16 place-items-center rounded-lg bg-indigo-100 text-[#4f46e5]">
@@ -69,10 +90,10 @@ export function SettingsPage() {
               </div>
               <div className="min-w-0">
                 <h2 className={`truncate text-2xl font-black ${isDark ? 'text-white' : 'text-slate-950'}`}>
-                  {currentUser?.username ?? 'Signed-in user'}
+                  {currentUser?.username ?? t('settings.account.userFallback')}
                 </h2>
                 <p className={`mt-1 truncate text-sm font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  {currentUser?.email ?? 'Loading account...'}
+                  {currentUser?.email ?? t('settings.account.loading')}
                 </p>
               </div>
             </div>
@@ -86,30 +107,34 @@ export function SettingsPage() {
                   isDark ? 'border-slate-700 bg-slate-800/78' : 'border-white/70 bg-white/62'
                 }`}
               >
-                <span className="block text-xs uppercase text-slate-500">Workspace</span>
-                Protected app
+                <span className="block text-xs uppercase text-slate-500">
+                  {t('settings.workspace')}
+                </span>
+                {t('settings.protectedApp')}
               </p>
               <p
                 className={`rounded-lg border px-4 py-3 ${
                   isDark ? 'border-slate-700 bg-slate-800/78' : 'border-white/70 bg-white/62'
                 }`}
               >
-                <span className="block text-xs uppercase text-slate-500">Session</span>
-                Cookie secured
+                <span className="block text-xs uppercase text-slate-500">
+                  {t('settings.session')}
+                </span>
+                {t('settings.cookieSecured')}
               </p>
             </div>
           </article>
 
           <article className={cardClass}>
             <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-950'}`}>
-              Theme
+              {t('settings.theme.title')}
             </h2>
             <p
               className={`mt-2 text-sm font-bold leading-6 ${
                 isDark ? 'text-slate-300' : 'text-slate-600'
               }`}
             >
-              Theme preference is saved on this device and restored after refresh.
+              {t('settings.theme.description')}
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <button
@@ -119,7 +144,7 @@ export function SettingsPage() {
                 onClick={() => handleThemeChange('light')}
               >
                 <Sun aria-hidden="true" size={18} />
-                Use light theme
+                {t('settings.theme.light')}
               </button>
               <button
                 aria-pressed={theme === 'dark'}
@@ -128,8 +153,36 @@ export function SettingsPage() {
                 onClick={() => handleThemeChange('dark')}
               >
                 <Moon aria-hidden="true" size={18} />
-                Use dark theme
+                {t('settings.theme.dark')}
               </button>
+            </div>
+          </article>
+
+          <article className={cardClass}>
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-950'}`}>
+              {t('settings.language.title')}
+            </h2>
+            <p
+              className={`mt-2 text-sm font-bold leading-6 ${
+                isDark ? 'text-slate-300' : 'text-slate-600'
+              }`}
+            >
+              {t('settings.language.description')}
+            </p>
+            <p
+              className={`mt-5 rounded-lg border px-4 py-3 text-sm font-black ${
+                isDark
+                  ? 'border-slate-700 bg-slate-800/78 text-slate-200'
+                  : 'border-white/70 bg-white/62 text-slate-700'
+              }`}
+            >
+              <span className="block text-xs uppercase text-slate-500">
+                {t('settings.language.currentLabel')}
+              </span>
+              {locale === 'en' ? t('settings.language.english') : t('settings.language.chinese')}
+            </p>
+            <div className="mt-5">
+              <LanguageToggle />
             </div>
           </article>
         </section>
@@ -137,9 +190,9 @@ export function SettingsPage() {
         <section className="rounded-lg border border-red-200 bg-red-50/88 p-6 shadow-[0_18px_45px_rgb(127_29_29_/_10%)]">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <h2 className="text-xl font-black text-red-950">End this session</h2>
+              <h2 className="text-xl font-black text-red-950">{t('settings.logout.title')}</h2>
               <p className="mt-2 text-sm font-bold leading-6 text-red-800">
-                Logging out clears the current session cookie on the server.
+                {t('settings.logout.description')}
               </p>
             </div>
             <button
@@ -149,12 +202,12 @@ export function SettingsPage() {
               onClick={handleLogout}
             >
               <LogOut aria-hidden="true" size={18} />
-              {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+              {logoutMutation.isPending ? t('settings.logout.pending') : t('settings.logout.action')}
             </button>
           </div>
           {logoutMutation.isError ? (
             <p className="mt-4 rounded-lg border border-red-200 bg-white/72 px-4 py-3 text-sm font-black text-red-950" role="alert">
-              Could not log out. Please try again.
+              {t('settings.logout.error')}
             </p>
           ) : null}
         </section>

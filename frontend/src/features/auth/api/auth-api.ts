@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api-client';
+import { t } from '../../../i18n/i18n-store';
 
 export type AuthUser = {
   id: string;
@@ -56,5 +57,5 @@ export function getApiErrorMessage(error: unknown) {
     return error.response.data.error;
   }
 
-  return 'Something went wrong. Please try again.';
+  return t('auth.error.fallback');
 }

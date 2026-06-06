@@ -120,6 +120,26 @@ describe('app shell and settings', () => {
     expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"light"');
   });
 
+  it('toggles app language from the shell and settings controls', async () => {
+    mockProtectedShell({ unreadCount: 1 });
+
+    renderAppRoute();
+
+    await userEvent.click(
+      (await screen.findAllByRole('button', { name: /switch language to chinese/i }))[0],
+    );
+
+    expect(await screen.findByRole('heading', { name: '设置' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^发现$/ })).toHaveAttribute('href', '/app/discover');
+    expect(screen.getByText('语言偏好会保存在本设备，并在刷新后恢复。')).toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-locale')).toContain('"locale":"zh-CN"');
+
+    await userEvent.click(screen.getAllByRole('button', { name: '切换到英文' })[0]);
+
+    expect(await screen.findByRole('heading', { name: /^settings$/i })).toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-locale')).toContain('"locale":"en"');
+  });
+
   it('logs out and sends the user back to login', async () => {
     mockProtectedShell({ unreadCount: 0 });
     const postSpy = vi

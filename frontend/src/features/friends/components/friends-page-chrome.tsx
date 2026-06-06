@@ -6,36 +6,63 @@ import profileCollage5 from '../../../assets/synctalk/profile-collage-5.png';
 import profileCollage6 from '../../../assets/synctalk/profile-collage-6.png';
 
 export const featureCardClass =
-  'rounded-lg border border-white/70 bg-white/72 shadow-[0_24px_60px_rgb(49_46_129_/_13%)] backdrop-blur-2xl';
+  'card-gamified bg-snow-white';
 
 export const discoverGlassPanel =
-  'border border-white/65 bg-white/36 shadow-[0_24px_70px_rgb(49_46_129_/_16%)] backdrop-blur-2xl';
+  'border-2 border-cloud-gray bg-snow-white';
+
+export const pageShellClass = 'min-h-screen bg-snow-white px-4 py-5 text-almost-black sm:px-8';
+
+export const pageContainerClass = 'mx-auto flex w-full max-w-[1140px] flex-col gap-8';
+
+export const heroHeaderClass =
+  'grid overflow-hidden rounded-xl border-2 border-cloud-gray bg-snow-white lg:grid-cols-[1.05fr_0.95fr]';
+
+export const heroContentClass =
+  'flex min-h-[20rem] flex-col justify-between gap-8 p-6 sm:p-8';
+
+export const heroEyebrowClass =
+  'inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-duo-green-light px-3 py-1.5 text-sm font-bold text-duo-green';
+
+export const heroTitleClass =
+  'mt-4 max-w-3xl font-feather text-heading-lg leading-[1.1] text-duo-green sm:text-display';
+
+export const heroDescriptionClass = 'mt-4 max-w-2xl text-body font-bold leading-7 text-graphite';
+
+export const heroIconClass =
+  'grid h-10 w-10 place-items-center rounded-xl bg-duo-green text-snow-white shadow-[0_4px_0_#3f8f01]';
+
+export const heroStatCardClass =
+  'rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal';
+
+export const sectionTitleClass =
+  'flex items-center gap-2 text-heading-sm font-feather text-almost-black';
 
 export function DiscoverStyleBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 opacity-50 [background-image:linear-gradient(#c7d2fe_1px,transparent_1px),linear-gradient(90deg,#c7d2fe_1px,transparent_1px)] [background-size:32px_32px]"
+      className="pointer-events-none fixed inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_12px_12px,var(--color-duo-green-light)_2px,transparent_0)] bg-[length:32px_32px] opacity-40"
     />
   );
 }
 
 export function DiscoverStyleVisualPanel() {
   return (
-    <section className="relative hidden min-h-[21rem] bg-[#fbbf24]/48 p-5 backdrop-blur-2xl lg:block">
+    <section className="relative hidden min-h-[20rem] border-l-2 border-cloud-gray bg-sunshine-yellow/25 p-5 lg:block">
       <img
         alt=""
-        className="absolute left-8 top-10 h-40 w-64 rotate-[-5deg] rounded-lg border border-white/70 object-cover shadow-[0_20px_48px_rgb(15_23_42_/_24%)]"
+        className="absolute left-8 top-10 h-40 w-64 rotate-[-5deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
         src={profileCollage1}
       />
       <img
         alt=""
-        className="absolute bottom-10 right-8 h-44 w-72 rotate-[4deg] rounded-lg border border-white/70 object-cover shadow-[0_20px_48px_rgb(15_23_42_/_24%)]"
+        className="absolute bottom-10 right-8 h-44 w-72 rotate-[4deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
         src={profileCollage3}
       />
       <img
         alt=""
-        className="absolute bottom-8 left-14 h-28 w-48 rotate-[-2deg] rounded-lg border border-white/70 object-cover shadow-[0_18px_42px_rgb(15_23_42_/_22%)]"
+        className="absolute bottom-8 left-14 h-28 w-48 rotate-[-2deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
         src={profileCollage6}
       />
     </section>

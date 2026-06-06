@@ -6,7 +6,6 @@ import {
   UserCircle,
   UsersRound,
 } from 'lucide-react';
-import { useEffect } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 
 import { useCurrentUserQuery } from '../../../features/auth/api/auth-hooks';

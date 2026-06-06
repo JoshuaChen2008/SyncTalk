@@ -34,7 +34,7 @@ export function AuthShell({ children }: AuthShellProps) {
         <div className="flex-1 flex items-center justify-center mt-10 lg:mt-0">
           <div className="w-full max-w-md">
             {/* Mobile Title */}
-            <div className="lg:hidden text-center mb-8">
+            <div aria-hidden="true" className="lg:hidden text-center mb-8">
               <h1 className="text-heading-lg font-feather text-duo-green">
                 SYNCTALK
               </h1>

@@ -24,7 +24,8 @@ function interpolate(template: string, params: TranslationParams = {}) {
 
 export function translate(locale: AppLocale, key: TranslationKey, params?: TranslationParams) {
   const localizedResources = translations[locale] as Partial<Record<TranslationKey, string>>;
-  const template = localizedResources[key] ?? translations[defaultLocale][key];
+  const defaultResources = translations[defaultLocale] as Record<TranslationKey, string>;
+  const template = localizedResources[key] ?? defaultResources[key];
 
   return interpolate(template, params);
 }

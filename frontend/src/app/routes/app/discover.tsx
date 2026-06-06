@@ -28,10 +28,19 @@ import {
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
+import {
+  heroContentClass,
+  heroDescriptionClass,
+  heroEyebrowClass,
+  heroHeaderClass,
+  heroIconClass,
+  heroStatCardClass,
+  heroTitleClass,
+  pageContainerClass,
+  pageShellClass,
+} from '../../../features/friends/components/friends-page-chrome';
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
-
-const glassPanel = 'card-gamified';
 
 function getRelationshipLabel(
   status: RelationshipStatus,
@@ -319,26 +328,26 @@ export function DiscoverPage() {
   }
 
   return (
-    <main className="min-h-screen bg-snow-white px-4 py-5 sm:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-        <header className="grid overflow-hidden rounded-xl border-2 border-cloud-gray bg-duo-green lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="flex min-h-[21rem] flex-col justify-between gap-8 p-6 text-snow-white sm:p-8">
+    <main className={pageShellClass}>
+      <div className={pageContainerClass}>
+        <header className={heroHeaderClass}>
+          <section className={heroContentClass}>
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-snow-white text-duo-green">
+              <span className={heroIconClass}>
                 <Languages aria-hidden="true" size={24} strokeWidth={2.5} />
               </span>
-              <span className="text-sm font-bold uppercase tracking-widest text-snow-white">SyncTalk</span>
+              <span className="text-sm font-bold uppercase text-graphite">SyncTalk</span>
             </div>
 
             <div>
-              <p className="inline-flex items-center gap-2 rounded-xl border-2 border-snow-white/40 bg-snow-white/20 px-3 py-1.5 text-sm font-bold">
+              <p className={heroEyebrowClass}>
                 <Sparkles aria-hidden="true" size={16} />
                 {t('discover.badge')}
               </p>
-              <h1 className="mt-4 max-w-3xl font-feather text-heading-lg sm:text-display">
+              <h1 className={heroTitleClass}>
                 {t('discover.title')}
               </h1>
-              <p className="mt-4 max-w-2xl text-body font-bold text-snow-white/90">
+              <p className={heroDescriptionClass}>
                 {t('discover.description')}
               </p>
             </div>
@@ -363,15 +372,15 @@ export function DiscoverPage() {
 
             <div
               aria-label={t('discover.view.label')}
-              className="inline-flex w-full max-w-sm rounded-xl border-2 border-snow-white/40 bg-snow-white/10 p-1"
+              className="inline-flex w-full max-w-sm rounded-xl border-2 border-cloud-gray bg-snow-white p-1"
               role="group"
             >
               <button
                 aria-pressed={!isSearch}
-                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition-colors ${
+                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-colors ${
                   !isSearch
-                    ? 'bg-snow-white text-duo-green'
-                    : 'text-snow-white hover:bg-snow-white/20'
+                    ? 'bg-duo-green-light text-duo-green'
+                    : 'text-graphite hover:bg-cloud-gray/20'
                 }`}
                 type="button"
                 onClick={() => setSearchTerm('')}
@@ -381,10 +390,10 @@ export function DiscoverPage() {
               </button>
               <button
                 aria-pressed={isSearch}
-                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition-colors ${
+                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-colors ${
                   isSearch
-                    ? 'bg-snow-white text-duo-green'
-                    : 'text-snow-white hover:bg-snow-white/20'
+                    ? 'bg-duo-green-light text-duo-green'
+                    : 'text-graphite hover:bg-cloud-gray/20'
                 }`}
                 type="button"
                 onClick={() => searchInputRef.current?.focus()}
@@ -395,7 +404,7 @@ export function DiscoverPage() {
             </div>
           </section>
 
-          <section className="relative hidden min-h-[21rem] bg-sunshine-yellow border-l-2 border-cloud-gray p-5 lg:block">
+          <section className="relative hidden min-h-[20rem] border-l-2 border-cloud-gray bg-sunshine-yellow/25 p-5 lg:block">
             <img
               alt=""
               className="absolute left-8 top-10 h-40 w-64 rotate-[-5deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
@@ -422,19 +431,19 @@ export function DiscoverPage() {
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="card-gamified p-5">
+          <div className={heroStatCardClass}>
             <p className="text-xs font-bold uppercase text-graphite">
               {t('discover.stat.logicLabel')}
             </p>
             <p className="mt-1 text-heading-sm font-feather text-duo-green">{t('discover.stat.logicValue')}</p>
           </div>
-          <div className="card-gamified p-5">
+          <div className={heroStatCardClass}>
             <p className="text-xs font-bold uppercase text-graphite">
               {t('discover.stat.stateLabel')}
             </p>
             <p className="mt-1 text-heading-sm font-feather text-sky-blue">{t('discover.stat.stateValue')}</p>
           </div>
-          <div className="card-gamified p-5">
+          <div className={heroStatCardClass}>
             <p className="text-xs font-bold uppercase text-graphite">
               {t('discover.stat.searchLabel')}
             </p>

@@ -109,8 +109,8 @@ export function AppShell() {
       />
       <div className="relative z-10 flex min-h-screen">
         <aside
-          className={`sticky top-0 hidden h-screen w-72 shrink-0 border-r px-5 py-6 shadow-[0_20px_70px_rgb(49_46_129_/_12%)] backdrop-blur-2xl lg:flex lg:flex-col ${
-            isDark ? 'border-slate-700 bg-slate-900/78' : 'border-white/72 bg-white/62'
+          className={`sticky top-0 z-30 hidden h-screen w-72 shrink-0 border-r px-5 py-6 shadow-[0_20px_70px_rgb(49_46_129_/_12%)] lg:flex lg:flex-col ${
+            isDark ? 'border-slate-700 bg-slate-900' : 'border-indigo-100 bg-white'
           }`}
         >
           <Link className="text-3xl font-black tracking-normal text-[#4648d4]" to="/app/discover">
@@ -127,8 +127,8 @@ export function AppShell() {
           <Link
             className={`mt-auto flex min-h-14 items-center gap-3 rounded-lg border px-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 motion-reduce:transition-none ${
               isDark
-                ? 'border-slate-700 bg-slate-800/78 text-slate-200 hover:bg-slate-800'
-                : 'border-white/70 bg-white/72 text-slate-700 hover:bg-white'
+                ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800'
+                : 'border-indigo-100 bg-white text-slate-700 hover:bg-indigo-50'
             }`}
             to="/app/settings"
           >

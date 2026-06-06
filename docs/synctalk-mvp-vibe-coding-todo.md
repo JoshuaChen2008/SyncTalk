@@ -310,6 +310,7 @@ git diff
 - 手动验收结果：自动验证覆盖 token/session service、route、前端 loading/success/403/缺少 key 状态和 Playwright 非好友 403 smoke；两个真实好友账号同 call、麦克风、摄像头和挂断仍需在有效 Stream key/secret、浏览器媒体权限和可用网络下做双浏览器手动验收。
 - 收口补充（2026-06-05）：真实 MongoDB + Stream 服务端 API 验证通过，两个临时好友账号能生成同一个稳定 call ID，Video token 可签发，非好友 403 正确；浏览器麦克风、摄像头和双页面媒体通话仍需在可用浏览器媒体权限环境下手动验收。
 - 最终收口补充（2026-06-06）：新增 Call 前端挂断自动测试，覆盖点击 Stream 控制条后调用 `call.leave()` 和 `videoClient.disconnectUser()`；真实麦克风、摄像头双账号媒体通话仍按 `docs/synctalk-stream-manual-acceptance.md` 在可用浏览器媒体权限环境下验收。
+- 验收阻塞记录（2026-06-06）：按最终收口计划启动前端成功，后端因本机 `127.0.0.1:27017` MongoDB 未运行而卡在 `mongoose.connect()`，`/health` 不可达；本机未发现 `mongod` 命令或 MongoDB 进程。未执行真实双账号摄像头/麦克风通话，因此本节两个媒体相关验收项保持未勾选。
 - 后续优化：可在 App Shell 后接入 incoming_call 通知入口，让对方从通知直接加入通话。
 
 可选 commit：`feat(call): add one-on-one video call session`
@@ -369,4 +370,5 @@ git diff
 - 关键文件：`frontend/e2e/auth.smoke.spec.ts`、`frontend/src/app/routes/app/app-shell.tsx`、`frontend/src/features/chat/components/chat-page.tsx`、`frontend/src/features/call/components/call-page.tsx`、`backend/src/services/chat-service.js`、`backend/src/services/call-service.js`。
 - 学到的 3 点：最终验收要把“API 会话创建”和“实时 WebSocket/媒体通话”分开记录；移动端验收可以用 Playwright 固定窄屏和 `scrollWidth` 检查固化；Stream 服务端 token/channel/session 可自动验证，但真实消息和媒体仍受 WebSocket、浏览器权限和网络环境影响。
 - 手动/自动验收结果：真实 MongoDB + Stream 服务端 API 闭环通过；前端移动端 Smoke 通过；Stream Chat 浏览器端 Socket 101 且双账号实时互发消息已通过；Call token/session、非好友权限和挂断清理已有自动覆盖；Call 摄像头、麦克风真实媒体仍需浏览器媒体权限下双账号验收。
+- Stream Video 收口尝试（2026-06-06）：前端本地服务可访问，后端因本机 MongoDB `127.0.0.1:27017` 不可连接而无法完成 `/health` 启动检查；当前环境未发现 `mongod` 命令或 MongoDB 进程。按计划未勾选真实媒体通话验收，待本地 MongoDB 和浏览器媒体权限可用后继续执行 `docs/synctalk-stream-manual-acceptance.md`。
 - 后续优化：按 `docs/synctalk-stream-manual-acceptance.md` 执行并记录 Stream Video 双账号媒体验收；Mongoose `new` 选项弃用警告已收口为 `returnDocument: 'after'`。

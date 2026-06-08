@@ -100,7 +100,7 @@ function FriendCard({
 
       <div className="mt-5 flex min-w-0 items-center gap-4">
         <div
-          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
+          className={`relative grid h-15 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
             isOnline ? 'border-duo-green' : 'border-cloud-gray'
           }`}
         >
@@ -161,7 +161,7 @@ function FriendCard({
       <div className="relative mt-auto grid grid-cols-3 gap-2 pt-5">
         <Link
           aria-label={t('friends.chatWith', { name: friend.username })}
-          className="btn-3d-base btn-3d-green min-h-12 min-w-0 gap-1.5 px-2 text-sm"
+          className="btn-3d-base btn-3d-green min-h-14 min-w-0 gap-1.5 px-3 text-base"
           to={`/app/chat/${friend.id}`}
         >
           <MessageCircle aria-hidden="true" className="shrink-0" size={17} />
@@ -169,7 +169,7 @@ function FriendCard({
         </Link>
         <Link
           aria-label={t('friends.callName', { name: friend.username })}
-          className="btn-3d-base btn-3d-purple min-h-12 min-w-0 gap-1.5 px-2 text-sm"
+          className="btn-3d-base btn-3d-purple min-h-14 min-w-0 gap-1.5 px-3 text-base"
           to={`/app/call/${friend.id}`}
         >
           <Phone aria-hidden="true" className="shrink-0" size={17} />
@@ -178,7 +178,7 @@ function FriendCard({
         <button
           aria-expanded={isMenuOpen}
           aria-label={t('friends.manageName', { name: friend.username })}
-          className="btn-3d-base btn-3d-yellow min-h-12 min-w-0 gap-1.5 px-2 text-sm"
+          className="btn-3d-base btn-3d-yellow min-h-14 min-w-0 gap-1.5 px-3 text-base"
           type="button"
           onClick={() => onMenuChange(isMenuOpen ? null : friend.id)}
         >
@@ -284,7 +284,7 @@ function FriendsCta() {
           {t('friends.cta.description')}
         </p>
       </div>
-      <Link className="btn-3d-base btn-3d-sky min-h-12 shrink-0 px-5 text-sm" to="/app/discover">
+      <Link className="btn-3d-base btn-3d-sky min-h-14 shrink-0 px-6 text-base" to="/app/discover">
         {t('friends.cta.action')}
       </Link>
     </section>
@@ -351,18 +351,18 @@ export function FriendsPage() {
           </p>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_17rem]">
+        <section className="relative z-30 grid gap-6 md:grid-cols-2">
           <div className="relative min-w-0">
-            <label className="relative block">
+            <label className="relative flex h-14 items-center md:h-[72px]">
               <span className="sr-only">{t('friends.search.sr')}</span>
               <Search
                 aria-hidden="true"
-                className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-silver"
-                size={22}
+                className="pointer-events-none absolute left-4 h-6 w-6 text-silver"
+                strokeWidth={3}
               />
               <input
                 aria-label={t('friends.search.sr')}
-                className="input-gamified min-h-16 rounded-2xl pl-14 pr-20 text-base font-black shadow-[0_4px_0_#e5e5e5]"
+                className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
                 placeholder={t('friends.search.placeholder')}
                 type="search"
                 value={searchTerm}
@@ -371,11 +371,11 @@ export function FriendsPage() {
               <button
                 aria-expanded={isFilterMenuOpen}
                 aria-label={t('friends.filterMenu')}
-                className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 cursor-pointer place-items-center rounded-xl text-sky-blue transition-colors hover:bg-[#ddf4ff] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/25"
+                className="absolute right-4 top-1/2 flex -translate-y-1/2 cursor-pointer items-center justify-center p-2 text-sky-blue hover:text-[#1899d6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
                 type="button"
                 onClick={() => setIsFilterMenuOpen((isOpen) => !isOpen)}
               >
-                <SlidersHorizontal aria-hidden="true" size={21} />
+                <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
               </button>
             </label>
             {isFilterMenuOpen ? (
@@ -399,35 +399,29 @@ export function FriendsPage() {
             ) : null}
           </div>
 
-          <div className="card-duo flex min-h-16 items-center justify-between gap-4 px-5 py-3">
-            <div>
-              <p className="text-xs font-black uppercase text-silver">
-                {t('friends.onlineSummary')}
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <div className="card-duo flex h-14 items-center justify-between gap-[12px] px-[16px] py-3 md:h-[72px]">
+              <p className="shrink-0 whitespace-nowrap text-sm font-black text-charcoal">
+                {formatFriendCount(locale, totalFriends)}
               </p>
-              <p className="mt-1 text-sm font-black text-graphite">{filterLabel}</p>
+              <p className="shrink-0 whitespace-nowrap text-right text-sm font-black text-sky-blue">
+                {resultSummary}
+              </p>
             </div>
-            <p className="shrink-0 text-heading-sm font-feather text-duo-green">
-              {onlineFriends} / {totalFriends}
-            </p>
+
+            <div className="card-duo flex h-14 items-center justify-between gap-4 px-5 py-3 md:h-[72px]"> 
+              <div className="min-w-0">
+                <p className="truncate text-xs font-black uppercase text-silver">
+                  {t('friends.onlineSummary')}
+                </p>
+                <p className="mt-1 truncate text-sm font-black text-graphite">{filterLabel}</p>
+              </div>
+              <p className="shrink-0 text-heading-sm font-feather text-duo-green">
+                {onlineFriends} / {totalFriends}
+              </p>
+            </div>
           </div>
         </section>
-
-        {friendsQuery.data ? (
-          <div className="grid gap-3 text-sm font-black text-charcoal sm:grid-cols-2">
-            <p className="card-duo px-5 py-3">
-              <span className="mr-2 text-heading-sm font-feather text-duo-green">
-                {totalFriends}
-              </span>
-              {formatFriendCount(locale, totalFriends)}
-            </p>
-            <p className="card-duo px-5 py-3">
-              <span className="mr-2 text-heading-sm font-feather text-sky-blue">
-                {filteredFriends.length}
-              </span>
-              {resultSummary}
-            </p>
-          </div>
-        ) : null}
 
         {removedFriendName ? (
           <p className="card-duo p-4 text-sm font-bold text-duo-green" role="status">

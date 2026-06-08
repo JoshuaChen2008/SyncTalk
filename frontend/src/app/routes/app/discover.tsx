@@ -440,7 +440,7 @@ export function DiscoverPage() {
             />
             <input
               ref={searchInputRef}
-              className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-12 pr-16 text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
+              className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
               placeholder={t('discover.search.placeholder')}
               type="search"
               value={searchTerm}

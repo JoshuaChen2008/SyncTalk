@@ -151,6 +151,128 @@
     border-radius: var(--radius-xl);
     padding: 1.5rem;
   }
+
+  .btn-3d-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .btn-3d-base:focus-visible {
+    outline: none;
+    box-shadow: 0 4px 0 #1899d6, 0 0 0 4px rgb(28 176 246 / 0.28);
+  }
+
+  .btn-3d-base:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+
+  .btn-3d-base:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.25);
+    opacity: 0.72;
+    transform: none;
+  }
+
+  .btn-3d-sky {
+    background-color: var(--color-sky-blue);
+    color: var(--color-snow-white);
+    box-shadow: 0 4px 0 #1899d6;
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
+  }
+
+  .btn-3d-sky:hover {
+    filter: brightness(1.04);
+  }
+
+  .btn-3d-green {
+    background-color: var(--color-duo-green);
+    color: var(--color-snow-white);
+    box-shadow: 0 4px 0 #46a300;
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
+  }
+
+  .btn-3d-green:hover {
+    filter: brightness(1.04);
+  }
+
+  .btn-3d-purple {
+    background-color: var(--color-grape-soda);
+    color: var(--color-snow-white);
+    box-shadow: 0 4px 0 #7f45d8;
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
+  }
+
+  .btn-3d-purple:hover {
+    filter: brightness(1.04);
+  }
+
+  .btn-3d-yellow {
+    background-color: var(--color-sunshine-yellow);
+    color: var(--color-almost-black);
+    box-shadow: 0 4px 0 #e5b400;
+  }
+
+  .btn-3d-yellow:hover {
+    filter: brightness(1.03);
+  }
+
+  .btn-3d-muted {
+    background-color: var(--color-cloud-gray);
+    color: #777777;
+    box-shadow: 0 4px 0 #cecece;
+  }
+
+  .btn-filter-active {
+    background-color: var(--color-sky-blue);
+    color: var(--color-snow-white);
+    box-shadow: 0 4px 0 #1899d6;
+  }
+
+  .btn-filter {
+    background-color: var(--color-snow-white);
+    color: #9ca3af;
+    border: 2px solid var(--color-cloud-gray);
+  }
+
+  .btn-filter:hover {
+    background-color: #f9fafb;
+  }
+
+  .card-duo {
+    background-color: var(--color-snow-white);
+    border: 2px solid var(--color-cloud-gray);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 0 var(--color-cloud-gray);
+  }
+
+  .custom-scrollbar {
+    scrollbar-color: var(--color-cloud-gray) transparent;
+    scrollbar-width: thin;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-cloud-gray);
+    border-radius: 999px;
+  }
   
   .label-gamified {
     display: block;

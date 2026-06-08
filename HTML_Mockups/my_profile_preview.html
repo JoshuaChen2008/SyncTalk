@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTalk x Duolingo Vibe - My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .font-feather { font-family: 'Nunito', sans-serif; font-weight: 900; letter-spacing: -0.02em; }
+        .btn-primary { background-color: #58cc02; color: white; border-bottom: 4px solid #58a700; }
+        .btn-primary:active { transform: translateY(4px); border-bottom-width: 0px; margin-bottom: 4px; box-shadow: none !important; }
+        .btn-secondary { background-color: #e5e5e5; color: #afafaf; border-bottom: 4px solid #cecece; }
+        .btn-secondary:active { transform: translateY(4px); border-bottom-width: 0px; margin-bottom: 4px; box-shadow: none !important; }
+        .input-base {
+            background-color: #f7f7f7;
+            border: 2px solid #e5e5e5;
+            transition: all 0.2s;
+        }
+        .input-base:focus {
+            border-color: #1cb0f6;
+            background-color: white;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-white text-[#3c3c3c] h-screen overflow-hidden">
+    <!-- Left sidebar nav from duolingo_preview to simulate AppShell -->
+    <div class="max-w-[1400px] mx-auto flex h-full">
+        <aside class="hidden md:flex flex-col w-24 lg:w-64 border-r-2 border-gray-200 bg-white p-4 pt-8 flex-shrink-0">
+            <div class="mb-10 text-center lg:text-left lg:pl-4">
+                <span class="text-4xl font-black text-green-500 tracking-tighter">SyncTalk</span>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a href="discover_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#1cb0f6]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3L4 9v12h16V9l-8-6zm0 2.5l5 3.75V20h-3v-5H10v5H7v-8.75l5-3.75z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">发现</span>
+                </a>
+                <a href="duolingo_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#ce82ff]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">好友</span>
+                </a>
+                <a href="chat_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#1cb0f6]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">聊天</span>
+                </a>
+                <a href="requests_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#ffc800]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">请求</span>
+                </a>
+                <a href="notifications_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#58cc02]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">通知</span>
+                </a>
+                <a href="settings_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-[#1cb0f6] bg-[#ddf4ff] border-2 border-[#84d8ff]">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:rotate-90 text-[#1cb0f6]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">设置</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Settings Main -->
+        <main class="flex-1 overflow-y-auto px-4 py-8 md:px-8 lg:py-12 bg-white text-[#3c3c3c]">
+            <div class="mx-auto max-w-[1040px]">
+                <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
+                
+                <div class="flex-1">
+                    <h1 class="mb-8 text-3xl md:text-[40px] font-feather leading-tight text-[#3c3c3c]">
+                    个人档案
+                    </h1>
+
+                    <!-- Profile Form -->
+                    <section class="mb-10">
+                        <!-- Avatar -->
+                        <div class="flex items-center gap-6 mb-8">
+                            <div class="relative group cursor-pointer">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Joshua" alt="Avatar" class="w-24 h-24 rounded-2xl border-4 border-[#e5e5e5] object-cover">
+                                <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-[#3c3c3c]">头像</h3>
+                                <p class="text-sm font-bold text-[#777777]">点击更换你的头像</p>
+                            </div>
+                        </div>
+
+                        <!-- Info Fields -->
+                        <div class="flex flex-col gap-5">
+                            <div class="flex flex-col gap-2">
+                                <label class="font-bold text-[#777777]">姓名</label>
+                                <input type="text" class="input-base w-full h-12 px-4 rounded-xl font-bold text-[#3c3c3c]" value="Joshua Chen">
+                            </div>
+                            
+                            <div class="flex flex-col gap-2">
+                                <label class="font-bold text-[#777777]">用户名</label>
+                                <input type="text" class="input-base w-full h-12 px-4 rounded-xl font-bold text-[#3c3c3c]" value="JoshuaChen2008">
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label class="font-bold text-[#777777]">个人简介</label>
+                                <textarea class="input-base w-full p-4 rounded-xl font-bold text-[#3c3c3c] resize-none h-32" placeholder="介绍一下你自己...">热爱编程，正在探索 AI 和 Agent！</textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Save Button -->
+                    <section class="mt-8">
+                        <div class="py-6 border-t-2 border-[#e5e5e5] flex justify-end">
+                            <button class="btn-primary inline-flex h-12 items-center justify-center gap-2 rounded-xl px-8 text-base font-bold shadow-[0_4px_0_#58a700] transition tracking-wider">
+                                保存更改
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Sidebar -->
+                <aside class="hidden w-64 shrink-0 md:block lg:w-72">
+                    <div class="mb-6 rounded-2xl border-2 p-4 border-[#e5e5e5] bg-white">
+                    <ul class="flex flex-col gap-1">
+                        <li>
+                        <div class="block cursor-not-allowed rounded-xl px-4 py-3 text-sm font-bold opacity-60 text-[#777777]">
+                            账户
+                        </div>
+                        </li>
+                        <li>
+                        <a href="settings_preview.html" class="block cursor-pointer rounded-xl px-4 py-3 text-sm font-bold text-[#777777] hover:bg-gray-100">
+                            偏好设置
+                        </a>
+                        </li>
+                        <li>
+                        <div class="block cursor-default rounded-xl px-4 py-3 text-sm font-bold bg-[#ddf4ff] text-[#1cb0f6]">
+                            个人档案
+                        </div>
+                        </li>
+                        <li>
+                        <div class="block cursor-not-allowed rounded-xl px-4 py-3 text-sm font-bold opacity-60 text-[#777777]">
+                            通知
+                        </div>
+                        </li>
+                        <li>
+                        <div class="block cursor-not-allowed rounded-xl px-4 py-3 text-sm font-bold opacity-60 text-[#777777]">
+                            课程
+                        </div>
+                        </li>
+                        <li>
+                        <div class="block cursor-not-allowed rounded-xl px-4 py-3 text-sm font-bold opacity-60 text-[#777777]">
+                            隐私设置
+                        </div>
+                        </li>
+                    </ul>
+                    </div>
+                </aside>
+                
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

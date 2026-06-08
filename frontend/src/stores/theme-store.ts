@@ -23,6 +23,11 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'synctalk-theme',
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          applyAppTheme(state.theme);
+        }
+      },
       partialize: (state) => ({ theme: state.theme }),
     },
   ),

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTalk x Duolingo Vibe - User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+        .btn-3d-base {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            text-align: center;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 4px; 
+            border-radius: 1rem;
+        }
+        .btn-primary { 
+            background-color: #58cc02; 
+            color: white; 
+            box-shadow: 0 4px 0 #58a700; 
+            text-shadow: 0 1px 0 rgba(0,0,0,0.15); 
+        }
+        .btn-primary:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 0px 0 #58a700; 
+        }
+        .btn-secondary { 
+            background-color: #e5e5e5; 
+            color: #888888; 
+            box-shadow: 0 4px 0 #cecece; 
+        }
+        .btn-secondary:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 0px 0 #cecece; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen overflow-hidden">
+    <div class="max-w-[1400px] mx-auto flex h-full">
+        <!-- 全局左侧导航栏 (Global Sidebar) -->
+        <aside class="hidden md:flex flex-col w-24 lg:w-64 border-r-2 border-gray-200 bg-white p-4 pt-8 flex-shrink-0">
+            <div class="mb-10 text-center lg:text-left lg:pl-4">
+                <span class="text-4xl font-black text-green-500 tracking-tighter">SyncTalk</span>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a href="discover_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#1cb0f6]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3L4 9v12h16V9l-8-6zm0 2.5l5 3.75V20h-3v-5H10v5H7v-8.75l5-3.75z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">发现</span>
+                </a>
+                <a href="duolingo_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#ce82ff]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">好友</span>
+                </a>
+                <a href="chat_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#1cb0f6]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">聊天</span>
+                </a>
+                <a href="requests_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#ffc800]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">请求</span>
+                </a>
+                <a href="notifications_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:-translate-y-1.5 text-[#58cc02]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">通知</span>
+                </a>
+                <a href="settings_preview.html" class="group flex items-center justify-center lg:justify-start gap-4 p-3 lg:px-4 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-100 border-2 border-transparent">
+                    <div class="w-8 h-8 transition-transform duration-300 group-hover:rotate-90 text-[#a5edff]">
+                        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </div>
+                    <span class="hidden lg:block text-lg font-bold">设置</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content: Profile Details -->
+        <main class="flex-1 flex flex-col min-w-0 bg-gray-50 overflow-y-auto custom-scroll">
+            <!-- Header with Back Button -->
+            <header class="flex items-center gap-4 p-4 md:p-6 bg-white border-b-2 border-gray-200 sticky top-0 z-20">
+                <button onclick="window.history.back()" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-2 rounded-xl hover:bg-gray-100">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <h2 class="text-2xl font-black text-gray-700">好友资料</h2>
+            </header>
+
+            <div class="flex-1 p-4 md:p-8 lg:p-12">
+                <div class="max-w-4xl mx-auto">
+                    <!-- Profile Card Main -->
+                    <div class="bg-white rounded-[2rem] border-2 border-gray-200 shadow-[0_4px_0_#e5e5e5] overflow-hidden">
+                        <!-- Cover Area -->
+                        <div class="h-40 md:h-56 bg-[#1cb0f6] relative">
+                            <!-- Avatar -->
+                            <div class="absolute -bottom-16 left-6 md:left-10 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-[6px] border-white bg-white shadow-sm ring-online relative z-10">
+                                <img src="https://i.pravatar.cc/150?img=47" class="w-full h-full object-cover">
+                                <div class="absolute bottom-0 right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-20 pb-8 px-6 md:px-10">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                                <div>
+                                    <h1 class="text-4xl md:text-5xl font-black text-gray-800 mb-2">Emma Watson</h1>
+                                    <div class="flex items-center gap-2 text-green-500 font-bold mb-4 text-lg">
+                                        当前在线
+                                    </div>
+                                    <p class="text-gray-500 font-bold mb-6 max-w-lg text-lg leading-relaxed">
+                                        "Hi! I am looking for someone to practice French with. I can help you with English in return!"
+                                    </p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button class="btn-3d-base btn-secondary px-6 py-3 text-lg hidden md:block">
+                                        取消关注
+                                    </button>
+                                    <a href="chat_preview.html" class="btn-3d-base btn-primary px-8 py-3 text-lg flex items-center gap-2">
+                                        发消息
+                                    </a>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 border-2 rounded-full my-8">
+
+                            <!-- Stats & Languages -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h3 class="text-2xl font-black text-gray-700 mb-4">语言</h3>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between p-5 border-2 border-gray-200 rounded-2xl bg-gray-50 hover:-translate-y-1 transition-transform">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-10 h-10 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl shadow-sm">🇫🇷</div>
+                                                <span class="font-bold text-gray-700 text-lg">法语 (学习中)</span>
+                                            </div>
+                                            <span class="px-3 py-1.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-black text-[#1cb0f6] shadow-sm">B1</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-5 border-2 border-gray-200 rounded-2xl bg-gray-50 hover:-translate-y-1 transition-transform">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-10 h-10 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center text-2xl shadow-sm">🇺🇸</div>
+                                                <span class="font-bold text-gray-700 text-lg">英语 (母语)</span>
+                                            </div>
+                                            <span class="px-3 py-1.5 bg-[#1cb0f6] border-2 border-[#1899d6] rounded-xl text-sm font-black text-white shadow-sm">Native</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-2xl font-black text-gray-700 mb-4">详细资料</h3>
+                                    <div class="space-y-4">
+                                        <div class="p-5 border-2 border-gray-200 rounded-2xl bg-gray-50 hover:-translate-y-1 transition-transform">
+                                            <div class="text-gray-400 font-bold text-sm mb-1 uppercase tracking-wider">所在时区</div>
+                                            <div class="font-black text-gray-700 text-lg">Europe/Paris</div>
+                                        </div>
+                                        <div class="p-5 border-2 border-gray-200 rounded-2xl bg-gray-50 hover:-translate-y-1 transition-transform">
+                                            <div class="text-gray-400 font-bold text-sm mb-1 uppercase tracking-wider">备注名</div>
+                                            <div class="font-black text-gray-700 text-lg">法语纠音老师</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

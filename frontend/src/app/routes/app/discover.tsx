@@ -1,21 +1,17 @@
 import {
-  ArrowUpRight,
-  BadgeCheck,
+  ChevronDown,
   Clock,
   Globe2,
-  Languages,
   MapPin,
   Search,
+  SlidersHorizontal,
   Sparkles,
   UserPlus,
   UserRoundCheck,
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
-import profileCollage1 from '../../../assets/synctalk/profile-collage-1.png';
-import profileCollage3 from '../../../assets/synctalk/profile-collage-3.png';
-import profileCollage6 from '../../../assets/synctalk/profile-collage-6.png';
 import {
   getDiscoveryApiErrorMessage,
   type DiscoveryUser,
@@ -28,19 +24,10 @@ import {
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
-import {
-  heroContentClass,
-  heroDescriptionClass,
-  heroEyebrowClass,
-  heroHeaderClass,
-  heroIconClass,
-  heroStatCardClass,
-  heroTitleClass,
-  pageContainerClass,
-  pageShellClass,
-} from '../../../features/friends/components/friends-page-chrome';
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
+
+type DiscoverMenu = 'language' | 'sort' | `skip-${string}`;
 
 function getRelationshipLabel(
   status: RelationshipStatus,
@@ -58,14 +45,14 @@ function getRelationshipLabel(
 
 function relationshipTone(status: RelationshipStatus) {
   if (status === 'friend') {
-    return 'border-cloud-gray bg-duo-green-light text-duo-green';
+    return 'border-duo-green bg-duo-green-light text-duo-green';
   }
 
   if (status === 'request_sent' || status === 'request_received') {
-    return 'border-cloud-gray bg-sunshine-yellow/20 text-almost-black';
+    return 'border-sunshine-yellow bg-sunshine-yellow/20 text-almost-black';
   }
 
-  return 'border-cloud-gray bg-snow-white text-almost-black';
+  return 'border-cloud-gray bg-snow-white text-graphite';
 }
 
 function matchesDemoSearch(user: DiscoveryUser, query: string) {
@@ -95,129 +82,190 @@ function withDevelopmentDemoUsers(
     ? discoveryDemoUsers.filter((user) => matchesDemoSearch(user, searchTerm))
     : discoveryDemoUsers;
   const currentIds = new Set(currentUsers.map((user) => user.id));
-  const mergedUsers = [
+
+  return [
     ...currentUsers,
     ...demoUsers.filter((user) => !currentIds.has(user.id)),
   ];
+}
 
-  return mergedUsers;
+function getInitials(name: string) {
+  return name.slice(0, 2).toUpperCase();
 }
 
 function DiscoveryUserCard({
   isSending,
+  isSkipped,
+  onMenuChange,
   onSendRequest,
+  onSkip,
+  onUndoSkip,
+  openMenu,
   user,
 }: {
   isSending: boolean;
+  isSkipped: boolean;
+  onMenuChange: (menu: DiscoverMenu | null) => void;
   onSendRequest: (user: DiscoveryUser) => void;
+  onSkip: (userId: string) => void;
+  onUndoSkip: (userId: string) => void;
+  openMenu: DiscoverMenu | null;
   user: DiscoveryUser;
 }) {
   const { locale, t } = useTranslation();
   const canSendRequest = user.relationshipStatus === 'stranger';
   const relationshipLabel = getRelationshipLabel(user.relationshipStatus, t);
+  const skipMenuId: DiscoverMenu = `skip-${user.id}`;
+  const primaryMatchReason = user.matchReasons[0] ?? t('discover.matchFallback');
 
   return (
-    <article
-      className={`group card-gamified p-0 overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
-    >
-      <div className="p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <div className="flex items-center gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border-2 border-cloud-gray bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5]">
-                {user.username.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h2 className="truncate text-heading-sm font-feather text-almost-black">{user.username}</h2>
-                <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-graphite">
-                  <MapPin aria-hidden="true" size={16} strokeWidth={2.5} />
-                  {user.timezone}
-                </p>
-              </div>
-            </div>
+    <article className="card-duo group relative flex min-h-[420px] flex-col overflow-hidden transition-transform duration-200 hover:-translate-y-2 motion-reduce:transform-none motion-reduce:transition-none">
+      {isSkipped ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-graphite/45 p-6 backdrop-blur-sm">
+          <button
+            aria-label={t('discover.undoSkipName', { name: user.username })}
+            className="btn-3d-base btn-3d-sky min-h-12 px-6 text-base"
+            type="button"
+            onClick={() => onUndoSkip(user.id)}
+          >
+            {t('discover.undoSkip')}
+          </button>
+        </div>
+      ) : null}
 
-            {user.bio ? <p className="mt-5 text-sm font-bold leading-6 text-charcoal">{user.bio}</p> : null}
-          </div>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-4 flex">
+          <span className="inline-flex items-center rounded-2xl border-2 border-cloud-gray px-4 py-1.5 text-xs font-black uppercase text-graphite shadow-[0_2px_0_#e5e5e5]">
+            {primaryMatchReason}
+          </span>
+        </div>
 
-          <div className="flex shrink-0 flex-col gap-3">
-            <span
-              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-bold ${relationshipTone(
-                user.relationshipStatus,
-              )}`}
-            >
-              <UserRoundCheck aria-hidden="true" size={18} strokeWidth={2.5} />
-              {relationshipLabel}
-            </span>
-            {user.relationshipStatus === 'request_received' ? (
-              <Link
-                aria-label={t('discover.reviewRequestFrom', { name: user.username })}
-                className="btn-primary"
-                to="/app/requests"
-              >
-                <UserPlus aria-hidden="true" size={18} strokeWidth={2.5} />
-                {t('discover.reviewRequest')}
-              </Link>
+        <div className="mb-5 flex items-center gap-5">
+          <div
+            className={`relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-[3px] bg-snow-white p-1 ${
+              user.relationshipStatus === 'stranger' ? 'border-duo-green' : 'border-cloud-gray'
+            }`}
+          >
+            {user.avatar ? (
+              <img
+                alt=""
+                className="h-full w-full rounded-full object-cover"
+                src={user.avatar}
+              />
             ) : (
-              <button
-                aria-label={
-                  canSendRequest
-                    ? t('discover.sendRequestTo', { name: user.username })
-                    : t('discover.relationshipWith', {
-                        name: user.username,
-                        status: relationshipLabel,
-                      })
-                }
-                className="btn-primary"
-                disabled={!canSendRequest || isSending}
-                type="button"
-                onClick={() => onSendRequest(user)}
-              >
-                <UserPlus aria-hidden="true" size={18} strokeWidth={2.5} />
-                {isSending
-                  ? t('discover.sending')
-                  : canSendRequest
-                    ? t('discover.sendRequest')
-                    : t('discover.unavailable')}
-              </button>
+              <span className="grid h-full w-full place-items-center rounded-full bg-sunshine-yellow text-xl font-feather text-almost-black">
+                {getInitials(user.username)}
+              </span>
             )}
+            {user.relationshipStatus === 'stranger' ? (
+              <span className="absolute bottom-0 right-1 h-5 w-5 rounded-full border-2 border-snow-white bg-sky-blue" />
+            ) : null}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-2xl font-black text-almost-black">{user.username}</h2>
+            <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-silver">
+              <MapPin aria-hidden="true" size={16} strokeWidth={3} />
+              {user.timezone}
+            </p>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border-2 border-cloud-gray bg-snow-white p-3">
-            <p className="text-xs font-bold uppercase text-graphite">{t('discover.native')}</p>
-            <p className="mt-1 font-bold text-almost-black">
-              {translateDisplayValue(locale, user.nativeLanguage)}
-            </p>
-          </div>
-          <div className="rounded-xl border-2 border-cloud-gray bg-snow-white p-3">
-            <p className="text-xs font-bold uppercase text-graphite">
-              {t('discover.learning')}
-            </p>
-            <p className="mt-1 font-bold text-almost-black">
-              {translateDisplayValue(locale, user.targetLanguage)}
-            </p>
-          </div>
-          <div className="rounded-xl border-2 border-cloud-gray bg-snow-white p-3">
-            <p className="text-xs font-bold uppercase text-graphite">{t('discover.level')}</p>
-            <p className="mt-1 font-bold text-almost-black">{user.languageLevel}</p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {user.matchReasons.map((reason) => (
-            <span
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-sky-blue/10 px-3 py-1.5 text-xs font-bold text-sky-blue"
-              key={reason}
-            >
-              <Languages aria-hidden="true" size={16} strokeWidth={2.5} />
-              {reason}
+        <div className="mb-4 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1 rounded-xl border-2 border-cloud-gray px-3 py-1.5 text-sm font-bold text-graphite">
+            {t('discover.learning')}: {translateDisplayValue(locale, user.targetLanguage)}
+            <span className="rounded border border-cloud-gray px-1 text-xs font-black text-silver">
+              {user.languageLevel}
             </span>
-          ))}
-          <span className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-bold text-graphite">
-            <Clock aria-hidden="true" size={16} strokeWidth={2.5} />
+          </span>
+          <span className="inline-flex items-center rounded-xl border-2 border-cloud-gray px-3 py-1.5 text-sm font-bold text-graphite">
+            {t('discover.native')}: {translateDisplayValue(locale, user.nativeLanguage)}
+          </span>
+        </div>
+
+        <div className="custom-scrollbar mb-5 min-h-0 flex-1 overflow-y-auto rounded-2xl border-2 border-gray-100 bg-gray-50 p-4">
+          <p className="text-sm font-bold leading-6 text-charcoal">
+            {user.bio || t('friends.defaultBio')}
+          </p>
+        </div>
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          <span className={`inline-flex items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-xs font-bold ${relationshipTone(user.relationshipStatus)}`}>
+            <UserRoundCheck aria-hidden="true" size={16} strokeWidth={3} />
+            {relationshipLabel}
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray px-3 py-1.5 text-xs font-bold text-graphite">
+            <Clock aria-hidden="true" size={16} strokeWidth={3} />
             {translateDisplayValue(locale, user.learningGoal)}
           </span>
+        </div>
+
+        <div className="relative mt-auto grid grid-cols-2 gap-4">
+          <div className="relative h-14 min-w-0">
+            <button
+              aria-expanded={openMenu === skipMenuId}
+              aria-label={t('discover.skipName', { name: user.username })}
+              className="btn-3d-base btn-3d-muted h-full w-full text-base"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onMenuChange(openMenu === skipMenuId ? null : skipMenuId);
+              }}
+            >
+              {t('discover.skip')}
+            </button>
+            {openMenu === skipMenuId ? (
+              <div className="absolute bottom-[130%] left-0 z-20 mb-2 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                <button
+                  className="block w-full cursor-pointer px-3 py-3 text-left text-sm font-black text-[#ef4444] hover:bg-[#fef2f2]"
+                  type="button"
+                  onClick={() => onSkip(user.id)}
+                >
+                  {t('discover.skipPerson')}
+                </button>
+                <button
+                  className="block w-full cursor-pointer border-t-2 border-gray-100 px-3 py-3 text-left text-sm font-black text-[#ef4444] hover:bg-[#fef2f2]"
+                  type="button"
+                  onClick={() => onSkip(user.id)}
+                >
+                  {t('discover.skipRegion')}
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          {user.relationshipStatus === 'request_received' ? (
+            <Link
+              aria-label={t('discover.reviewRequestFrom', { name: user.username })}
+              className="btn-3d-base btn-3d-sky min-h-14 min-w-0 px-4 text-base"
+              to="/app/requests"
+            >
+              <UserPlus aria-hidden="true" size={18} strokeWidth={3} />
+              {t('discover.reviewRequest')}
+            </Link>
+          ) : (
+            <button
+              aria-label={
+                canSendRequest
+                  ? t('discover.sendRequestTo', { name: user.username })
+                  : t('discover.relationshipWith', {
+                      name: user.username,
+                      status: relationshipLabel,
+                    })
+              }
+              className="btn-3d-base btn-3d-sky min-h-14 min-w-0 gap-2 px-4 text-base"
+              disabled={!canSendRequest || isSending}
+              type="button"
+              onClick={() => onSendRequest(user)}
+            >
+              <UserPlus aria-hidden="true" size={18} strokeWidth={3} />
+              {isSending
+                ? t('discover.sending')
+                : canSendRequest
+                  ? t('discover.sendRequest')
+                  : t('discover.unavailable')}
+            </button>
+          )}
         </div>
       </div>
     </article>
@@ -229,25 +277,35 @@ function ResultsState({
   isError,
   isPending,
   isSearch,
+  onMenuChange,
   onSendRequest,
+  onSkip,
+  onUndoSkip,
+  openMenu,
   sendingUserId,
+  skippedUserIds,
   users,
 }: {
   error: unknown;
   isError: boolean;
   isPending: boolean;
   isSearch: boolean;
+  onMenuChange: (menu: DiscoverMenu | null) => void;
   onSendRequest: (user: DiscoveryUser) => void;
+  onSkip: (userId: string) => void;
+  onUndoSkip: (userId: string) => void;
+  openMenu: DiscoverMenu | null;
   sendingUserId: string;
+  skippedUserIds: Set<string>;
   users: DiscoveryUser[] | undefined;
 }) {
   const { t } = useTranslation();
 
   if (isPending) {
     return (
-      <section className="card-gamified p-6 text-body font-bold text-graphite flex justify-center">
+      <section className="card-duo flex justify-center p-6 text-body font-bold text-graphite">
         <span className="inline-flex items-center gap-2">
-          <Sparkles aria-hidden="true" size={18} strokeWidth={2.5} />
+          <Sparkles aria-hidden="true" size={18} strokeWidth={3} />
           {t('discover.loading')}
         </span>
       </section>
@@ -257,7 +315,7 @@ function ResultsState({
   if (isError) {
     return (
       <section
-        className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-6 text-body font-bold text-[#b91c1c] text-center"
+        className="rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] p-6 text-center text-body font-bold text-[#b91c1c] shadow-[0_4px_0_#fecaca]"
         role="alert"
       >
         {getDiscoveryApiErrorMessage(error)}
@@ -267,9 +325,9 @@ function ResultsState({
 
   if (!users || users.length === 0) {
     return (
-      <section className="card-gamified p-12 text-center flex flex-col items-center">
-        <div className="grid h-16 w-16 place-items-center rounded-xl border-2 border-cloud-gray bg-sunshine-yellow text-almost-black shadow-[0_4px_0_#e5e5e5]">
-          <Globe2 aria-hidden="true" size={28} strokeWidth={2.5} />
+      <section className="card-duo flex flex-col items-center p-12 text-center">
+        <div className="grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-sunshine-yellow text-almost-black shadow-[0_4px_0_#e5e5e5]">
+          <Globe2 aria-hidden="true" size={28} strokeWidth={3} />
         </div>
         <h2 className="mt-6 text-heading-sm font-feather text-almost-black">
           {isSearch ? t('discover.noSearchTitle') : t('discover.noPartnersTitle')}
@@ -285,15 +343,20 @@ function ResultsState({
 
   return (
     <section
-      className="grid gap-5 lg:grid-cols-2"
       aria-label={isSearch ? t('discover.results.search') : t('discover.results.recommended')}
+      className="relative z-0 grid gap-6 md:grid-cols-2"
     >
       {users.map((user) => (
         <DiscoveryUserCard
           isSending={sendingUserId === user.id}
+          isSkipped={skippedUserIds.has(user.id)}
           key={user.id}
+          openMenu={openMenu}
           user={user}
+          onMenuChange={onMenuChange}
           onSendRequest={onSendRequest}
+          onSkip={onSkip}
+          onUndoSkip={onUndoSkip}
         />
       ))}
     </section>
@@ -301,9 +364,12 @@ function ResultsState({
 }
 
 export function DiscoverPage() {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
+  const [openMenu, setOpenMenu] = useState<DiscoverMenu | null>(null);
+  const [languageFilter, setLanguageFilter] = useState('');
+  const [skippedUserIds, setSkippedUserIds] = useState<Set<string>>(() => new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
   const normalizedSearchTerm = searchTerm.trim();
   const isSearch = normalizedSearchTerm.length > 0;
@@ -315,6 +381,13 @@ export function DiscoverPage() {
     isSearch,
     searchTerm: normalizedSearchTerm,
   });
+  const languageOptions = useMemo(() => {
+    const languages = new Set((visibleUsers ?? []).map((user) => user.targetLanguage));
+    return Array.from(languages).slice(0, 4);
+  }, [visibleUsers]);
+  const selectedLanguage =
+    languageFilter || languageOptions[0] || 'English';
+  const selectedLanguageLabel = translateDisplayValue(locale, selectedLanguage);
 
   async function handleSendRequest(user: DiscoveryUser) {
     setRequestFeedback('');
@@ -327,138 +400,146 @@ export function DiscoverPage() {
     }
   }
 
+  function handleSkip(userId: string) {
+    setSkippedUserIds((current) => new Set(current).add(userId));
+    setOpenMenu(null);
+  }
+
+  function handleUndoSkip(userId: string) {
+    setSkippedUserIds((current) => {
+      const next = new Set(current);
+      next.delete(userId);
+      return next;
+    });
+  }
+
   return (
-    <main className={pageShellClass}>
-      <div className={pageContainerClass}>
-        <header className={heroHeaderClass}>
-          <section className={heroContentClass}>
-            <div className="flex items-center gap-3">
-              <span className={heroIconClass}>
-                <Languages aria-hidden="true" size={24} strokeWidth={2.5} />
-              </span>
-              <span className="text-sm font-bold uppercase text-graphite">SyncTalk</span>
-            </div>
-
-            <div>
-              <p className={heroEyebrowClass}>
-                <Sparkles aria-hidden="true" size={16} />
-                {t('discover.badge')}
-              </p>
-              <h1 className={heroTitleClass}>
-                {t('discover.title')}
-              </h1>
-              <p className={heroDescriptionClass}>
-                {t('discover.description')}
-              </p>
-            </div>
-
-            <label className="relative block w-full max-w-xl text-almost-black">
-              <span className="sr-only">{t('discover.search.sr')}</span>
-              <Search
-                aria-hidden="true"
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-graphite"
-                size={20}
-                strokeWidth={3}
-              />
-              <input
-                ref={searchInputRef}
-                className="input-gamified pl-12 shadow-[0_4px_0_#e5e5e5]"
-                placeholder={t('discover.search.placeholder')}
-                type="search"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </label>
-
-            <div
-              aria-label={t('discover.view.label')}
-              className="inline-flex w-full max-w-sm rounded-xl border-2 border-cloud-gray bg-snow-white p-1"
-              role="group"
-            >
-              <button
-                aria-pressed={!isSearch}
-                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-colors ${
-                  !isSearch
-                    ? 'bg-duo-green-light text-duo-green'
-                    : 'text-graphite hover:bg-cloud-gray/20'
-                }`}
-                type="button"
-                onClick={() => setSearchTerm('')}
-              >
-                <Sparkles aria-hidden="true" size={16} strokeWidth={2.5} />
-                {t('discover.view.recommended')}
-              </button>
-              <button
-                aria-pressed={isSearch}
-                className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-colors ${
-                  isSearch
-                    ? 'bg-duo-green-light text-duo-green'
-                    : 'text-graphite hover:bg-cloud-gray/20'
-                }`}
-                type="button"
-                onClick={() => searchInputRef.current?.focus()}
-              >
-                <Search aria-hidden="true" size={16} strokeWidth={2.5} />
-                {t('discover.view.search')}
-              </button>
-            </div>
-          </section>
-
-          <section className="relative hidden min-h-[20rem] border-l-2 border-cloud-gray bg-sunshine-yellow/25 p-5 lg:block">
-            <img
-              alt=""
-              className="absolute left-8 top-10 h-40 w-64 rotate-[-5deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
-              src={profileCollage1}
-            />
-            <img
-              alt=""
-              className="absolute bottom-10 right-8 h-44 w-72 rotate-[4deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
-              src={profileCollage3}
-            />
-            <img
-              alt=""
-              className="absolute bottom-8 left-14 h-28 w-48 rotate-[-2deg] rounded-xl border-4 border-snow-white object-cover shadow-[0_8px_0_#e5e5e5]"
-              src={profileCollage6}
-            />
-            <div className="absolute left-8 bottom-44 flex items-center gap-2 rounded-xl border-2 border-almost-black bg-snow-white px-4 py-3 text-sm font-bold text-almost-black shadow-[0_4px_0_#3c3c3c]">
-              <BadgeCheck aria-hidden="true" size={20} strokeWidth={2.5} className="text-duo-green" />
-              {t('discover.visual.status')}
-            </div>
-            <div className="absolute right-10 top-24 grid h-16 w-16 place-items-center rounded-xl border-2 border-almost-black bg-bubblegum-pink text-snow-white shadow-[0_4px_0_#3c3c3c]">
-              <ArrowUpRight aria-hidden="true" size={32} strokeWidth={3} />
-            </div>
-          </section>
+    <main
+      className="custom-scrollbar min-h-screen overflow-y-auto bg-snow-white px-4 py-6 pb-24 text-almost-black md:px-12 md:py-10 lg:pb-12"
+      onClick={() => setOpenMenu(null)}
+    >
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-10 flex min-h-[104px] items-end justify-between border-b-2 border-gray-100 pb-6">
+          <div>
+            <h1 className="mb-4 text-5xl font-black tracking-tight text-sky-blue [text-shadow:2px_2px_0_#1899d6] md:text-6xl">
+              {t('discover.title')}
+            </h1>
+            <p className="text-base font-bold text-graphite md:text-lg">
+              {t('discover.description')}
+            </p>
+          </div>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className={heroStatCardClass}>
-            <p className="text-xs font-bold uppercase text-graphite">
-              {t('discover.stat.logicLabel')}
-            </p>
-            <p className="mt-1 text-heading-sm font-feather text-duo-green">{t('discover.stat.logicValue')}</p>
-          </div>
-          <div className={heroStatCardClass}>
-            <p className="text-xs font-bold uppercase text-graphite">
-              {t('discover.stat.stateLabel')}
-            </p>
-            <p className="mt-1 text-heading-sm font-feather text-sky-blue">{t('discover.stat.stateValue')}</p>
-          </div>
-          <div className={heroStatCardClass}>
-            <p className="text-xs font-bold uppercase text-graphite">
-              {t('discover.stat.searchLabel')}
-            </p>
-            <p className="mt-1 text-heading-sm font-feather text-bubblegum-pink">{t('discover.stat.searchValue')}</p>
+        <section className="relative z-30 mb-8 flex min-h-[72px] flex-col items-stretch gap-6 md:flex-row">
+          <label className="relative z-10 flex h-14 flex-1 items-center py-2 md:h-[72px]">
+            <span className="sr-only">{t('discover.search.sr')}</span>
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 h-6 w-6 text-silver"
+              strokeWidth={3}
+            />
+            <input
+              ref={searchInputRef}
+              className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-12 pr-16 text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
+              placeholder={t('discover.search.placeholder')}
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <button
+                aria-expanded={openMenu === 'sort'}
+                aria-label={t('discover.controls.sort')}
+                className="flex cursor-pointer items-center justify-center p-2 text-sky-blue hover:text-[#1899d6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setOpenMenu(openMenu === 'sort' ? null : 'sort');
+                }}
+              >
+                <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
+              </button>
+              {openMenu === 'sort' ? (
+                <div className="absolute right-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                  {[t('discover.controls.comprehensive'), t('discover.controls.recentlyActive'), t('discover.controls.nearest')].map((label) => (
+                    <button
+                      className="block w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0 hover:bg-gray-100"
+                      key={label}
+                      type="button"
+                      onClick={() => setOpenMenu(null)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </label>
+
+          <div className="custom-scrollbar flex h-14 flex-1 items-center gap-3 overflow-x-auto py-2 md:h-[72px]">
+            <button
+              aria-pressed={!isSearch}
+              className="btn-3d-base btn-filter-active h-14 shrink-0 px-6 py-3.5 text-base"
+              type="button"
+              onClick={() => setSearchTerm('')}
+            >
+              {t('discover.controls.bestMatch')}
+            </button>
+
+            <div className="relative h-14 shrink-0">
+              <button
+                aria-expanded={openMenu === 'language'}
+                className="btn-3d-base btn-filter h-full gap-2 px-6 py-3.5 text-base"
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setOpenMenu(openMenu === 'language' ? null : 'language');
+                }}
+              >
+                <span>
+                  {t('discover.controls.sharedLanguage', { language: selectedLanguageLabel })}
+                </span>
+                <ChevronDown aria-hidden="true" size={16} strokeWidth={3} />
+              </button>
+              {openMenu === 'language' ? (
+                <div className="absolute left-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                  {(languageOptions.length > 0 ? languageOptions : ['English', 'Japanese', 'Korean', 'French']).map((language) => (
+                    <button
+                      className="block w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0 hover:bg-gray-50"
+                      key={language}
+                      type="button"
+                      onClick={() => {
+                        setLanguageFilter(language);
+                        setOpenMenu(null);
+                      }}
+                    >
+                      {t('discover.controls.sharedLanguage', {
+                        language: translateDisplayValue(locale, language),
+                      })}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <button
+              className="btn-3d-base btn-filter h-14 shrink-0 px-6 py-3.5 text-base"
+              type="button"
+              onClick={() => searchInputRef.current?.focus()}
+            >
+              {t('discover.controls.currentlyOnline')}
+            </button>
           </div>
         </section>
 
         {requestFeedback ? (
-          <p className="rounded-xl border-2 border-duo-green bg-duo-green-light p-4 text-sm font-bold text-duo-green" role="status">
+          <p className="mb-6 rounded-2xl border-2 border-duo-green bg-duo-green-light p-4 text-sm font-bold text-duo-green shadow-[0_4px_0_#d7ffb8]" role="status">
             {requestFeedback}
           </p>
         ) : null}
 
         {sendFriendRequestMutation.isError ? (
-          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c]" role="alert">
+          <p className="mb-6 rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c] shadow-[0_4px_0_#fecaca]" role="alert">
             {getFriendsApiErrorMessage(sendFriendRequestMutation.error)}
           </p>
         ) : null}
@@ -468,13 +549,18 @@ export function DiscoverPage() {
           isError={activeQuery.isError}
           isPending={activeQuery.isPending}
           isSearch={isSearch}
-          onSendRequest={handleSendRequest}
+          openMenu={openMenu}
           sendingUserId={
             sendFriendRequestMutation.isPending
               ? (sendFriendRequestMutation.variables as string | undefined) ?? ''
               : ''
           }
+          skippedUserIds={skippedUserIds}
           users={visibleUsers}
+          onMenuChange={setOpenMenu}
+          onSendRequest={handleSendRequest}
+          onSkip={handleSkip}
+          onUndoSkip={handleUndoSkip}
         />
       </div>
     </main>

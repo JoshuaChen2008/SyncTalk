@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 describe('friends page', () => {
-  it('renders the Figma-style friends page with chat, call, and remove actions', async () => {
+  it('renders the redesigned friends page with stats, chat, call, and manage actions', async () => {
     mockProtectedAppGet({ friends: [mockFriend()] });
 
     renderFriendsRoute();
@@ -107,6 +107,7 @@ describe('friends page', () => {
     expect(
       await screen.findByRole('heading', { name: /your language friends/i }),
     ).toBeInTheDocument();
+    expect(await screen.findByText(/online friends \/ total friends/i)).toBeInTheDocument();
     expect(await screen.findByText(/1 friend ready/i)).toBeInTheDocument();
     expect(screen.getByText(/showing 1 of 1/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(
@@ -130,6 +131,8 @@ describe('friends page', () => {
       'href',
       '/app/call/user-2',
     );
+    await userEvent.click(screen.getByRole('button', { name: /manage sam/i }));
+    expect(screen.getByRole('button', { name: /details/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove sam/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /find more language partners/i })).toHaveAttribute(
       'href',
@@ -198,7 +201,7 @@ describe('friends page', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/could not load friends/i);
   });
 
-  it('removes a friend', async () => {
+  it('removes a friend from the manage menu', async () => {
     mockProtectedAppGet({ friends: [mockFriend()] });
     const deleteSpy = vi
       .spyOn(apiClient, 'delete')
@@ -208,7 +211,8 @@ describe('friends page', () => {
 
     renderFriendsRoute();
 
-    await userEvent.click(await screen.findByRole('button', { name: /remove sam/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /manage sam/i }));
+    await userEvent.click(screen.getByRole('button', { name: /remove sam/i }));
 
     expect(deleteSpy).toHaveBeenCalledWith('/friends/user-2');
     expect(await screen.findByText(/removed sam/i)).toBeInTheDocument();

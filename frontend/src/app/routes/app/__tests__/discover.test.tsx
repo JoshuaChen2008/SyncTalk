@@ -160,6 +160,22 @@ describe('discover page', () => {
     expect(getSpy).toHaveBeenCalledWith('/users/search', { params: { query: 'English' } });
   });
 
+  it('renders the redesigned discover controls and handles local skip state', async () => {
+    mockProtectedDiscovery({
+      recommendations: [mockDiscoveryUser({ id: 'user-2', username: 'sam', relationshipStatus: 'stranger' })],
+    });
+
+    renderDiscoverRoute();
+
+    expect(await screen.findByRole('button', { name: /best match/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /currently online/i })).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByRole('button', { name: /skip sam/i }));
+    await userEvent.click(screen.getByRole('button', { name: /hide this person/i }));
+
+    expect(screen.getByRole('button', { name: /undo skip sam/i })).toBeInTheDocument();
+  });
+
   it('sends a friend request from a stranger discovery card', async () => {
     mockProtectedDiscovery({
       recommendations: [mockDiscoveryUser({ id: 'user-2', username: 'sam', relationshipStatus: 'stranger' })],

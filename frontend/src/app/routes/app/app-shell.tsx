@@ -14,11 +14,11 @@ import { useTranslation } from '../../../i18n/i18n-store';
 import { LanguageToggle } from '../../../i18n/language-toggle';
 
 const navItems = [
-  { to: '/app/discover', labelKey: 'app.nav.discover', icon: Compass },
-  { to: '/app/friends', labelKey: 'app.nav.friends', icon: UsersRound },
-  { to: '/app/requests', labelKey: 'app.nav.requests', icon: Inbox },
-  { to: '/app/notifications', labelKey: 'app.nav.notifications', icon: Bell },
-  { to: '/app/settings', labelKey: 'app.nav.settings', icon: Settings },
+  { to: '/app/discover', labelKey: 'app.nav.discover', icon: Compass, iconClass: 'text-sky-blue' },
+  { to: '/app/friends', labelKey: 'app.nav.friends', icon: UsersRound, iconClass: 'text-grape-soda' },
+  { to: '/app/requests', labelKey: 'app.nav.requests', icon: Inbox, iconClass: 'text-sunshine-yellow' },
+  { to: '/app/notifications', labelKey: 'app.nav.notifications', icon: Bell, iconClass: 'text-duo-green' },
+  { to: '/app/settings', labelKey: 'app.nav.settings', icon: Settings, iconClass: 'text-sky-blue/45' },
 ] as const;
 
 function getNavLabel({
@@ -50,11 +50,11 @@ function AppShellNav({ variant }: { variant: 'desktop' | 'mobile' }) {
       aria-label={isDesktop ? t('app.nav.primary') : t('app.nav.mobile')}
       className={
         isDesktop
-          ? 'hidden flex-col gap-2 lg:flex'
-          : 'fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-xl border-2 border-cloud-gray bg-snow-white p-1.5 shadow-none lg:hidden'
+          ? 'hidden flex-col gap-2 md:flex'
+          : 'fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-2xl border-2 border-cloud-gray bg-snow-white p-1.5 shadow-[0_4px_0_#e5e5e5] md:hidden'
       }
     >
-      {navItems.map(({ icon: Icon, labelKey, to }) => {
+      {navItems.map(({ icon: Icon, iconClass, labelKey, to }) => {
         const label = t(labelKey);
         const isNotifications = labelKey === 'app.nav.notifications';
         const navLabel = getNavLabel({ isNotifications, label, t, unreadCount });
@@ -64,19 +64,26 @@ function AppShellNav({ variant }: { variant: 'desktop' | 'mobile' }) {
             aria-label={isDesktop ? navLabel : t('app.nav.mobileTab', { label: navLabel })}
             className={({ isActive }) =>
               isDesktop
-                ? `flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
+                ? `group flex min-h-14 items-center gap-4 rounded-xl border-2 px-4 text-lg font-black transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
                     isActive
-                      ? 'bg-sky-blue/10 text-sky-blue border-2 border-transparent'
-                      : 'text-graphite hover:bg-cloud-gray/30 hover:text-almost-black border-2 border-transparent'
+                      ? 'border-[#84d8ff] bg-[#ddf4ff] text-sky-blue'
+                      : 'border-transparent text-graphite hover:bg-cloud-gray/30 hover:text-almost-black'
                   }`
-                : `relative grid min-h-12 place-items-center rounded-xl text-graphite transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
-                    isActive ? 'bg-sky-blue/10 text-sky-blue' : 'hover:bg-cloud-gray/30'
+                : `relative grid min-h-12 place-items-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
+                    isActive ? 'bg-[#ddf4ff] text-sky-blue' : 'text-graphite hover:bg-cloud-gray/30'
                   }`
             }
             key={to}
             to={to}
           >
-            <Icon aria-hidden="true" size={isDesktop ? 22 : 24} strokeWidth={2.5} />
+            <Icon
+              aria-hidden="true"
+              className={`${iconClass} transition-transform duration-300 ${
+                isDesktop ? 'group-hover:-translate-y-1' : ''
+              }`}
+              size={isDesktop ? 30 : 24}
+              strokeWidth={2.8}
+            />
             {isDesktop ? <span>{label}</span> : <span className="sr-only">{label}</span>}
             {isNotifications && unreadCount > 0 ? (
               <span
@@ -102,21 +109,18 @@ export function AppShell() {
   const currentUserQuery = useCurrentUserQuery();
   const currentUser = currentUserQuery.data;
 
-  // The design specifically calls for a light theme ("Theme: light") so we remove dark mode logic.
-  // The system is intentionally flat, avoiding traditional shadows for elevation.
-
   return (
-    <div className="min-h-screen bg-snow-white text-almost-black">
-      <div className="relative z-10 flex min-h-screen max-w-[1440px] mx-auto">
-        <aside className="sticky top-0 z-30 hidden h-screen w-72 shrink-0 border-r-2 border-cloud-gray bg-snow-white px-5 py-6 lg:flex lg:flex-col">
-          <Link className="text-heading font-feather text-duo-green hover:brightness-110 transition-all" to="/app/discover">
+    <div className="min-h-screen bg-[#f9fafb] text-almost-black">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1400px]">
+        <aside className="sticky top-0 z-30 hidden h-screen w-[250px] shrink-0 border-r-2 border-cloud-gray bg-snow-white p-4 pt-8 md:flex md:flex-col">
+          <Link className="px-4 text-heading font-feather text-duo-green transition-all hover:brightness-110" to="/app/discover">
             SyncTalk
           </Link>
-          <p className="mt-2 text-sm font-bold text-silver uppercase tracking-wider">
+          <p className="mt-2 px-4 text-xs font-black uppercase text-silver">
             {t('app.brand.tagline')}
           </p>
 
-          <div className="mt-8">
+          <div className="mt-10">
             <AppShellNav variant="desktop" />
           </div>
 
@@ -125,7 +129,7 @@ export function AppShell() {
           </div>
 
           <Link
-            className="mt-3 flex min-h-14 items-center gap-3 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-sm font-bold text-almost-black transition-colors hover:bg-cloud-gray/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+            className="mt-3 flex min-h-14 items-center gap-3 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-sm font-bold text-almost-black shadow-[0_3px_0_#e5e5e5] transition-colors hover:bg-cloud-gray/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
             to="/app/settings"
           >
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-cloud-gray/40 text-graphite">
@@ -142,8 +146,8 @@ export function AppShell() {
           </Link>
         </aside>
 
-        <div className="min-w-0 flex-1 pb-20 lg:pb-0 bg-snow-white">
-          <header className="sticky top-0 z-40 flex min-h-16 items-center justify-between border-b-2 border-cloud-gray bg-snow-white px-4 lg:hidden">
+        <div className="min-w-0 flex-1 bg-snow-white pb-20 md:pb-0">
+          <header className="sticky top-0 z-40 flex min-h-16 items-center justify-between border-b-2 border-cloud-gray bg-snow-white px-4 md:hidden">
             <Link className="text-heading-sm font-feather text-duo-green" to="/app/discover">
               SyncTalk
             </Link>

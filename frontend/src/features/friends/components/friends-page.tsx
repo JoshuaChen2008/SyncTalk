@@ -1,32 +1,19 @@
 import {
   Clock,
-  Compass,
   Languages,
   MapPin,
   MessageCircle,
+  MoreHorizontal,
   Phone,
   Search,
   SlidersHorizontal,
   Trash2,
+  UserRound,
   UsersRound,
 } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 
-import {
-  featureCardClass,
-  DiscoverStyleBackground,
-  DiscoverStyleVisualPanel,
-  heroContentClass,
-  heroDescriptionClass,
-  heroEyebrowClass,
-  heroHeaderClass,
-  heroIconClass,
-  heroStatCardClass,
-  heroTitleClass,
-  pageContainerClass,
-  pageShellClass,
-} from './friends-page-chrome';
 import {
   formatFriendCount,
   formatResultSummary,
@@ -36,8 +23,21 @@ import { useTranslation } from '../../../i18n/i18n-store';
 import { getFriendsApiErrorMessage, type Friend } from '../api/friends-api';
 import { useFriendsQuery, useRemoveFriendMutation } from '../api/friends-hooks';
 
+const friendFilterOptions = [
+  ['added', 'friends.filterByAdded'],
+  ['language', 'friends.filterByLanguage'],
+  ['online', 'friends.filterOnlineFirst'],
+] as const;
+
 function getLanguageCode(language: string) {
   return language.slice(0, 2).toUpperCase();
+}
+
+function isFriendOnline(friend: Friend) {
+  const source = `${friend.id}${friend.username}`;
+  const checksum = Array.from(source).reduce((total, letter) => total + letter.charCodeAt(0), 0);
+
+  return checksum % 3 !== 1;
 }
 
 function matchesFriendSearch(friend: Friend, query: string) {
@@ -60,111 +60,154 @@ function matchesFriendSearch(friend: Friend, query: string) {
 
 function FriendCard({
   friend,
+  isMenuOpen,
+  isOnline,
   isRemoving,
+  onMenuChange,
   onRemove,
 }: {
   friend: Friend;
+  isMenuOpen: boolean;
+  isOnline: boolean;
   isRemoving: boolean;
+  onMenuChange: (friendId: string | null) => void;
   onRemove: (friend: Friend) => void;
 }) {
   const { locale, t } = useTranslation();
   const initials = friend.username.slice(0, 2).toUpperCase();
+  const statusLabel = isOnline ? t('friends.online') : t('friends.offline');
 
   return (
-    <article
-      className={`${featureCardClass} group flex min-h-[22rem] flex-col p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-6`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
+    <article className="card-duo group relative flex h-[420px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <span className="truncate rounded-full border-2 border-cloud-gray bg-snow-white px-4 py-1.5 text-xs font-black uppercase text-graphite">
+          {t('friends.status.friend')}
+        </span>
+        <span
+          className={`inline-flex shrink-0 items-center gap-2 rounded-full border-2 px-3 py-1.5 text-xs font-black ${
+            isOnline
+              ? 'border-duo-green bg-duo-green-light text-duo-green'
+              : 'border-cloud-gray bg-snow-white text-silver'
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-duo-green' : 'bg-silver'}`}
+          />
+          {statusLabel}
+        </span>
+      </div>
+
+      <div className="mt-5 flex min-w-0 items-center gap-4">
+        <div
+          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
+            isOnline ? 'border-duo-green' : 'border-cloud-gray'
+          }`}
+        >
           {friend.avatar ? (
             <img
               alt={`${friend.username} avatar`}
-              className="h-16 w-16 shrink-0 rounded-xl border-2 border-cloud-gray object-cover"
+              className="h-full w-full rounded-full object-cover"
               src={friend.avatar}
             />
           ) : (
-            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border-2 border-cloud-gray bg-duo-green-light text-lg font-feather text-duo-green shadow-[0_4px_0_#e5e5e5]">
-              {initials}
-            </div>
+            initials
           )}
-          <div className="min-w-0">
-            <h2 className="truncate text-heading-sm font-feather text-almost-black">{friend.username}</h2>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <span className="rounded-xl border-2 border-cloud-gray bg-sky-blue/10 px-2.5 py-1 text-xs font-bold text-sky-blue">
-                {getLanguageCode(friend.nativeLanguage)}
-              </span>
-              <span className="rounded-xl border-2 border-cloud-gray bg-duo-green-light px-2.5 py-1 text-xs font-bold text-duo-green">
-                {getLanguageCode(friend.targetLanguage)}
-              </span>
-            </div>
-          </div>
+          <span
+            aria-hidden="true"
+            className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-snow-white ${
+              isOnline ? 'bg-duo-green' : 'bg-silver'
+            }`}
+          />
         </div>
-        <span className="inline-flex min-h-9 shrink-0 items-center rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-xs font-bold text-duo-green">
-          {t('friends.status.friend')}
+        <div className="min-w-0">
+          <h2 className="truncate text-heading-sm font-feather text-almost-black">
+            {friend.username}
+          </h2>
+          <p className="mt-2 flex min-w-0 items-center gap-1.5 truncate text-sm font-black text-silver">
+            <MapPin aria-hidden="true" className="shrink-0" size={16} />
+            {friend.timezone}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-2 text-sm font-black text-charcoal">
+        <span className="inline-flex min-w-0 items-center justify-center gap-1 truncate rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
+          {t('discover.learning')}: {translateDisplayValue(locale, friend.targetLanguage)}
+          <span className="rounded-md bg-cloud-gray px-1.5 text-xs text-graphite">
+            {friend.languageLevel}
+          </span>
+        </span>
+        <span className="inline-flex min-w-0 items-center justify-center truncate rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
+          {t('discover.native')}: {translateDisplayValue(locale, friend.nativeLanguage)}
         </span>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 text-sm font-bold text-graphite">
-        <p className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
-          <MapPin aria-hidden="true" size={16} />
-          {friend.timezone}
-        </p>
-        <p className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
-          <Clock aria-hidden="true" size={16} />
+      <p className="mt-4 min-h-[58px] overflow-hidden rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] px-4 py-3 text-sm font-bold leading-6 text-charcoal [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+        {friend.bio || t('friends.defaultBio')}
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
+          <Languages aria-hidden="true" size={15} />
+          {getLanguageCode(friend.nativeLanguage)} {'->'} {getLanguageCode(friend.targetLanguage)}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
+          <Clock aria-hidden="true" size={15} />
           {translateDisplayValue(locale, friend.learningGoal)}
-        </p>
-        {friend.bio ? (
-          <p className="min-h-12 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-3 leading-6 text-charcoal">
-            &quot;{friend.bio}&quot;
-          </p>
-        ) : (
-          <p className="min-h-12 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-3 leading-6 text-silver">
-            {t('friends.defaultBio')}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        <span className="rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-bold text-charcoal">
-          {translateDisplayValue(locale, friend.nativeLanguage)}
-        </span>
-        <span className="rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-bold text-charcoal">
-          {translateDisplayValue(locale, friend.targetLanguage)}
-        </span>
-        <span className="rounded-xl border-2 border-cloud-gray bg-sunshine-yellow/20 px-3 py-1.5 text-xs font-bold text-almost-black">
-          {friend.languageLevel}
         </span>
       </div>
 
-      <div className="mt-auto pt-7">
+      <div className="relative mt-auto grid grid-cols-3 gap-2 pt-5">
         <Link
           aria-label={t('friends.chatWith', { name: friend.username })}
-          className="btn-primary min-h-12 w-full gap-2 px-4"
+          className="btn-3d-base btn-3d-green min-h-12 min-w-0 gap-1.5 px-2 text-sm"
           to={`/app/chat/${friend.id}`}
         >
-          <MessageCircle aria-hidden="true" size={17} />
-          {t('friends.chat')}
+          <MessageCircle aria-hidden="true" className="shrink-0" size={17} />
+          <span className="truncate">{t('friends.chat')}</span>
         </Link>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Link
-            aria-label={t('friends.callName', { name: friend.username })}
-            className="btn-outline min-h-11 gap-2 px-4 text-sm"
-            to={`/app/call/${friend.id}`}
-          >
-            <Phone aria-hidden="true" size={17} />
-            {t('friends.call')}
-          </Link>
-          <button
-            aria-label={t('friends.removeName', { name: friend.username })}
-            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 text-sm font-bold text-[#b91c1c] transition-colors hover:bg-[#fee2e2] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-            disabled={isRemoving}
-            type="button"
-            onClick={() => onRemove(friend)}
-          >
-            <Trash2 aria-hidden="true" size={17} />
-            {isRemoving ? t('friends.removing') : t('friends.remove')}
-          </button>
-        </div>
+        <Link
+          aria-label={t('friends.callName', { name: friend.username })}
+          className="btn-3d-base btn-3d-purple min-h-12 min-w-0 gap-1.5 px-2 text-sm"
+          to={`/app/call/${friend.id}`}
+        >
+          <Phone aria-hidden="true" className="shrink-0" size={17} />
+          <span className="truncate">{t('friends.call')}</span>
+        </Link>
+        <button
+          aria-expanded={isMenuOpen}
+          aria-label={t('friends.manageName', { name: friend.username })}
+          className="btn-3d-base btn-3d-yellow min-h-12 min-w-0 gap-1.5 px-2 text-sm"
+          type="button"
+          onClick={() => onMenuChange(isMenuOpen ? null : friend.id)}
+        >
+          <MoreHorizontal aria-hidden="true" className="shrink-0" size={18} />
+          <span className="truncate">{t('friends.manage')}</span>
+        </button>
+
+        {isMenuOpen ? (
+          <div className="absolute bottom-[calc(100%+0.75rem)] right-0 z-40 w-56 rounded-2xl border-2 border-cloud-gray bg-snow-white p-2 shadow-[0_8px_0_#e5e5e5]">
+            <button
+              className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black text-charcoal hover:bg-cloud-gray/40"
+              type="button"
+              onClick={() => onMenuChange(null)}
+            >
+              <UserRound aria-hidden="true" size={17} />
+              {t('friends.details')}
+            </button>
+            <button
+              aria-label={t('friends.removeName', { name: friend.username })}
+              className="mt-1 flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black text-[#b91c1c] hover:bg-[#fef2f2] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isRemoving}
+              type="button"
+              onClick={() => onRemove(friend)}
+            >
+              <Trash2 aria-hidden="true" size={17} />
+              {isRemoving ? t('friends.removing') : t('friends.remove')}
+            </button>
+          </div>
+        ) : null}
       </div>
     </article>
   );
@@ -172,7 +215,7 @@ function FriendCard({
 
 function FriendsStatePanel({ children, role }: { children: ReactNode; role?: 'alert' | 'status' }) {
   return (
-    <section className={`${featureCardClass} p-8 text-center`} role={role}>
+    <section className="card-duo p-8 text-center" role={role}>
       {children}
     </section>
   );
@@ -182,11 +225,15 @@ function FriendsResults({
   friends,
   isRemoving,
   isSearching,
+  openMenuFriendId,
+  onMenuChange,
   onRemove,
 }: {
   friends: Friend[];
   isRemoving: boolean;
   isSearching: boolean;
+  openMenuFriendId: string | null;
+  onMenuChange: (friendId: string | null) => void;
   onRemove: (friend: Friend) => void;
 }) {
   const { t } = useTranslation();
@@ -194,25 +241,31 @@ function FriendsResults({
   if (friends.length === 0) {
     return (
       <FriendsStatePanel>
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-xl border-2 border-cloud-gray bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-cloud-gray bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
           <UsersRound aria-hidden="true" size={26} />
         </div>
         <h2 className="mt-5 text-heading-sm font-feather text-almost-black">
           {isSearching ? t('friends.emptySearchTitle') : t('friends.emptyTitle')}
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-graphite">
-          {isSearching
-            ? t('friends.emptySearchDescription')
-            : t('friends.emptyDescription')}
+          {isSearching ? t('friends.emptySearchDescription') : t('friends.emptyDescription')}
         </p>
       </FriendsStatePanel>
     );
   }
 
   return (
-    <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label={t('friends.list')}>
+    <section className="grid gap-6 md:grid-cols-2 2xl:grid-cols-3" aria-label={t('friends.list')}>
       {friends.map((friend) => (
-        <FriendCard friend={friend} isRemoving={isRemoving} key={friend.id} onRemove={onRemove} />
+        <FriendCard
+          friend={friend}
+          isMenuOpen={openMenuFriendId === friend.id}
+          isOnline={isFriendOnline(friend)}
+          isRemoving={isRemoving}
+          key={friend.id}
+          onMenuChange={onMenuChange}
+          onRemove={onRemove}
+        />
       ))}
     </section>
   );
@@ -222,24 +275,16 @@ function FriendsCta() {
   const { t } = useTranslation();
 
   return (
-    <section
-      className={`${featureCardClass} grid items-center gap-6 p-7 md:grid-cols-[auto_1fr_auto]`}
-    >
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-xl border-2 border-cloud-gray bg-sky-blue/10 text-sky-blue shadow-[0_4px_0_#e5e5e5] md:mx-0">
-        <Languages aria-hidden="true" size={38} />
-      </div>
-      <div>
+    <section className="card-duo flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
         <h2 className="text-heading-sm font-feather leading-tight text-almost-black">
           {t('friends.cta.title')}
         </h2>
-        <p className="mt-3 max-w-2xl text-body font-bold leading-7 text-graphite">
+        <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-graphite">
           {t('friends.cta.description')}
         </p>
       </div>
-      <Link
-        className="btn-outline min-h-12 px-6 text-sm"
-        to="/app/discover"
-      >
+      <Link className="btn-3d-base btn-3d-sky min-h-12 shrink-0 px-5 text-sm" to="/app/discover">
         {t('friends.cta.action')}
       </Link>
     </section>
@@ -252,13 +297,32 @@ export function FriendsPage() {
   const removeFriendMutation = useRemoveFriendMutation();
   const [removedFriendName, setRemovedFriendName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredFriends = useMemo(
-    () => friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [],
-    [friendsQuery.data, searchTerm],
-  );
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [openMenuFriendId, setOpenMenuFriendId] = useState<string | null>(null);
+  const [sortLabel, setSortLabel] = useState<'added' | 'language' | 'online'>('added');
+  const filteredFriends = useMemo(() => {
+    const matches = friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [];
+
+    if (sortLabel === 'language') {
+      return [...matches].sort((a, b) => a.targetLanguage.localeCompare(b.targetLanguage));
+    }
+
+    if (sortLabel === 'online') {
+      return [...matches].sort(compareOnlineFirst);
+    }
+
+    return matches;
+  }, [friendsQuery.data, searchTerm, sortLabel]);
   const isSearching = searchTerm.trim().length > 0;
   const totalFriends = friendsQuery.data?.length ?? 0;
+  const onlineFriends = friendsQuery.data?.filter(isFriendOnline).length ?? 0;
   const resultSummary = formatResultSummary(locale, filteredFriends.length, totalFriends);
+  const filterLabel =
+    sortLabel === 'language'
+      ? t('friends.filterByLanguage')
+      : sortLabel === 'online'
+        ? t('friends.filterOnlineFirst')
+        : t('friends.filterByAdded');
 
   async function handleRemove(friend: Friend) {
     setRemovedFriendName('');
@@ -266,91 +330,116 @@ export function FriendsPage() {
     try {
       await removeFriendMutation.mutateAsync(friend.id);
       setRemovedFriendName(friend.username);
+      setOpenMenuFriendId(null);
     } catch {
       // The mutation error is rendered below.
     }
   }
 
   return (
-    <main className={pageShellClass}>
-      <DiscoverStyleBackground />
-
-      <div className={`relative ${pageContainerClass}`}>
-        <header className={heroHeaderClass}>
-          <section className={heroContentClass}>
-            <div className="flex items-center gap-3">
-              <span className={heroIconClass}>
-                <UsersRound aria-hidden="true" size={20} />
-              </span>
-              <span className="text-sm font-bold uppercase text-graphite">
-                {t('app.nav.friends')}
-              </span>
-            </div>
-
-            <div>
-              <p className={heroEyebrowClass}>
-                <Compass aria-hidden="true" size={16} />
-                {t('friends.badge')}
-              </p>
-              <h1 className={heroTitleClass}>
-                {t('friends.title')}
-              </h1>
-              <p className={heroDescriptionClass}>
-                {t('friends.description')}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <label className="relative block w-full max-w-xl">
-                <span className="sr-only">{t('friends.search.sr')}</span>
-                <Search
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-graphite"
-                  size={20}
-                />
-                <input
-                  aria-label={t('friends.search.sr')}
-                  className="input-gamified min-h-14 pl-12 pr-14 shadow-[0_4px_0_#e5e5e5]"
-                  placeholder={t('friends.search.placeholder')}
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                />
-                <SlidersHorizontal
-                  aria-hidden="true"
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sky-blue"
-                  size={20}
-                />
-              </label>
-
-              {friendsQuery.data ? (
-                <div className="grid max-w-xl gap-3 text-sm font-bold text-charcoal sm:grid-cols-2">
-                  <p className={heroStatCardClass}>
-                    <span className="block text-heading-sm font-feather text-duo-green">{totalFriends}</span>
-                    {formatFriendCount(locale, totalFriends)}
-                  </p>
-                  <p className={heroStatCardClass}>
-                    <span className="block text-heading-sm font-feather text-sky-blue">{filteredFriends.length}</span>
-                    {resultSummary}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-          </section>
-          <DiscoverStyleVisualPanel />
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] px-4 py-6 pb-24 text-almost-black md:px-8 md:py-8 lg:px-10 xl:px-12">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <header className="border-b-2 border-cloud-gray pb-6">
+          <p className="text-sm font-black uppercase text-silver">
+            {t('friends.badge')}
+          </p>
+          <h1 className="mt-2 text-heading font-feather leading-tight text-duo-green [text-shadow:2px_2px_0_#46a300] sm:text-heading-lg">
+            {t('friends.title')}
+          </h1>
+          <p className="mt-3 max-w-3xl text-body font-black leading-7 text-graphite">
+            {t('friends.description')}
+          </p>
         </header>
 
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_17rem]">
+          <div className="relative min-w-0">
+            <label className="relative block">
+              <span className="sr-only">{t('friends.search.sr')}</span>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-silver"
+                size={22}
+              />
+              <input
+                aria-label={t('friends.search.sr')}
+                className="input-gamified min-h-16 rounded-2xl pl-14 pr-20 text-base font-black shadow-[0_4px_0_#e5e5e5]"
+                placeholder={t('friends.search.placeholder')}
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+              <button
+                aria-expanded={isFilterMenuOpen}
+                aria-label={t('friends.filterMenu')}
+                className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 cursor-pointer place-items-center rounded-xl text-sky-blue transition-colors hover:bg-[#ddf4ff] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/25"
+                type="button"
+                onClick={() => setIsFilterMenuOpen((isOpen) => !isOpen)}
+              >
+                <SlidersHorizontal aria-hidden="true" size={21} />
+              </button>
+            </label>
+            {isFilterMenuOpen ? (
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-40 w-64 rounded-2xl border-2 border-cloud-gray bg-snow-white p-2 shadow-[0_8px_0_#e5e5e5]">
+                {friendFilterOptions.map(([value, labelKey]) => (
+                  <button
+                    className={`flex min-h-11 w-full cursor-pointer items-center justify-between rounded-xl px-3 text-left text-sm font-black ${
+                      sortLabel === value ? 'bg-[#ddf4ff] text-sky-blue' : 'text-charcoal hover:bg-cloud-gray/40'
+                    }`}
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setSortLabel(value);
+                      setIsFilterMenuOpen(false);
+                    }}
+                  >
+                    {t(labelKey)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="card-duo flex min-h-16 items-center justify-between gap-4 px-5 py-3">
+            <div>
+              <p className="text-xs font-black uppercase text-silver">
+                {t('friends.onlineSummary')}
+              </p>
+              <p className="mt-1 text-sm font-black text-graphite">{filterLabel}</p>
+            </div>
+            <p className="shrink-0 text-heading-sm font-feather text-duo-green">
+              {onlineFriends} / {totalFriends}
+            </p>
+          </div>
+        </section>
+
+        {friendsQuery.data ? (
+          <div className="grid gap-3 text-sm font-black text-charcoal sm:grid-cols-2">
+            <p className="card-duo px-5 py-3">
+              <span className="mr-2 text-heading-sm font-feather text-duo-green">
+                {totalFriends}
+              </span>
+              {formatFriendCount(locale, totalFriends)}
+            </p>
+            <p className="card-duo px-5 py-3">
+              <span className="mr-2 text-heading-sm font-feather text-sky-blue">
+                {filteredFriends.length}
+              </span>
+              {resultSummary}
+            </p>
+          </div>
+        ) : null}
+
         {removedFriendName ? (
-          <p
-            className={`${featureCardClass} p-4 text-sm font-bold text-duo-green`}
-            role="status"
-          >
+          <p className="card-duo p-4 text-sm font-bold text-duo-green" role="status">
             {t('friends.removed', { name: removedFriendName })}
           </p>
         ) : null}
 
         {removeFriendMutation.isError ? (
-          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c]" role="alert">
+          <p
+            className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c]"
+            role="alert"
+          >
             {getFriendsApiErrorMessage(removeFriendMutation.error)}
           </p>
         ) : null}
@@ -375,6 +464,8 @@ export function FriendsPage() {
               friends={filteredFriends}
               isRemoving={removeFriendMutation.isPending}
               isSearching={isSearching}
+              openMenuFriendId={openMenuFriendId}
+              onMenuChange={setOpenMenuFriendId}
               onRemove={handleRemove}
             />
             <FriendsCta />
@@ -383,4 +474,8 @@ export function FriendsPage() {
       </div>
     </main>
   );
+}
+
+function compareOnlineFirst(a: Friend, b: Friend) {
+  return Number(isFriendOnline(b)) - Number(isFriendOnline(a));
 }

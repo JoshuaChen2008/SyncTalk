@@ -172,7 +172,9 @@ test.describe('auth smoke', () => {
     await page.goto('/app/settings');
 
     await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
-    await expect(page.getByText(/mei@example\.com/i).first()).toBeVisible();
+    await expect(
+      page.getByRole('article').filter({ hasText: /mei@example\.com/i }).first(),
+    ).toBeVisible();
 
     await page.getByRole('button', { name: /use dark theme/i }).click();
     await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe(

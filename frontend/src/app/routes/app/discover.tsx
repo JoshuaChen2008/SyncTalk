@@ -476,30 +476,32 @@ export function DiscoverPage() {
             </div>
           </label>
 
-          <div className="custom-scrollbar flex h-14 flex-1 items-center gap-3 overflow-x-auto py-2 md:h-[72px]">
+          <div className="grid h-14 flex-1 grid-cols-3 items-center gap-3 md:h-[72px]">
             <button
               aria-pressed={!isSearch}
-              className="btn-3d-base btn-filter-active h-14 shrink-0 px-6 py-3.5 text-base"
+              className="btn-3d-base btn-filter-active h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base"
               type="button"
               onClick={() => setSearchTerm('')}
             >
-              {t('discover.controls.bestMatch')}
+              <span className="truncate whitespace-nowrap">
+                {t('discover.controls.bestMatch')}
+              </span>
             </button>
 
-            <div className="relative h-14 shrink-0">
+            <div className="relative h-14 min-w-0">
               <button
                 aria-expanded={openMenu === 'language'}
-                className="btn-3d-base btn-filter h-full gap-2 px-6 py-3.5 text-base"
+                className="btn-3d-base btn-filter h-full w-full min-w-0 gap-1 overflow-hidden px-3 py-3.5 text-sm leading-none sm:gap-2 sm:px-4 sm:text-base"
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
                   setOpenMenu(openMenu === 'language' ? null : 'language');
                 }}
               >
-                <span>
+                <span className="min-w-0 truncate whitespace-nowrap">
                   {t('discover.controls.sharedLanguage', { language: selectedLanguageLabel })}
                 </span>
-                <ChevronDown aria-hidden="true" size={16} strokeWidth={3} />
+                <ChevronDown aria-hidden="true" className="shrink-0" size={16} strokeWidth={3} />
               </button>
               {openMenu === 'language' ? (
                 <div className="absolute left-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
@@ -523,11 +525,13 @@ export function DiscoverPage() {
             </div>
 
             <button
-              className="btn-3d-base btn-filter h-14 shrink-0 px-6 py-3.5 text-base"
+              className="btn-3d-base btn-filter h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base"
               type="button"
               onClick={() => searchInputRef.current?.focus()}
             >
-              {t('discover.controls.currentlyOnline')}
+              <span className="truncate whitespace-nowrap">
+                {t('discover.controls.currentlyOnline')}
+              </span>
             </button>
           </div>
         </section>

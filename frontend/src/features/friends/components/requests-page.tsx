@@ -1,4 +1,4 @@
-import { Check, Clock, Inbox, MapPin, Search, Send, SlidersHorizontal, X } from 'lucide-react';
+import { Check, Clock, Inbox, MapPin, Search, Send, X } from 'lucide-react';
 
 import {
   featureCardClass,
@@ -141,72 +141,47 @@ export function RequestsPage() {
   return (
     <main className={pageShellClass}>
       <div className={pageContainerClass}>
-        <section
-          aria-label={t('requests.overview')}
-          className="flex flex-col gap-8 border-b-2 border-cloud-gray/70 pb-8 lg:flex-row lg:items-end lg:justify-between"
-        >
-          <header className="max-w-3xl">
-            <div className="flex items-center gap-3">
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-duo-green text-snow-white shadow-[0_5px_0_#46a300]">
-                <Inbox aria-hidden="true" size={20} />
-              </span>
-              <span className="text-heading-sm font-feather text-graphite">
-                {t('app.nav.requests')}
-              </span>
-            </div>
+        <header className="border-b-2 border-cloud-gray pb-6">
+          <h1 className="text-heading font-feather leading-tight text-duo-green [text-shadow:2px_2px_0_#46a300] sm:text-heading-lg">
+            {t('requests.title')}
+          </h1>
+        </header>
 
-            <div className="mt-8">
-              <p className="mb-6 inline-flex min-h-12 items-center gap-3 rounded-2xl border-2 border-cloud-gray bg-duo-green-light px-4 text-base font-black text-duo-green shadow-[0_4px_0_#e5e5e5]">
-                <Send aria-hidden="true" size={16} />
-                {t('requests.badge')}
-              </p>
-              <h1 className="font-feather text-[clamp(3.25rem,8vw,6rem)] leading-none text-duo-green">
-                {t('requests.title')}
-              </h1>
-              <p className="mt-6 max-w-3xl text-lg font-bold leading-8 text-graphite">
-                {t('requests.description')}
-              </p>
-            </div>
-          </header>
-
-          {requestsQuery.data ? (
-            <div className="grid w-full max-w-xl gap-4 text-sm font-black text-charcoal sm:grid-cols-2 lg:w-[32rem]">
-              <p className={`${featureCardClass} min-h-24 p-5`}>
-                <span className="block text-heading-sm font-feather text-sky-blue">
-                  {requestsQuery.data.receivedRequests.length}
-                </span>
-                {t('requests.received')}
-              </p>
-              <p className={`${featureCardClass} min-h-24 p-5`}>
-                <span className="block text-heading-sm font-feather text-sunshine-yellow">
-                  {requestsQuery.data.sentRequests.length}
-                </span>
-                {t('requests.sent')}
-              </p>
-            </div>
-          ) : null}
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-[1fr_auto]" aria-label="Request tools">
-          <label className={`${featureCardClass} flex min-h-16 items-center gap-3 px-4`} htmlFor="request-search">
-            <Search aria-hidden="true" className="text-silver" size={22} />
+        <section className="relative z-30 grid gap-6 md:grid-cols-2" aria-label="Request tools">
+          <label className="relative flex h-14 min-w-0 items-center md:h-[72px]" htmlFor="request-search">
             <span className="sr-only">{t('requests.searchLabel')}</span>
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 h-6 w-6 text-silver"
+              strokeWidth={3}
+            />
             <input
-              className="min-w-0 flex-1 bg-transparent text-base font-bold text-charcoal outline-none placeholder:text-silver"
+              aria-label={t('requests.searchLabel')}
+              className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-5 text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors placeholder:text-silver focus:border-sky-blue focus:outline-none"
               id="request-search"
               placeholder={t('requests.searchLabel')}
               type="search"
             />
           </label>
-          <div className={`${featureCardClass} flex min-h-16 items-center justify-between gap-6 px-5 text-sm font-black text-charcoal md:min-w-80`}>
-            <span className="inline-flex items-center gap-2">
-              <SlidersHorizontal aria-hidden="true" className="text-sky-blue" size={20} />
-              {t('requests.toolSummary')}
-            </span>
-            <span className="text-heading-sm font-feather text-duo-green">
-              {(requestsQuery.data?.receivedRequests.length ?? 0) +
-                (requestsQuery.data?.sentRequests.length ?? 0)}
-            </span>
+
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <div className="card-duo flex h-14 items-center justify-between gap-4 px-5 py-3 md:h-[72px]">
+              <p className="shrink-0 text-sm font-black text-charcoal">
+                {t('requests.received')}
+              </p>
+              <p className="shrink-0 text-heading-sm font-feather text-sky-blue">
+                {requestsQuery.data?.receivedRequests.length ?? 0}
+              </p>
+            </div>
+
+            <div className="card-duo flex h-14 items-center justify-between gap-4 px-5 py-3 md:h-[72px]">
+              <p className="shrink-0 text-sm font-black text-charcoal">
+                {t('requests.sent')}
+              </p>
+              <p className="shrink-0 text-heading-sm font-feather text-sunshine-yellow">
+                {requestsQuery.data?.sentRequests.length ?? 0}
+              </p>
+            </div>
           </div>
         </section>
 

@@ -111,9 +111,9 @@ describe('requests page', () => {
     renderRequestsRoute();
 
     expect(await screen.findByRole('heading', { name: /friend requests/i })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /friend requests overview/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /request tools/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/search friend requests/i)).toBeInTheDocument();
-    expect(screen.getByText(/online-style invitations/i)).toBeInTheDocument();
+    expect(screen.getByText(/received/i)).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(
       'href',

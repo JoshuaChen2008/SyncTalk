@@ -117,6 +117,8 @@ describe('notifications page', () => {
     renderNotificationsRoute();
 
     expect(await screen.findByRole('heading', { name: /notifications/i })).toBeInTheDocument();
+    expect(screen.getByText(/notification inbox/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /mark visible notifications read/i })).toBeDisabled();
     expect(await screen.findByText(/sam sent you a friend request/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^notifications 2 unread$/i })).toHaveAttribute(
       'href',

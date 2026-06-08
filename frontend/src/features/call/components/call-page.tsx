@@ -9,16 +9,17 @@ import {
 } from '@stream-io/video-react-sdk';
 import type { Call } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
-import { ArrowLeft, MessageCircle, Mic, MicOff, Phone, ShieldAlert, Video, VideoOff } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Mic, MicOff, ShieldAlert, Video, VideoOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
 import {
+  AppStatePanel,
   featureCardClass,
-  FriendsFeatureBackground,
-  HeroGlassPanel,
 } from '../../friends/components/friends-page-chrome';
+import { SessionWorkspace } from '../../friends/components/session-workspace';
+import { useFriendsQuery } from '../../friends/api/friends-hooks';
 import { useTranslation } from '../../../i18n/i18n-store';
 import { getCallApiErrorMessage, type CallSession, type CallToken } from '../api/call-api';
 import { useCallSessionQuery, useCallTokenQuery } from '../api/call-hooks';
@@ -35,9 +36,9 @@ function CallStatePanel({
   role?: 'alert' | 'status';
 }) {
   return (
-    <section className={`${featureCardClass} p-8 text-center`} role={role}>
+    <AppStatePanel role={role}>
       {children}
-    </section>
+    </AppStatePanel>
   );
 }
 
@@ -46,13 +47,13 @@ function CallErrorPanel({ message }: { message: string }) {
 
   return (
     <CallStatePanel role="alert">
-      <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-700">
+      <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
-      <h2 className="mt-5 text-2xl font-black text-slate-950">{t('call.unavailable')}</h2>
+      <h2 className="mt-5 text-heading-sm font-feather text-almost-black">{t('call.unavailable')}</h2>
       <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
       <Link
-        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-black text-[#4f46e5] transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 motion-reduce:transition-none"
+        className="btn-3d-base btn-3d-sky mt-5 min-h-11 gap-2 px-5 text-sm"
         to="/app/friends"
       >
         <ArrowLeft aria-hidden="true" size={17} />
@@ -223,17 +224,17 @@ function StreamCallPanel({
 
   return (
     <section className={`${featureCardClass} overflow-hidden`}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100 bg-white/80 px-5 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-normal text-teal-700">
+          <p className="text-xs font-black uppercase tracking-normal text-duo-green">
             {t('call.callLabel', { id: sessionData.callId })}
           </p>
-          <p className="mt-1 text-sm font-bold text-slate-600">
+          <p className="mt-1 text-sm font-bold text-graphite">
             {t('call.practiceWith', { name: sessionData.friend.username })}
           </p>
         </div>
         <Link
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-3 text-sm font-black text-[#4f46e5] transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 motion-reduce:transition-none"
+          className="btn-3d-base btn-3d-sky min-h-10 gap-2 px-4 text-sm"
           to={`/app/chat/${sessionData.friend.id}`}
         >
           <MessageCircle aria-hidden="true" size={16} />
@@ -267,39 +268,41 @@ export function CallPage() {
   const { t } = useTranslation();
   const { friendId = '' } = useParams();
   const streamApiKey = getStreamApiKey();
+  const friendsQuery = useFriendsQuery();
   const tokenQuery = useCallTokenQuery();
   const sessionQuery = useCallSessionQuery(friendId);
   const isLoading = tokenQuery.isPending || sessionQuery.isPending;
   const error = tokenQuery.error ?? sessionQuery.error;
+  const activeFriend = sessionQuery.data
+    ? {
+        avatar: sessionQuery.data.friend.avatar,
+        id: sessionQuery.data.friend.id,
+        languageLevel: '',
+        targetLanguage: '',
+        username: sessionQuery.data.friend.username,
+      }
+    : undefined;
+  const title = sessionQuery.data
+    ? t('call.hero.titleWithName', { name: sessionQuery.data.friend.username })
+    : t('call.hero.title');
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4fbf9] text-slate-950">
-      <FriendsFeatureBackground />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-8">
-        <HeroGlassPanel>
-          <p className="inline-flex items-center gap-2 rounded-lg bg-white/74 px-3 py-1.5 text-sm font-black text-teal-700 shadow-sm backdrop-blur-xl">
-            <Phone aria-hidden="true" size={16} />
-            {t('call.badge')}
-          </p>
-          <h1 className="mt-4 max-w-4xl text-5xl font-black leading-none tracking-normal text-slate-950 sm:text-6xl">
-            {sessionQuery.data
-              ? t('call.hero.titleWithName', { name: sessionQuery.data.friend.username })
-              : t('call.hero.title')}
-          </h1>
-          <p className="mt-4 max-w-3xl text-base font-bold leading-7 text-slate-600">
-            {t('call.hero.description')}
-          </p>
-        </HeroGlassPanel>
-
+    <SessionWorkspace
+      activeFriend={activeFriend}
+      friends={friendsQuery.data ?? []}
+      mode="call"
+      statusText={sessionQuery.data ? t('session.status.livePractice') : t('call.badge')}
+      title={title}
+    >
+      <div className="mx-auto flex h-full max-w-5xl flex-col gap-4">
         {!streamApiKey ? <CallErrorPanel message={t('call.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
           <CallStatePanel role="status">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal-100 text-teal-700">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
               <Video aria-hidden="true" size={26} />
             </div>
-            <p className="mt-5 text-sm font-black text-slate-700">{t('call.loading')}</p>
+            <p className="mt-5 text-sm font-black text-graphite">{t('call.loading')}</p>
           </CallStatePanel>
         ) : null}
 
@@ -313,6 +316,6 @@ export function CallPage() {
           />
         ) : null}
       </div>
-    </main>
+    </SessionWorkspace>
   );
 }

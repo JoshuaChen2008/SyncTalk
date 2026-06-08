@@ -1,4 +1,4 @@
-import { Bell, CheckCircle2, ExternalLink, Inbox, UsersRound } from 'lucide-react';
+import { Bell, CheckCircle2, ExternalLink, Inbox, Trash2, UsersRound } from 'lucide-react';
 import { Link } from 'react-router';
 
 import {
@@ -70,7 +70,7 @@ function NotificationCard({
   const isUnread = !notification.readAt;
 
   return (
-    <article className={`${featureCardClass} grid gap-5 p-6 md:grid-cols-[auto_1fr_auto]`}>
+    <article className={`${featureCardClass} grid gap-5 p-5 sm:p-6 md:grid-cols-[auto_1fr_auto]`}>
       <div
         className={
           isUnread
@@ -104,14 +104,14 @@ function NotificationCard({
         {safeHref ? (
           <Link
             aria-label={t('notifications.openName', { title: notification.title })}
-            className="btn-primary min-h-11 gap-2 px-4 text-sm"
+            className="btn-3d-base btn-3d-green min-h-11 gap-2 px-4 text-sm"
             to={safeHref}
           >
             <ExternalLink aria-hidden="true" size={17} />
             {t('notifications.open')}
           </Link>
         ) : (
-          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-center text-sm font-bold text-[#b91c1c]">
+          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-center text-sm font-bold text-[#b91c1c] shadow-[0_3px_0_#fecaca]">
             {t('notifications.invalidTarget')}
           </p>
         )}
@@ -119,7 +119,7 @@ function NotificationCard({
         {isUnread ? (
           <button
             aria-label={t('notifications.markReadName', { title: notification.title })}
-            className="btn-outline min-h-11 cursor-pointer gap-2 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-3d-base btn-3d-sky min-h-11 cursor-pointer gap-2 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isMarkingRead}
             type="button"
             onClick={() => onMarkRead(notification.id)}
@@ -184,6 +184,35 @@ export function NotificationsPage() {
           </section>
           <DiscoverStyleVisualPanel />
         </header>
+
+        <section className={`${featureCardClass} flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center`}>
+          <div>
+            <p className="text-xs font-black uppercase text-sky-blue">{t('notifications.inbox')}</p>
+            <p className="mt-1 text-sm font-bold text-graphite">
+              {t('notifications.inboxDescription')}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              aria-label={t('notifications.markVisibleName')}
+              className="btn-3d-base btn-3d-green min-h-11 gap-2 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              disabled
+              type="button"
+            >
+              <CheckCircle2 aria-hidden="true" size={17} />
+              {t('notifications.markVisible')}
+            </button>
+            <button
+              aria-label={t('notifications.deleteVisibleName')}
+              className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 text-sm font-black text-[#b91c1c] opacity-60 shadow-[0_4px_0_#fecaca]"
+              disabled
+              type="button"
+            >
+              <Trash2 aria-hidden="true" size={17} />
+              {t('notifications.deleteVisible')}
+            </button>
+          </div>
+        </section>
 
         {notificationsQuery.isPending ? (
           <NotificationsStatePanel role="status">{t('notifications.loading')}</NotificationsStatePanel>

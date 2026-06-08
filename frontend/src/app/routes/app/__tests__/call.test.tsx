@@ -188,6 +188,8 @@ describe('call page', () => {
     renderCallRoute();
 
     expect(await screen.findByRole('heading', { name: /call with sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: /call conversations/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /active call workspace/i })).toBeInTheDocument();
     expect(screen.getByText(/call user-1-user-2/i)).toBeInTheDocument();
     expect(screen.getByText(/live with 1 partner/i)).toBeInTheDocument();
     expect(screen.getByText(/stream speaker layout/i)).toBeInTheDocument();

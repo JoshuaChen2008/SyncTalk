@@ -1,9 +1,25 @@
-import { Rocket, UserCircle } from 'lucide-react';
+import { Globe2, Languages, Rocket, UserCircle } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
+import {
+  AppStatePanel,
+  DiscoverStyleBackground,
+  DiscoverStyleVisualPanel,
+  featureCardClass,
+  heroContentClass,
+  heroDescriptionClass,
+  heroEyebrowClass,
+  heroHeaderClass,
+  heroIconClass,
+  heroStatCardClass,
+  heroTitleClass,
+  pageContainerClass,
+  pageShellClass,
+  sectionTitleClass,
+} from '../../friends/components/friends-page-chrome';
 import { getProfileApiErrorMessage, type ProfileInput } from '../api/profile-api';
 import { useMyProfileQuery, useUpdateMyProfileMutation } from '../api/profile-hooks';
 
@@ -77,27 +93,6 @@ function SelectField({
   );
 }
 
-function ProfileTopNav() {
-  const { t } = useTranslation();
-
-  return (
-    <header className="relative z-10 flex h-16 items-center justify-between border-b-2 border-cloud-gray bg-snow-white px-4 sm:px-12">
-      <Link className="font-feather text-heading-sm text-duo-green" to="/app/profile">
-        SyncTalk
-      </Link>
-      <nav className="hidden items-center gap-8 text-sm font-bold text-graphite sm:flex" aria-label={t('profile.nav.label')}>
-        <Link className="hover:text-sky-blue transition-colors" to="/app/discover">{t('profile.nav.discover')}</Link>
-        <Link className="hover:text-sky-blue transition-colors" to="/app/friends">{t('profile.nav.friends')}</Link>
-        <Link className="hover:text-sky-blue transition-colors" to="/app/requests">{t('profile.nav.requests')}</Link>
-        <span className="text-silver">{t('profile.nav.messages')}</span>
-      </nav>
-      <button className="grid h-10 w-10 place-items-center rounded-xl bg-transparent text-graphite hover:bg-cloud-gray transition-colors border-none cursor-pointer" type="button" aria-label={t('profile.menu')}>
-        <UserCircle aria-hidden="true" size={24} strokeWidth={2.5} />
-      </button>
-    </header>
-  );
-}
-
 export function ProfilePage() {
   const { locale, t } = useTranslation();
   const navigate = useNavigate();
@@ -140,34 +135,89 @@ export function ProfilePage() {
 
   if (profileQuery.isPending) {
     return (
-      <main className="min-h-screen bg-snow-white flex items-center justify-center">
-        <p className="text-sm font-bold text-graphite">{t('profile.loading')}</p>
+      <main className={pageShellClass}>
+        <div className={pageContainerClass}>
+          <AppStatePanel role="status">
+            <p className="text-sm font-bold text-graphite">{t('profile.loading')}</p>
+          </AppStatePanel>
+        </div>
       </main>
     );
   }
 
   if (profileQuery.isError) {
     return (
-      <main className="min-h-screen bg-snow-white p-8">
-        <section className="mx-auto max-w-2xl rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-6 text-[#991b1b]">
-          <h1 className="text-heading-sm font-feather">{t('profile.unavailable')}</h1>
-          <p className="mt-2 text-sm font-bold">{getProfileApiErrorMessage(profileQuery.error)}</p>
-        </section>
+      <main className={pageShellClass}>
+        <div className={pageContainerClass}>
+          <AppStatePanel role="alert">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+              <UserCircle aria-hidden="true" size={28} />
+            </div>
+            <h1 className="mt-5 text-heading-sm font-feather text-[#991b1b]">
+              {t('profile.unavailable')}
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm font-bold leading-6 text-[#b91c1c]">
+              {getProfileApiErrorMessage(profileQuery.error)}
+            </p>
+          </AppStatePanel>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-snow-white text-almost-black">
-      <ProfileTopNav />
+    <main className={pageShellClass}>
+      <DiscoverStyleBackground />
 
-      <section className="relative z-10 flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 sm:p-8 lg:p-12" aria-labelledby="profile-title">
-        <form className="w-full max-w-3xl card-gamified" onSubmit={handleSubmit}>
-          <div className="mb-10 text-center">
-            <h1 id="profile-title" className="text-heading font-feather text-almost-black">
-              {t('profile.title')}
-            </h1>
-            <p className="mt-2 text-body font-bold text-graphite">{t('profile.description')}</p>
+      <div className={`relative ${pageContainerClass}`}>
+        <header className={heroHeaderClass}>
+          <section className={heroContentClass}>
+            <div className="flex items-center gap-3">
+              <span className={heroIconClass}>
+                <UserCircle aria-hidden="true" size={20} />
+              </span>
+              <span className="text-sm font-bold uppercase text-graphite">
+                {t('profile.title')}
+              </span>
+            </div>
+
+            <div>
+              <p className={heroEyebrowClass}>
+                <Languages aria-hidden="true" size={16} />
+                {profileQuery.data.isProfileComplete ? t('profile.finish') : t('profile.incomplete')}
+              </p>
+              <h1 id="profile-title" className={heroTitleClass}>
+                {t('profile.title')}
+              </h1>
+              <p className={heroDescriptionClass}>{t('profile.description')}</p>
+            </div>
+
+            <div className="grid max-w-xl gap-3 text-sm font-bold text-charcoal sm:grid-cols-2">
+              <p className={heroStatCardClass}>
+                <span className="block text-heading-sm font-feather text-sky-blue">
+                  {form.nativeLanguage ? translateDisplayValue(locale, form.nativeLanguage) : '--'}
+                </span>
+                {t('profile.nativeLanguage')}
+              </p>
+              <p className={heroStatCardClass}>
+                <span className="block text-heading-sm font-feather text-duo-green">
+                  {form.targetLanguage ? translateDisplayValue(locale, form.targetLanguage) : '--'}
+                </span>
+                {t('profile.targetLanguage')}
+              </p>
+            </div>
+          </section>
+          <DiscoverStyleVisualPanel />
+        </header>
+
+        <form
+          aria-labelledby="profile-title"
+          className={`${featureCardClass} grid gap-8 p-5 sm:p-8`}
+          onSubmit={handleSubmit}
+        >
+          <div className={sectionTitleClass}>
+            <Globe2 aria-hidden="true" className="text-sky-blue" size={22} />
+            <p>{t('profile.title')}</p>
           </div>
 
           {updateProfileMutation.isError ? (
@@ -177,12 +227,32 @@ export function ProfilePage() {
           ) : null}
 
           {!profileQuery.data.isProfileComplete ? (
-            <p className="mb-6 rounded-xl border-2 border-sky-blue bg-sky-blue/10 px-4 py-3 text-sm font-bold text-sky-blue">
+            <p className="rounded-xl border-2 border-sky-blue bg-sky-blue/10 px-4 py-3 text-sm font-bold text-sky-blue shadow-[0_3px_0_#ddf4ff]">
               {t('profile.incomplete')}
             </p>
           ) : null}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+          <section className="grid gap-5 rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] p-5 sm:grid-cols-[auto_1fr] sm:items-center">
+            {profileQuery.data.avatar ? (
+              <img
+                alt={`${profileQuery.data.username} avatar`}
+                className="h-24 w-24 rounded-full border-4 border-snow-white object-cover shadow-[0_4px_0_#e5e5e5]"
+                src={profileQuery.data.avatar}
+              />
+            ) : (
+              <div className="grid h-24 w-24 place-items-center rounded-full border-4 border-snow-white bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
+                <UserCircle aria-hidden="true" size={42} />
+              </div>
+            )}
+            <div>
+              <h2 className="text-heading-sm font-feather text-almost-black">{t('profile.avatar.title')}</h2>
+              <p className="mt-2 text-sm font-bold leading-6 text-graphite">
+                {t('profile.avatar.description')}
+              </p>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <SelectField
               id="nativeLanguage"
               label={t('profile.nativeLanguage')}
@@ -199,7 +269,7 @@ export function ProfilePage() {
             />
           </div>
 
-          <fieldset className="mb-8" aria-labelledby="profile-level-label">
+          <fieldset aria-labelledby="profile-level-label">
             <legend id="profile-level-label" className="label-gamified">
               {t('profile.currentLevel')}
             </legend>
@@ -222,7 +292,7 @@ export function ProfilePage() {
             </div>
           </fieldset>
 
-          <fieldset className="mb-8" aria-labelledby="profile-goal-label">
+          <fieldset aria-labelledby="profile-goal-label">
             <legend id="profile-goal-label" className="label-gamified">
               {t('profile.learningGoals')}
             </legend>
@@ -253,7 +323,7 @@ export function ProfilePage() {
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <SelectField
               id="timezone"
               label={t('profile.timezone')}
@@ -263,7 +333,7 @@ export function ProfilePage() {
             />
           </div>
 
-          <div className="mb-10">
+          <div>
             <label className="label-gamified" htmlFor="bio">
               {t('profile.shortBio')}
             </label>
@@ -279,16 +349,16 @@ export function ProfilePage() {
 
           <div className="flex justify-center border-t-2 border-cloud-gray pt-8">
             <button
-              className="btn-primary min-w-[12rem]"
+              className="btn-3d-base btn-3d-green min-h-14 min-w-[12rem] gap-2 px-8 text-base"
               type="submit"
               disabled={updateProfileMutation.isPending}
             >
-              <span className="mr-2">{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
+              <span>{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
               <Rocket aria-hidden="true" size={20} strokeWidth={2.5} />
             </button>
           </div>
         </form>
-      </section>
+      </div>
     </main>
   );
 }

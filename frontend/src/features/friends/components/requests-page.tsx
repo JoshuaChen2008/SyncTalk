@@ -1,16 +1,7 @@
-import { Check, Clock, Inbox, MapPin, Send, X } from 'lucide-react';
+import { Check, Clock, Inbox, MapPin, Search, Send, SlidersHorizontal, X } from 'lucide-react';
 
 import {
-  DiscoverStyleBackground,
-  DiscoverStyleVisualPanel,
   featureCardClass,
-  heroContentClass,
-  heroDescriptionClass,
-  heroEyebrowClass,
-  heroHeaderClass,
-  heroIconClass,
-  heroStatCardClass,
-  heroTitleClass,
   pageContainerClass,
   pageShellClass,
   sectionTitleClass,
@@ -42,17 +33,17 @@ function RequestCard({
   const initials = request.user.username.slice(0, 2).toUpperCase();
 
   return (
-    <article className={`${featureCardClass} flex min-h-[17rem] flex-col p-6`}>
+    <article className={`${featureCardClass} flex min-h-[17rem] flex-col p-5 sm:p-6`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
           {request.user.avatar ? (
             <img
               alt={`${request.user.username} avatar`}
-              className="h-16 w-16 shrink-0 rounded-xl border-2 border-cloud-gray object-cover"
+              className="h-16 w-16 shrink-0 rounded-2xl border-2 border-cloud-gray object-cover shadow-[0_4px_0_#e5e5e5]"
               src={request.user.avatar}
             />
           ) : (
-            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border-2 border-cloud-gray bg-sunshine-yellow/25 text-lg font-feather text-almost-black shadow-[0_4px_0_#e5e5e5]">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-cloud-gray bg-sunshine-yellow text-lg font-feather text-almost-black shadow-[0_4px_0_#e5e5e5]">
               {initials}
             </div>
           )}
@@ -100,7 +91,7 @@ function RequestCard({
         <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
           <button
             aria-label={t('requests.acceptName', { name: request.user.username })}
-            className="btn-primary min-h-12 cursor-pointer gap-2 px-4 disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-3d-base btn-3d-green min-h-12 cursor-pointer gap-2 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isMutating}
             type="button"
             onClick={() => onRespond(request.id, 'accept')}
@@ -110,7 +101,7 @@ function RequestCard({
           </button>
           <button
             aria-label={t('requests.rejectName', { name: request.user.username })}
-            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 text-sm font-bold text-[#b91c1c] transition-colors hover:bg-[#fee2e2] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 text-sm font-black text-[#b91c1c] shadow-[0_4px_0_#fecaca] transition-colors hover:bg-[#fee2e2] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
             disabled={isMutating}
             type="button"
             onClick={() => onRespond(request.id, 'reject')}
@@ -149,48 +140,75 @@ export function RequestsPage() {
 
   return (
     <main className={pageShellClass}>
-      <DiscoverStyleBackground />
-
-      <div className={`relative ${pageContainerClass}`}>
-        <header className={heroHeaderClass}>
-          <section className={heroContentClass}>
+      <div className={pageContainerClass}>
+        <section
+          aria-label={t('requests.overview')}
+          className="flex flex-col gap-8 border-b-2 border-cloud-gray/70 pb-8 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <header className="max-w-3xl">
             <div className="flex items-center gap-3">
-              <span className={heroIconClass}>
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-duo-green text-snow-white shadow-[0_5px_0_#46a300]">
                 <Inbox aria-hidden="true" size={20} />
               </span>
-              <span className="text-sm font-bold uppercase text-graphite">
+              <span className="text-heading-sm font-feather text-graphite">
                 {t('app.nav.requests')}
               </span>
             </div>
 
-            <div>
-              <p className={heroEyebrowClass}>
+            <div className="mt-8">
+              <p className="mb-6 inline-flex min-h-12 items-center gap-3 rounded-2xl border-2 border-cloud-gray bg-duo-green-light px-4 text-base font-black text-duo-green shadow-[0_4px_0_#e5e5e5]">
                 <Send aria-hidden="true" size={16} />
                 {t('requests.badge')}
               </p>
-              <h1 className={heroTitleClass}>
+              <h1 className="font-feather text-[clamp(3.25rem,8vw,6rem)] leading-none text-duo-green">
                 {t('requests.title')}
               </h1>
-              <p className={heroDescriptionClass}>
+              <p className="mt-6 max-w-3xl text-lg font-bold leading-8 text-graphite">
                 {t('requests.description')}
               </p>
             </div>
+          </header>
 
-            {requestsQuery.data ? (
-              <div className="grid max-w-xl gap-3 text-sm font-bold text-charcoal sm:grid-cols-2">
-                <p className={heroStatCardClass}>
-                  <span className="block text-heading-sm font-feather text-sky-blue">{requestsQuery.data.receivedRequests.length}</span>
-                  {t('requests.received')}
-                </p>
-                <p className={heroStatCardClass}>
-                  <span className="block text-heading-sm font-feather text-sunshine-yellow">{requestsQuery.data.sentRequests.length}</span>
-                  {t('requests.sent')}
-                </p>
-              </div>
-            ) : null}
-          </section>
-          <DiscoverStyleVisualPanel />
-        </header>
+          {requestsQuery.data ? (
+            <div className="grid w-full max-w-xl gap-4 text-sm font-black text-charcoal sm:grid-cols-2 lg:w-[32rem]">
+              <p className={`${featureCardClass} min-h-24 p-5`}>
+                <span className="block text-heading-sm font-feather text-sky-blue">
+                  {requestsQuery.data.receivedRequests.length}
+                </span>
+                {t('requests.received')}
+              </p>
+              <p className={`${featureCardClass} min-h-24 p-5`}>
+                <span className="block text-heading-sm font-feather text-sunshine-yellow">
+                  {requestsQuery.data.sentRequests.length}
+                </span>
+                {t('requests.sent')}
+              </p>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-[1fr_auto]" aria-label="Request tools">
+          <label className={`${featureCardClass} flex min-h-16 items-center gap-3 px-4`} htmlFor="request-search">
+            <Search aria-hidden="true" className="text-silver" size={22} />
+            <span className="sr-only">{t('requests.searchLabel')}</span>
+            <input
+              className="min-w-0 flex-1 bg-transparent text-base font-bold text-charcoal outline-none placeholder:text-silver"
+              id="request-search"
+              placeholder={t('requests.searchLabel')}
+              type="search"
+            />
+          </label>
+          <div className={`${featureCardClass} flex min-h-16 items-center justify-between gap-6 px-5 text-sm font-black text-charcoal md:min-w-80`}>
+            <span className="inline-flex items-center gap-2">
+              <SlidersHorizontal aria-hidden="true" className="text-sky-blue" size={20} />
+              {t('requests.toolSummary')}
+            </span>
+            <span className="text-heading-sm font-feather text-duo-green">
+              {(requestsQuery.data?.receivedRequests.length ?? 0) +
+                (requestsQuery.data?.sentRequests.length ?? 0)}
+            </span>
+          </div>
+        </section>
 
         {requestsQuery.isPending ? (
           <RequestsStatePanel role="status">{t('requests.loading')}</RequestsStatePanel>

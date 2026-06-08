@@ -81,6 +81,28 @@ function mockProtectedChat({
       return { data: { notifications: [], unreadCount: 0 } } as Awaited<ReturnType<typeof apiClient.get>>;
     }
 
+    if (url === '/friends') {
+      return {
+        data: {
+          friends: [
+            {
+              id: 'user-2',
+              username: 'sam',
+              avatar: '',
+              nativeLanguage: 'English',
+              targetLanguage: 'Japanese',
+              languageLevel: 'B1',
+              learningGoal: 'Daily conversation',
+              bio: 'Coffee chats welcome.',
+              timezone: 'Asia/Tokyo',
+              friendshipId: 'friendship-1',
+              createdAt: '2026-06-01T00:00:00.000Z',
+            },
+          ],
+        },
+      } as Awaited<ReturnType<typeof apiClient.get>>;
+    }
+
     if (url === '/chat/token') {
       return {
         data: {
@@ -136,6 +158,8 @@ describe('chat page', () => {
     renderChatRoute();
 
     expect(await screen.findByRole('heading', { name: /chat with sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: /chat conversations/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /active chat workspace/i })).toBeInTheDocument();
     expect(screen.getByText(/channel user-1-user-2/i)).toBeInTheDocument();
     expect(screen.getByText(/stream message list/i)).toBeInTheDocument();
     expect(screen.getByText(/stream message input/i)).toBeInTheDocument();

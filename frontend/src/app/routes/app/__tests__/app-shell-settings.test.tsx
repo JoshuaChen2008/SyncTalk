@@ -81,6 +81,7 @@ describe('app shell and settings', () => {
     renderAppRoute();
 
     expect(await screen.findByRole('heading', { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByText(/notification preferences/i)).toBeInTheDocument();
     expect(screen.getAllByText(/mei@example\.com/i)).toHaveLength(2);
     expect(screen.getByRole('navigation', { name: /primary app navigation/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(

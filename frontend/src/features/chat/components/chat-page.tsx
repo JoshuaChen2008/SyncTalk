@@ -1,4 +1,4 @@
-import { ArrowLeft, MessageCircle, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
@@ -7,10 +7,11 @@ import { Chat, Channel, MessageComposer, MessageList, Window, useCreateChatClien
 import 'stream-chat-react/dist/css/index.css';
 
 import {
+  AppStatePanel,
   featureCardClass,
-  FriendsFeatureBackground,
-  HeroGlassPanel,
 } from '../../friends/components/friends-page-chrome';
+import { SessionWorkspace } from '../../friends/components/session-workspace';
+import { useFriendsQuery } from '../../friends/api/friends-hooks';
 import { useTranslation } from '../../../i18n/i18n-store';
 import { getChatApiErrorMessage, type ChatChannel, type ChatToken } from '../api/chat-api';
 import { useChatChannelQuery, useChatTokenQuery } from '../api/chat-hooks';
@@ -27,9 +28,9 @@ function ChatStatePanel({
   role?: 'alert' | 'status';
 }) {
   return (
-    <section className={`${featureCardClass} p-8 text-center`} role={role}>
+    <AppStatePanel role={role}>
       {children}
-    </section>
+    </AppStatePanel>
   );
 }
 
@@ -38,13 +39,13 @@ function ChatErrorPanel({ message }: { message: string }) {
 
   return (
     <ChatStatePanel role="alert">
-      <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-700">
+      <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
-      <h2 className="mt-5 text-2xl font-black text-slate-950">{t('chat.unavailable')}</h2>
+      <h2 className="mt-5 text-heading-sm font-feather text-almost-black">{t('chat.unavailable')}</h2>
       <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
       <Link
-        className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-black text-[#4f46e5] transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 motion-reduce:transition-none"
+        className="btn-3d-base btn-3d-sky mt-5 min-h-11 gap-2 px-5 text-sm"
         to="/app/friends"
       >
         <ArrowLeft aria-hidden="true" size={17} />
@@ -122,8 +123,8 @@ function StreamChatPanel({
 
   return (
     <section className={`${featureCardClass} overflow-hidden`}>
-      <div className="border-b border-indigo-100 bg-white/80 px-5 py-4">
-        <p className="text-xs font-black uppercase tracking-normal text-[#4f46e5]">
+      <div className="border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
+        <p className="text-xs font-black uppercase tracking-normal text-sky-blue">
           {t('chat.channelLabel', { id: channelData.channelId })}
         </p>
       </div>
@@ -145,36 +146,38 @@ export function ChatPage() {
   const { t } = useTranslation();
   const { friendId = '' } = useParams();
   const streamApiKey = getStreamApiKey();
+  const friendsQuery = useFriendsQuery();
   const tokenQuery = useChatTokenQuery();
   const channelQuery = useChatChannelQuery(friendId);
   const isLoading = tokenQuery.isPending || channelQuery.isPending;
   const error = tokenQuery.error ?? channelQuery.error;
+  const activeFriend = channelQuery.data
+    ? {
+        avatar: channelQuery.data.friend.avatar,
+        id: channelQuery.data.friend.id,
+        languageLevel: '',
+        targetLanguage: '',
+        username: channelQuery.data.friend.username,
+      }
+    : undefined;
+  const title = channelQuery.data
+    ? t('chat.hero.titleWithName', { name: channelQuery.data.friend.username })
+    : t('chat.hero.title');
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f7f6ff] text-slate-950">
-      <FriendsFeatureBackground />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-8">
-        <HeroGlassPanel>
-          <p className="inline-flex items-center gap-2 rounded-lg bg-white/74 px-3 py-1.5 text-sm font-black text-[#4f46e5] shadow-sm backdrop-blur-xl">
-            <MessageCircle aria-hidden="true" size={16} />
-            {t('chat.badge')}
-          </p>
-          <h1 className="mt-4 max-w-4xl text-5xl font-black leading-none tracking-normal text-slate-950 sm:text-6xl">
-            {channelQuery.data
-              ? t('chat.hero.titleWithName', { name: channelQuery.data.friend.username })
-              : t('chat.hero.title')}
-          </h1>
-          <p className="mt-4 max-w-3xl text-base font-bold leading-7 text-slate-600">
-            {t('chat.hero.description')}
-          </p>
-        </HeroGlassPanel>
-
+    <SessionWorkspace
+      activeFriend={activeFriend}
+      friends={friendsQuery.data ?? []}
+      mode="chat"
+      statusText={channelQuery.data ? t('session.status.online') : t('chat.badge')}
+      title={title}
+    >
+      <div className="mx-auto flex h-full max-w-5xl flex-col gap-4">
         {!streamApiKey ? <ChatErrorPanel message={t('chat.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
           <ChatStatePanel role="status">
-            <p className="text-sm font-black text-slate-700">{t('chat.loading')}</p>
+            <p className="text-sm font-black text-graphite">{t('chat.loading')}</p>
           </ChatStatePanel>
         ) : null}
 
@@ -188,6 +191,6 @@ export function ChatPage() {
           />
         ) : null}
       </div>
-    </main>
+    </SessionWorkspace>
   );
 }

@@ -85,6 +85,7 @@ describe('profile page', () => {
 
     renderRoute('/app/profile');
 
+    expect(await screen.findByText(/avatar/i)).toBeInTheDocument();
     expect(await screen.findByLabelText(/native language/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/target language/i)).toBeInTheDocument();
     expect(screen.getByRole('group', { name: /current level/i })).toBeInTheDocument();

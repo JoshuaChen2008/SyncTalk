@@ -1,4 +1,4 @@
-import { LogOut, Moon, Settings, Sun, UserCircle } from 'lucide-react';
+import { Bell, LogOut, Moon, Settings, Sun, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { useCurrentUserQuery, useLogoutMutation } from '../../auth/api/auth-hooks';
@@ -36,10 +36,7 @@ export function SettingsPage() {
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
   const currentUser = currentUserQuery.data;
-  const isDark = theme === 'dark';
-  const cardClass = isDark
-    ? 'rounded-xl border-2 border-charcoal bg-almost-black p-6 text-snow-white'
-    : `${featureCardClass} p-6`;
+  const cardClass = `${featureCardClass} p-6`;
 
   async function handleLogout() {
     await logoutMutation.mutateAsync();
@@ -98,35 +95,29 @@ export function SettingsPage() {
                 <UserCircle aria-hidden="true" size={34} />
               </div>
               <div className="min-w-0">
-                <h2 className={`truncate text-heading-sm font-feather ${isDark ? 'text-snow-white' : 'text-almost-black'}`}>
+                <h2 className="truncate text-heading-sm font-feather text-almost-black">
                   {currentUser?.username ?? t('settings.account.userFallback')}
                 </h2>
-                <p className={`mt-1 truncate text-sm font-bold ${isDark ? 'text-cloud-gray' : 'text-graphite'}`}>
+                <p className="mt-1 truncate text-sm font-bold text-graphite">
                   {currentUser?.email ?? t('settings.account.loading')}
                 </p>
               </div>
             </div>
             <div
-              className={`mt-6 grid gap-3 text-sm font-black sm:grid-cols-2 ${
-                isDark ? 'text-cloud-gray' : 'text-charcoal'
-              }`}
+              className="mt-6 grid gap-3 text-sm font-black text-charcoal sm:grid-cols-2"
             >
               <p
-                className={`rounded-xl border-2 px-4 py-3 ${
-                  isDark ? 'border-charcoal bg-charcoal' : 'border-cloud-gray bg-snow-white'
-                }`}
+                className="rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 shadow-[0_3px_0_#e5e5e5]"
               >
-                <span className={`block text-xs uppercase ${isDark ? 'text-silver' : 'text-graphite'}`}>
+                <span className="block text-xs uppercase text-graphite">
                   {t('settings.workspace')}
                 </span>
                 {t('settings.protectedApp')}
               </p>
               <p
-                className={`rounded-xl border-2 px-4 py-3 ${
-                  isDark ? 'border-charcoal bg-charcoal' : 'border-cloud-gray bg-snow-white'
-                }`}
+                className="rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 shadow-[0_3px_0_#e5e5e5]"
               >
-                <span className={`block text-xs uppercase ${isDark ? 'text-silver' : 'text-graphite'}`}>
+                <span className="block text-xs uppercase text-graphite">
                   {t('settings.session')}
                 </span>
                 {t('settings.cookieSecured')}
@@ -135,14 +126,40 @@ export function SettingsPage() {
           </article>
 
           <article className={cardClass}>
-            <h2 className={`text-heading-sm font-feather ${isDark ? 'text-snow-white' : 'text-almost-black'}`}>
+            <div className="flex items-center gap-3">
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-duo-green-light text-duo-green">
+                <Bell aria-hidden="true" size={24} />
+              </span>
+              <div>
+                <h2 className="text-heading-sm font-feather text-almost-black">
+                  {t('settings.notifications.title')}
+                </h2>
+                <p className="mt-1 text-sm font-bold text-graphite">
+                  {t('settings.notifications.mode')}
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3">
+              <p className="rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal shadow-[0_3px_0_#e5e5e5]">
+                {t('settings.notifications.description')}
+              </p>
+              <button
+                aria-pressed="false"
+                className="inline-flex min-h-12 cursor-not-allowed items-center justify-between rounded-xl border-2 border-cloud-gray bg-[#f7f7f7] px-4 text-sm font-black text-graphite opacity-70"
+                disabled
+                type="button"
+              >
+                {t('settings.notifications.disabled')}
+                <span className="h-7 w-12 rounded-full border-2 border-cloud-gray bg-snow-white" />
+              </button>
+            </div>
+          </article>
+
+          <article className={cardClass}>
+            <h2 className="text-heading-sm font-feather text-almost-black">
               {t('settings.theme.title')}
             </h2>
-            <p
-              className={`mt-2 text-sm font-bold leading-6 ${
-                isDark ? 'text-cloud-gray' : 'text-graphite'
-              }`}
-            >
+            <p className="mt-2 text-sm font-bold leading-6 text-graphite">
               {t('settings.theme.description')}
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -168,24 +185,16 @@ export function SettingsPage() {
           </article>
 
           <article className={cardClass}>
-            <h2 className={`text-heading-sm font-feather ${isDark ? 'text-snow-white' : 'text-almost-black'}`}>
+            <h2 className="text-heading-sm font-feather text-almost-black">
               {t('settings.language.title')}
             </h2>
-            <p
-              className={`mt-2 text-sm font-bold leading-6 ${
-                isDark ? 'text-cloud-gray' : 'text-graphite'
-              }`}
-            >
+            <p className="mt-2 text-sm font-bold leading-6 text-graphite">
               {t('settings.language.description')}
             </p>
             <p
-              className={`mt-5 rounded-xl border-2 px-4 py-3 text-sm font-bold ${
-                isDark
-                  ? 'border-charcoal bg-charcoal text-cloud-gray'
-                  : 'border-cloud-gray bg-snow-white text-charcoal'
-              }`}
+              className="mt-5 rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal shadow-[0_3px_0_#e5e5e5]"
             >
-              <span className={`block text-xs uppercase ${isDark ? 'text-silver' : 'text-graphite'}`}>
+              <span className="block text-xs uppercase text-graphite">
                 {t('settings.language.currentLabel')}
               </span>
               {locale === 'en' ? t('settings.language.english') : t('settings.language.chinese')}

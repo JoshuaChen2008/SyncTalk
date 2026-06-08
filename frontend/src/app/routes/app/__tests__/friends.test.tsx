@@ -173,6 +173,43 @@ describe('friends page', () => {
     expect(screen.getByText(/showing 1 of 2/i)).toBeInTheDocument();
   });
 
+  it('keeps long friend card content compact without showing timezone metadata', async () => {
+    mockProtectedAppGet({
+      friends: [
+        mockFriend({
+          username: 'samuel-with-a-very-long-display-name',
+          nativeLanguage: 'Portuguese',
+          targetLanguage: 'Chinese',
+          languageLevel: 'Upper intermediate B2',
+          learningGoal: 'Daily conversation and pronunciation practice',
+          bio:
+            'I want to practice long conversations about work, travel, food, and daily life without the card controls being pushed out of view.',
+          timezone: 'America/Argentina/Buenos_Aires',
+        }),
+      ],
+    });
+
+    renderFriendsRoute();
+
+    expect(
+      await screen.findByRole('heading', { name: /samuel-with-a-very-long-display-name/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/America\/Argentina\/Buenos_Aires/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/learning:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/native:/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Portuguese')).toBeInTheDocument();
+    expect(screen.getByText('Chinese')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /chat with samuel-with-a-very-long-display-name/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /call samuel-with-a-very-long-display-name/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /manage samuel-with-a-very-long-display-name/i }),
+    ).toBeInTheDocument();
+  });
+
   it('shows a filtered empty state when no friends match the search', async () => {
     mockProtectedAppGet({ friends: [mockFriend()] });
 

@@ -1,7 +1,6 @@
 import {
   Clock,
   Languages,
-  MapPin,
   MessageCircle,
   MoreHorizontal,
   Phone,
@@ -28,10 +27,6 @@ const friendFilterOptions = [
   ['language', 'friends.filterByLanguage'],
   ['online', 'friends.filterOnlineFirst'],
 ] as const;
-
-function getLanguageCode(language: string) {
-  return language.slice(0, 2).toUpperCase();
-}
 
 function isFriendOnline(friend: Friend) {
   const source = `${friend.id}${friend.username}`;
@@ -78,7 +73,7 @@ function FriendCard({
   const statusLabel = isOnline ? t('friends.online') : t('friends.offline');
 
   return (
-    <article className="card-duo group relative flex h-[420px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <article className="card-duo group relative flex h-[376px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <span className="truncate rounded-full border-2 border-cloud-gray bg-snow-white px-4 py-1.5 text-xs font-black uppercase text-graphite">
           {t('friends.status.friend')}
@@ -100,7 +95,7 @@ function FriendCard({
 
       <div className="mt-5 flex min-w-0 items-center gap-4">
         <div
-          className={`relative grid h-15 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
+          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
             isOnline ? 'border-duo-green' : 'border-cloud-gray'
           }`}
         >
@@ -120,26 +115,27 @@ function FriendCard({
             }`}
           />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="truncate text-heading-sm font-feather text-almost-black">
             {friend.username}
           </h2>
-          <p className="mt-2 flex min-w-0 items-center gap-1.5 truncate text-sm font-black text-silver">
-            <MapPin aria-hidden="true" className="shrink-0" size={16} />
-            {friend.timezone}
-          </p>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 text-sm font-black text-charcoal">
-        <span className="inline-flex min-w-0 items-center justify-center gap-1 truncate rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
-          {t('discover.learning')}: {translateDisplayValue(locale, friend.targetLanguage)}
-          <span className="rounded-md bg-cloud-gray px-1.5 text-xs text-graphite">
+      <div className="mt-5 flex min-w-0 flex-wrap gap-2">
+        <span className="inline-flex min-w-0 items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
+          <Languages aria-hidden="true" size={15} />
+          <span className="truncate">{translateDisplayValue(locale, friend.nativeLanguage)}</span>
+        </span>
+        <span className="inline-flex min-w-0 items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
+          <span className="truncate">{translateDisplayValue(locale, friend.targetLanguage)}</span>
+          <span className="shrink-0 rounded-md bg-cloud-gray px-1.5 text-xs text-graphite">
             {friend.languageLevel}
           </span>
         </span>
-        <span className="inline-flex min-w-0 items-center justify-center truncate rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-2">
-          {t('discover.native')}: {translateDisplayValue(locale, friend.nativeLanguage)}
+        <span className="inline-flex min-w-0 items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
+          <Clock aria-hidden="true" size={15} />
+          <span className="truncate">{translateDisplayValue(locale, friend.learningGoal)}</span>
         </span>
       </div>
 
@@ -147,21 +143,10 @@ function FriendCard({
         {friend.bio || t('friends.defaultBio')}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
-          <Languages aria-hidden="true" size={15} />
-          {getLanguageCode(friend.nativeLanguage)} {'->'} {getLanguageCode(friend.targetLanguage)}
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-xs font-black text-charcoal">
-          <Clock aria-hidden="true" size={15} />
-          {translateDisplayValue(locale, friend.learningGoal)}
-        </span>
-      </div>
-
-      <div className="relative mt-auto grid grid-cols-3 gap-2 pt-5">
+      <div className="relative mt-auto grid h-[92px] grid-cols-3 gap-2 border-t-2 border-cloud-gray pb-5 pt-4">
         <Link
           aria-label={t('friends.chatWith', { name: friend.username })}
-          className="btn-3d-base btn-3d-green min-h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-green h-14 min-w-0 gap-1.5 px-3 text-base"
           to={`/app/chat/${friend.id}`}
         >
           <MessageCircle aria-hidden="true" className="shrink-0" size={17} />
@@ -169,7 +154,7 @@ function FriendCard({
         </Link>
         <Link
           aria-label={t('friends.callName', { name: friend.username })}
-          className="btn-3d-base btn-3d-purple min-h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-purple h-14 min-w-0 gap-1.5 px-3 text-base"
           to={`/app/call/${friend.id}`}
         >
           <Phone aria-hidden="true" className="shrink-0" size={17} />
@@ -178,7 +163,7 @@ function FriendCard({
         <button
           aria-expanded={isMenuOpen}
           aria-label={t('friends.manageName', { name: friend.username })}
-          className="btn-3d-base btn-3d-yellow min-h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-yellow h-14 min-w-0 gap-1.5 px-3 text-base"
           type="button"
           onClick={() => onMenuChange(isMenuOpen ? null : friend.id)}
         >

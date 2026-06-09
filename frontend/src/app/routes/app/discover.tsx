@@ -24,6 +24,7 @@ import {
 import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-demo-users';
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
+import { pageTitleClass } from '../../../features/friends/components/friends-page-chrome';
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
 
@@ -421,7 +422,7 @@ export function DiscoverPage() {
       <div className="mx-auto max-w-5xl">
         <header className="mb-10 flex min-h-[104px] items-end justify-between border-b-2 border-gray-100 pb-6">
           <div>
-            <h1 className="mb-4 text-5xl font-black tracking-tight text-sky-blue [text-shadow:2px_2px_0_#1899d6] md:text-6xl">
+            <h1 className={`mb-4 ${pageTitleClass} text-sky-blue [text-shadow:2px_2px_0_#1899d6]`}>
               {t('discover.title')}
             </h1>
             <p className="text-base font-bold text-graphite md:text-lg">

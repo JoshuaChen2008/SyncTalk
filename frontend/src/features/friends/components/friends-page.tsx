@@ -21,6 +21,7 @@ import {
 import { useTranslation } from '../../../i18n/i18n-store';
 import { getFriendsApiErrorMessage, type Friend } from '../api/friends-api';
 import { useFriendsQuery, useRemoveFriendMutation } from '../api/friends-hooks';
+import { pageTitleClass } from './friends-page-chrome';
 
 const friendFilterOptions = [
   ['added', 'friends.filterByAdded'],
@@ -322,13 +323,10 @@ export function FriendsPage() {
   }
 
   return (
-    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] px-4 py-6 pb-24 text-almost-black md:px-8 md:py-8 lg:px-10 xl:px-12">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-10 lg:pb-12">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <header className="border-b-2 border-cloud-gray pb-6">
-          <p className="text-sm font-black uppercase text-silver">
-            {t('friends.badge')}
-          </p>
-          <h1 className="mt-2 text-heading font-feather leading-tight text-duo-green [text-shadow:2px_2px_0_#46a300] sm:text-heading-lg">
+          <h1 className={`${pageTitleClass} text-duo-green [text-shadow:2px_2px_0_#46a300]`}>
             {t('friends.title')}
           </h1>
           <p className="mt-3 max-w-3xl text-body font-black leading-7 text-graphite">
@@ -336,9 +334,9 @@ export function FriendsPage() {
           </p>
         </header>
 
-        <section className="relative z-30 grid gap-6 md:grid-cols-2">
+        <section className="relative z-30 grid min-h-[72px] gap-6 xl:grid-cols-2">
           <div className="relative min-w-0">
-            <label className="relative flex h-14 items-center md:h-[72px]">
+            <label className="relative flex h-14 items-center md:h-[72px] md:py-2">
               <span className="sr-only">{t('friends.search.sr')}</span>
               <Search
                 aria-hidden="true"
@@ -384,8 +382,8 @@ export function FriendsPage() {
             ) : null}
           </div>
 
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-            <div className="card-duo flex h-14 items-center justify-between gap-[12px] px-[16px] py-3 md:h-[72px]">
+          <div className="grid h-14 min-w-0 grid-cols-2 gap-4 md:h-[72px] md:py-2">
+            <div className="card-duo flex h-full items-center justify-between gap-[12px] px-[16px] py-3">
               <p className="shrink-0 whitespace-nowrap text-sm font-black text-charcoal">
                 {formatFriendCount(locale, totalFriends)}
               </p>
@@ -394,7 +392,7 @@ export function FriendsPage() {
               </p>
             </div>
 
-            <div className="card-duo flex h-14 items-center justify-between gap-4 px-5 py-3 md:h-[72px]"> 
+            <div className="card-duo flex h-full items-center justify-between gap-4 px-5 py-3">
               <div className="min-w-0">
                 <p className="truncate text-xs font-black uppercase text-silver">
                   {t('friends.onlineSummary')}

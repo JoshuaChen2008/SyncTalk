@@ -233,7 +233,10 @@ describe('call page', () => {
     renderCallRoute();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/only friends can call/i);
-    expect(screen.getByRole('link', { name: /back to friends/i })).toHaveAttribute('href', '/app/friends');
+    expect(screen.getByRole('link', { name: /back to chat/i })).toHaveAttribute(
+      'href',
+      '/app/chat/user-2',
+    );
   });
 
   it('shows configuration error when the Stream key is missing', async () => {
@@ -243,5 +246,9 @@ describe('call page', () => {
     renderCallRoute();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/stream video key is missing/i);
+    expect(screen.getByRole('link', { name: /back to chat/i })).toHaveAttribute(
+      'href',
+      '/app/chat/user-2',
+    );
   });
 });

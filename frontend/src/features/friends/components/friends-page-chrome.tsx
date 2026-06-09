@@ -12,9 +12,12 @@ export const discoverGlassPanel =
   'border-2 border-cloud-gray bg-snow-white';
 
 export const pageShellClass =
-  'custom-scrollbar min-h-screen overflow-y-auto bg-snow-white px-4 py-6 pb-24 text-almost-black sm:px-8 md:py-10 lg:pb-12';
+  'custom-scrollbar min-h-screen overflow-y-auto bg-snow-white px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-10 lg:pb-12';
 
-export const pageContainerClass = 'mx-auto flex w-full max-w-[1140px] flex-col gap-8';
+export const pageContainerClass = 'mx-auto flex w-full max-w-5xl flex-col gap-8';
+
+export const pageTitleClass =
+  'text-heading font-feather leading-tight sm:text-heading-lg';
 
 export const heroHeaderClass =
   'grid overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5] lg:grid-cols-[1.05fr_0.95fr]';

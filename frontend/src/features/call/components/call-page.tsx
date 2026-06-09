@@ -16,7 +16,6 @@ import { Link, useNavigate, useParams } from 'react-router';
 
 import {
   AppStatePanel,
-  featureCardClass,
 } from '../../friends/components/friends-page-chrome';
 import { SessionWorkspace } from '../../friends/components/session-workspace';
 import { useFriendsQuery } from '../../friends/api/friends-hooks';
@@ -42,8 +41,16 @@ function CallStatePanel({
   );
 }
 
-function CallErrorPanel({ message }: { message: string }) {
+function CallErrorPanel({
+  friendId,
+  message,
+}: {
+  friendId?: string;
+  message: string;
+}) {
   const { t } = useTranslation();
+  const backTo = friendId ? `/app/chat/${friendId}` : '/app/friends';
+  const backLabel = friendId ? t('call.backToChat') : t('call.backToFriends');
 
   return (
     <CallStatePanel role="alert">
@@ -54,10 +61,10 @@ function CallErrorPanel({ message }: { message: string }) {
       <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
       <Link
         className="btn-3d-base btn-3d-sky mt-5 min-h-11 gap-2 px-5 text-sm"
-        to="/app/friends"
+        to={backTo}
       >
         <ArrowLeft aria-hidden="true" size={17} />
-        {t('call.backToFriends')}
+        {backLabel}
       </Link>
     </CallStatePanel>
   );
@@ -78,7 +85,7 @@ function CallPresenceStatus({
   ).length;
 
   return (
-    <p className="border-t border-white/10 bg-slate-900/90 px-4 py-3 text-sm font-black text-teal-100">
+    <p className="border-t border-white/10 bg-slate-950/90 px-4 py-3 text-sm font-black text-teal-100">
       {remoteParticipantCount > 0
         ? t('call.liveWith', {
             count: remoteParticipantCount,
@@ -95,7 +102,7 @@ function CallMediaControls() {
   const { microphone, isMute: isMicrophoneMuted } = useMicrophoneState();
   const { camera, isMute: isCameraMuted } = useCameraState();
   const mediaButtonClass =
-    'grid h-11 w-11 place-items-center rounded-lg border border-white/15 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 motion-reduce:transition-none';
+    'grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-[0_2px_0_rgba(255,255,255,0.08)] transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 motion-reduce:transition-none';
 
   const microphoneLabel = isMicrophoneMuted ? t('call.turnOnMic') : t('call.turnOffMic');
   const cameraLabel = isCameraMuted ? t('call.turnOnCamera') : t('call.turnOffCamera');
@@ -211,7 +218,7 @@ function StreamCallPanel({
   }
 
   if (connectionError) {
-    return <CallErrorPanel message={connectionError} />;
+    return <CallErrorPanel friendId={sessionData.friend.id} message={connectionError} />;
   }
 
   if (!videoClient || !activeCall || isJoining || !isJoined) {
@@ -223,7 +230,7 @@ function StreamCallPanel({
   }
 
   return (
-    <section className={`${featureCardClass} overflow-hidden`}>
+    <section className="session-call-shell overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-duo-green">
@@ -241,24 +248,26 @@ function StreamCallPanel({
           {t('call.backToChat')}
         </Link>
       </div>
-      <div className="min-h-[34rem] bg-slate-950 text-white">
-        <StreamVideo client={videoClient}>
-          <StreamCall call={activeCall}>
-            <StreamTheme>
-              <div className="min-h-[30rem]">
-                <SpeakerLayout participantsBarPosition="bottom" />
-              </div>
-              <CallPresenceStatus
-                currentUserId={tokenData.user.id}
-                friendName={sessionData.friend.username}
-              />
-              <div className="flex flex-wrap items-center justify-center gap-3 border-t border-white/10 bg-slate-900/90 px-4 py-4">
-                <CallMediaControls />
-                <CallControls onLeave={handleLeave} />
-              </div>
-            </StreamTheme>
-          </StreamCall>
-        </StreamVideo>
+      <div className="bg-[#f7f7f7] p-2 md:p-3">
+        <div className="min-h-[34rem] overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white">
+          <StreamVideo client={videoClient}>
+            <StreamCall call={activeCall}>
+              <StreamTheme>
+                <div className="min-h-[30rem] bg-slate-950">
+                  <SpeakerLayout participantsBarPosition="bottom" />
+                </div>
+                <CallPresenceStatus
+                  currentUserId={tokenData.user.id}
+                  friendName={sessionData.friend.username}
+                />
+                <div className="flex flex-wrap items-center justify-center gap-3 border-t border-white/10 bg-slate-900/90 px-4 py-4">
+                  <CallMediaControls />
+                  <CallControls onLeave={handleLeave} />
+                </div>
+              </StreamTheme>
+            </StreamCall>
+          </StreamVideo>
+        </div>
       </div>
     </section>
   );
@@ -294,8 +303,8 @@ export function CallPage() {
       statusText={sessionQuery.data ? t('session.status.livePractice') : t('call.badge')}
       title={title}
     >
-      <div className="mx-auto flex h-full max-w-5xl flex-col gap-4">
-        {!streamApiKey ? <CallErrorPanel message={t('call.missingKey')} /> : null}
+      <div className="mx-auto flex h-full w-full max-w-[1040px] flex-col gap-4">
+        {!streamApiKey ? <CallErrorPanel friendId={friendId} message={t('call.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
           <CallStatePanel role="status">
@@ -306,7 +315,9 @@ export function CallPage() {
           </CallStatePanel>
         ) : null}
 
-        {streamApiKey && error ? <CallErrorPanel message={getCallApiErrorMessage(error)} /> : null}
+        {streamApiKey && error ? (
+          <CallErrorPanel friendId={friendId} message={getCallApiErrorMessage(error)} />
+        ) : null}
 
         {streamApiKey && tokenQuery.data && sessionQuery.data && !error ? (
           <StreamCallPanel

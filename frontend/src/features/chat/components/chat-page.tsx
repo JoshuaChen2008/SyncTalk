@@ -8,7 +8,6 @@ import 'stream-chat-react/dist/css/index.css';
 
 import {
   AppStatePanel,
-  featureCardClass,
 } from '../../friends/components/friends-page-chrome';
 import { SessionWorkspace } from '../../friends/components/session-workspace';
 import { useFriendsQuery } from '../../friends/api/friends-hooks';
@@ -57,10 +56,12 @@ function ChatErrorPanel({ message }: { message: string }) {
 
 function StreamChatPanel({
   channelData,
+  friendName,
   streamApiKey,
   tokenData,
 }: {
   channelData: ChatChannel;
+  friendName: string;
   streamApiKey: string;
   tokenData: ChatToken;
 }) {
@@ -122,21 +123,31 @@ function StreamChatPanel({
   }
 
   return (
-    <section className={`${featureCardClass} overflow-hidden`}>
-      <div className="border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
-        <p className="text-xs font-black uppercase tracking-normal text-sky-blue">
-          {t('chat.channelLabel', { id: channelData.channelId })}
-        </p>
+    <section className="session-chat-shell flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-normal text-sky-blue">
+            {t('chat.channelLabel', { id: channelData.channelId })}
+          </p>
+          <p className="mt-1 text-sm font-bold text-graphite">
+            {friendName}
+          </p>
+        </div>
+        <span className="rounded-full border-2 border-[#84d8ff] bg-[#ddf4ff] px-3 py-1 text-xs font-black text-sky-blue">
+          {t('session.status.online')}
+        </span>
       </div>
-      <div className="min-h-[34rem] bg-white">
-        <Chat client={client}>
-          <Channel channel={streamChannel}>
-            <Window>
-              <MessageList />
-              <MessageComposer focus />
-            </Window>
-          </Channel>
-        </Chat>
+      <div className="flex min-h-0 flex-1 bg-[#f7f7f7] p-2 md:p-3">
+        <div className="flex min-h-[34rem] min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
+          <Chat client={client}>
+            <Channel channel={streamChannel}>
+              <Window>
+                <MessageList />
+                <MessageComposer focus />
+              </Window>
+            </Channel>
+          </Chat>
+        </div>
       </div>
     </section>
   );
@@ -172,7 +183,7 @@ export function ChatPage() {
       statusText={channelQuery.data ? t('session.status.online') : t('chat.badge')}
       title={title}
     >
-      <div className="mx-auto flex h-full max-w-5xl flex-col gap-4">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-[1040px] flex-1 flex-col gap-4">
         {!streamApiKey ? <ChatErrorPanel message={t('chat.missingKey')} /> : null}
 
         {streamApiKey && isLoading ? (
@@ -186,6 +197,7 @@ export function ChatPage() {
         {streamApiKey && tokenQuery.data && channelQuery.data && !error ? (
           <StreamChatPanel
             channelData={channelQuery.data}
+            friendName={channelQuery.data.friend.username}
             streamApiKey={streamApiKey}
             tokenData={tokenQuery.data}
           />

@@ -1,19 +1,11 @@
-import { Bell, CheckCircle2, ExternalLink, Inbox, Trash2, UsersRound } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Inbox, Trash2, UsersRound } from 'lucide-react';
 import { Link } from 'react-router';
 
 import {
-  DiscoverStyleBackground,
-  DiscoverStyleVisualPanel,
   featureCardClass,
-  heroContentClass,
-  heroDescriptionClass,
-  heroEyebrowClass,
-  heroHeaderClass,
-  heroIconClass,
-  heroStatCardClass,
-  heroTitleClass,
   pageContainerClass,
   pageShellClass,
+  pageTitleClass,
 } from '../../friends/components/friends-page-chrome';
 import {
   getNotificationsApiErrorMessage,
@@ -70,20 +62,28 @@ function NotificationCard({
   const isUnread = !notification.readAt;
 
   return (
-    <article className={`${featureCardClass} grid gap-5 p-5 sm:p-6 md:grid-cols-[auto_1fr_auto]`}>
+    <article className={`${featureCardClass} relative p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-6`}>
+      {isUnread ? (
+        <span
+          aria-hidden="true"
+          className="absolute right-6 top-6 h-3 w-3 rounded-full bg-sky-blue md:right-8 md:top-8"
+        />
+      ) : null}
+
+      <div className="flex gap-4">
       <div
         className={
           isUnread
-            ? 'grid h-12 w-12 place-items-center rounded-xl bg-duo-green text-snow-white shadow-[0_4px_0_#3f8f01]'
-            : 'grid h-12 w-12 place-items-center rounded-xl border-2 border-cloud-gray bg-duo-green-light text-duo-green'
+            ? 'grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-sky-blue bg-[#ddf4ff] text-sky-blue md:h-14 md:w-14'
+            : 'grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-cloud-gray bg-duo-green-light text-duo-green md:h-14 md:w-14'
         }
       >
-        <Icon aria-hidden="true" size={22} />
+        <Icon aria-hidden="true" size={24} />
       </div>
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1 pr-6">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-heading-sm font-feather text-almost-black">{notification.title}</h2>
+          <h2 className="text-xl font-black text-almost-black md:text-2xl">{notification.title}</h2>
           <span
             className={
               isUnread
@@ -94,13 +94,12 @@ function NotificationCard({
             {isUnread ? t('notifications.unread') : t('notifications.read')}
           </span>
         </div>
-        <p className="mt-2 text-sm font-bold leading-6 text-charcoal">{notification.content}</p>
-        <p className="mt-3 text-xs font-bold text-graphite">
+        <p className="mt-2 text-xs font-bold text-silver">
           {formatDateTime(locale, notification.createdAt)}
         </p>
-      </div>
+        <p className="mt-3 text-base font-bold leading-6 text-graphite">{notification.content}</p>
 
-      <div className="flex flex-col gap-3 md:min-w-44">
+        <div className="mt-5 flex flex-wrap gap-3">
         {safeHref ? (
           <Link
             aria-label={t('notifications.openName', { title: notification.title })}
@@ -111,7 +110,7 @@ function NotificationCard({
             {t('notifications.open')}
           </Link>
         ) : (
-          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-center text-sm font-bold text-[#b91c1c] shadow-[0_3px_0_#fecaca]">
+          <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-bold text-[#b91c1c] shadow-[0_3px_0_#fecaca]">
             {t('notifications.invalidTarget')}
           </p>
         )}
@@ -128,6 +127,8 @@ function NotificationCard({
             {t('notifications.markRead')}
           </button>
         ) : null}
+        </div>
+      </div>
       </div>
     </article>
   );
@@ -145,57 +146,21 @@ export function NotificationsPage() {
 
   return (
     <main className={pageShellClass}>
-      <DiscoverStyleBackground />
-
-      <div className={`relative ${pageContainerClass}`}>
-        <header className={heroHeaderClass}>
-          <section className={heroContentClass}>
-            <div className="flex items-center gap-3">
-              <span className={heroIconClass}>
-                <Bell aria-hidden="true" size={20} />
-              </span>
-              <span className="text-sm font-bold uppercase text-graphite">
-                {t('app.nav.notifications')}
-              </span>
-            </div>
-
+      <div className={pageContainerClass}>
+        <header className="flex flex-col gap-4 border-b-2 border-gray-100 pb-6 md:min-h-[104px] md:flex-row md:items-end md:justify-between">
             <div>
-              <p className={heroEyebrowClass}>
-                <CheckCircle2 aria-hidden="true" size={16} />
-                {t('notifications.badge')}
-              </p>
-              <h1 className={heroTitleClass}>
+            <h1 className={`mb-2 ${pageTitleClass} text-duo-green [text-shadow:2px_2px_0_#58a700]`}>
                 {t('notifications.title')}
               </h1>
-              <p className={heroDescriptionClass}>
+            <p className="text-base font-bold text-graphite">
                 {t('notifications.description')}
               </p>
             </div>
 
-            <div className="grid max-w-xl gap-3 text-sm font-bold text-charcoal sm:grid-cols-2">
-              <p className={heroStatCardClass}>
-                <span className="block text-heading-sm font-feather text-duo-green">{unreadCount}</span>
-                {t('notifications.unreadCount')}
-              </p>
-              <p className={heroStatCardClass}>
-                {t('notifications.safeLinks')}
-              </p>
-            </div>
-          </section>
-          <DiscoverStyleVisualPanel />
-        </header>
-
-        <section className={`${featureCardClass} flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center`}>
-          <div>
-            <p className="text-xs font-black uppercase text-sky-blue">{t('notifications.inbox')}</p>
-            <p className="mt-1 text-sm font-bold text-graphite">
-              {t('notifications.inboxDescription')}
-            </p>
-          </div>
           <div className="flex flex-wrap gap-3">
             <button
               aria-label={t('notifications.markVisibleName')}
-              className="btn-3d-base btn-3d-green min-h-11 gap-2 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-3d-base btn-3d-green min-h-11 gap-2 px-5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               disabled
               type="button"
             >
@@ -204,13 +169,25 @@ export function NotificationsPage() {
             </button>
             <button
               aria-label={t('notifications.deleteVisibleName')}
-              className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 text-sm font-black text-[#b91c1c] opacity-60 shadow-[0_4px_0_#fecaca]"
+              className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-[#ff4b4b] px-5 text-sm font-black text-snow-white opacity-60 shadow-[0_4px_0_#ea2b2b]"
               disabled
               type="button"
             >
               <Trash2 aria-hidden="true" size={17} />
               {t('notifications.deleteVisible')}
             </button>
+          </div>
+        </header>
+
+        <section className="card-duo flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs font-black uppercase text-sky-blue">{t('notifications.inbox')}</p>
+            <p className="mt-1 text-sm font-bold text-graphite">
+              {t('notifications.inboxDescription')}
+            </p>
+          </div>
+          <div className="rounded-2xl border-2 border-sky-blue/10 bg-sky-blue/10 px-4 py-2 font-black text-sky-blue">
+            {unreadCount} {t('notifications.unreadCount')}
           </div>
         </section>
 

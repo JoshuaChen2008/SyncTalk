@@ -1,9 +1,17 @@
-import { MessageCircle, Phone, Search, UserCircle, Video } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  Phone,
+  Search,
+  UserCircle,
+  Video,
+} from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 import { Link } from 'react-router';
-import type { ReactNode } from 'react';
 
-import type { Friend } from '../api/friends-api';
 import { useTranslation } from '../../../i18n/i18n-store';
+import type { Friend } from '../api/friends-api';
 
 function getInitials(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -57,6 +65,7 @@ export function SessionWorkspace({
   title?: string;
 }) {
   const { t } = useTranslation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isChat = mode === 'chat';
   const label = isChat ? t('session.chat.conversations') : t('session.call.conversations');
   const workspaceLabel = isChat
@@ -66,41 +75,103 @@ export function SessionWorkspace({
   const activeName = title ?? activeFriend?.username ?? (isChat ? 'Chat' : 'Call');
   const sidebarFriends = friends.length > 0 ? friends : activeFriend ? [activeFriend] : [];
   const HeaderIcon = isChat ? MessageCircle : Video;
+  const sidebarBadgeText = isChat ? t('chat.badge') : t('call.badge');
+  const activeMeta = [activeFriend?.targetLanguage ?? '', activeFriend?.languageLevel ?? '']
+    .filter(Boolean)
+    .join(' / ');
+  const toggleLabel = isSidebarCollapsed
+    ? t('session.sidebar.expand')
+    : t('session.sidebar.collapse');
 
   return (
-    <main className="min-h-screen bg-snow-white text-almost-black">
-      <div className="flex min-h-screen bg-snow-white">
-        <aside className="hidden w-72 shrink-0 flex-col border-r-2 border-cloud-gray bg-snow-white md:flex lg:w-80">
-          <div className="border-b-2 border-cloud-gray p-4">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-heading-sm font-feather text-charcoal">
-                {isChat ? t('session.chat.title') : t('session.call.title')}
-              </h2>
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-duo-green text-snow-white shadow-[0_4px_0_#46a300]">
-                <HeaderIcon aria-hidden="true" size={19} />
-              </span>
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f4f7fb] px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-8 lg:pb-12">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1320px] overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_8px_0_#e5e5e5]">
+        <aside
+          className={`hidden shrink-0 flex-col border-r-2 border-cloud-gray bg-snow-white transition-[width] duration-300 md:flex ${
+            isSidebarCollapsed ? 'w-[5.75rem]' : 'w-[18.5rem] lg:w-[21rem]'
+          }`}
+        >
+          <div
+            className={`border-b-2 border-cloud-gray ${
+              isSidebarCollapsed ? 'px-3 py-4' : 'px-4 py-5 lg:px-5'
+            }`}
+          >
+            <div
+              className={`flex items-center gap-3 ${
+                isSidebarCollapsed ? 'justify-center' : 'justify-between'
+              }`}
+            >
+              {isSidebarCollapsed ? null : (
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-normal text-silver">
+                    SyncTalk
+                  </p>
+                  <h2 className="truncate text-heading-sm font-feather text-charcoal">
+                    {isChat ? t('session.chat.title') : t('session.call.title')}
+                  </h2>
+                </div>
+              )}
+
+              {!isSidebarCollapsed ? (
+                <div className="flex items-center gap-2">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] text-sky-blue shadow-[0_2px_0_#e5e5e5]">
+                    <HeaderIcon aria-hidden="true" size={18} />
+                  </span>
+                  <button
+                    aria-controls={`${mode}-conversation-list`}
+                    aria-expanded={!isSidebarCollapsed}
+                    aria-label={toggleLabel}
+                    className="grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite shadow-[0_2px_0_#e5e5e5] transition hover:bg-[#f7f7f7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
+                    onClick={() => setIsSidebarCollapsed(true)}
+                    type="button"
+                  >
+                    <ChevronLeft aria-hidden="true" size={18} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  aria-controls={`${mode}-conversation-list`}
+                  aria-expanded={!isSidebarCollapsed}
+                  aria-label={toggleLabel}
+                  className="grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite shadow-[0_2px_0_#e5e5e5] transition hover:bg-[#f7f7f7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
+                  onClick={() => setIsSidebarCollapsed(false)}
+                  type="button"
+                >
+                  <ChevronRight aria-hidden="true" size={18} />
+                </button>
+              )}
             </div>
-            <label className="sr-only" htmlFor={`${mode}-friend-search`}>
-              {isChat ? 'Search chat friends' : 'Search call friends'}
-            </label>
-            <div className="relative mt-4">
-              <Search
-                aria-hidden="true"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-silver"
-                size={18}
-              />
-              <input
-                className="input-gamified h-11 min-h-0 bg-[#f7f7f7] pl-10 text-sm"
-                id={`${mode}-friend-search`}
-                placeholder={
-                  isChat ? t('session.chat.search') : t('session.call.search')
-                }
-                type="search"
-              />
-            </div>
+
+            {isSidebarCollapsed ? null : (
+              <>
+                <p className="mt-2 text-xs font-bold text-graphite">{sidebarBadgeText}</p>
+                <label className="sr-only" htmlFor={`${mode}-friend-search`}>
+                  {isChat ? 'Search chat friends' : 'Search call friends'}
+                </label>
+                <div className="relative mt-4">
+                  <Search
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-silver"
+                    size={18}
+                  />
+                  <input
+                    className="h-11 w-full rounded-xl border-2 border-transparent bg-[#f3f4f6] pl-10 pr-4 text-sm font-bold text-charcoal outline-none transition-colors placeholder:text-silver focus:border-[#84d8ff] focus:bg-snow-white"
+                    id={`${mode}-friend-search`}
+                    placeholder={isChat ? t('session.chat.search') : t('session.call.search')}
+                    type="search"
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          <nav aria-label={label} className="custom-scrollbar flex-1 overflow-y-auto p-2">
+          <nav
+            aria-label={label}
+            className={`custom-scrollbar flex-1 overflow-y-auto bg-snow-white ${
+              isSidebarCollapsed ? 'px-2 py-3' : 'p-2'
+            }`}
+            id={`${mode}-conversation-list`}
+          >
             {sidebarFriends.length > 0 ? (
               <div className="space-y-1">
                 {sidebarFriends.map((friend) => {
@@ -108,12 +179,18 @@ export function SessionWorkspace({
 
                   return (
                     <Link
-                      className={`flex items-center gap-3 rounded-xl border-2 p-3 transition-colors ${
+                      aria-label={isChat ? `Chat with ${friend.username}` : `Call with ${friend.username}`}
+                      className={`flex items-center rounded-2xl border-2 transition-colors ${
+                        isSidebarCollapsed
+                          ? 'mx-auto h-[4.25rem] w-[4.25rem] justify-center rounded-full p-0'
+                          : 'gap-3 p-3'
+                      } ${
                         isActive
                           ? 'border-[#84d8ff] bg-[#ddf4ff] text-sky-blue'
-                          : 'border-transparent text-charcoal hover:bg-cloud-gray/30'
+                          : 'border-transparent text-charcoal hover:bg-[#f7f7f7]'
                       }`}
                       key={friend.id}
+                      title={friend.username}
                       to={`${basePath}/${friend.id}`}
                     >
                       <SessionAvatar
@@ -121,21 +198,36 @@ export function SessionWorkspace({
                         isActive={isActive}
                         name={friend.username}
                       />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-black">
-                          {friend.username}
+                      {isSidebarCollapsed ? null : (
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="truncate text-sm font-black">
+                              {friend.username}
+                            </span>
+                            <span
+                              className={`shrink-0 text-[11px] font-black ${
+                                isActive ? 'text-sky-blue' : 'text-silver'
+                              }`}
+                            >
+                              {isActive ? t('session.status.online') : sidebarBadgeText}
+                            </span>
+                          </span>
+                          <span className="mt-1 block truncate text-xs font-bold text-graphite">
+                            {friend.targetLanguage || 'Language partner'}
+                            {friend.languageLevel ? ` / ${friend.languageLevel}` : ''}
+                          </span>
                         </span>
-                        <span className="block truncate text-xs font-bold text-graphite">
-                          {friend.targetLanguage || 'Language partner'}
-                          {friend.languageLevel ? ` · ${friend.languageLevel}` : ''}
-                        </span>
-                      </span>
+                      )}
                     </Link>
                   );
                 })}
               </div>
             ) : (
-              <p className="rounded-xl border-2 border-cloud-gray bg-[#f7f7f7] p-4 text-sm font-bold text-graphite">
+              <p
+                className={`rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] font-bold text-graphite ${
+                  isSidebarCollapsed ? 'p-3 text-center text-xs' : 'p-4 text-sm'
+                }`}
+              >
                 {t('session.empty')}
               </p>
             )}
@@ -146,7 +238,7 @@ export function SessionWorkspace({
           aria-label={workspaceLabel}
           className="flex min-w-0 flex-1 flex-col bg-snow-white"
         >
-          <header className="flex items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white p-4">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-4 py-4 md:px-5">
             <div className="flex min-w-0 items-center gap-3">
               {activeFriend ? (
                 <SessionAvatar avatar={activeFriend.avatar} isActive name={activeFriend.username} />
@@ -159,7 +251,12 @@ export function SessionWorkspace({
                 <h1 className="truncate text-heading-sm font-feather text-charcoal">
                   {activeName}
                 </h1>
-                <p className="text-xs font-black text-duo-green">{statusText}</p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p className="text-xs font-black text-duo-green">{statusText}</p>
+                  {activeMeta ? (
+                    <p className="truncate text-xs font-bold text-graphite">{activeMeta}</p>
+                  ) : null}
+                </div>
               </div>
             </div>
             {activeFriend ? (
@@ -177,7 +274,7 @@ export function SessionWorkspace({
             ) : null}
           </header>
 
-          <div className="min-h-0 flex-1 bg-[#f7f7f7] p-4 md:p-6">{children}</div>
+          <div className="min-h-0 flex-1 bg-[#f7f7f7] p-3 md:p-4 lg:p-5">{children}</div>
         </section>
       </div>
     </main>

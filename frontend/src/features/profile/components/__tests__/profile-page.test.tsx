@@ -85,6 +85,9 @@ describe('profile page', () => {
 
     renderRoute('/app/profile');
 
+    expect(await screen.findAllByText(/mei@example.com/i)).not.toHaveLength(0);
+    expect(screen.getAllByText(/^mei$/i)).not.toHaveLength(0);
+    expect(screen.getAllByText(/profile menu/i)).not.toHaveLength(0);
     expect(await screen.findByText(/avatar/i)).toBeInTheDocument();
     expect(await screen.findByLabelText(/native language/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/target language/i)).toBeInTheDocument();

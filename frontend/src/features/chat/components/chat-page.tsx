@@ -137,7 +137,7 @@ function StreamChatPanel({
         </span>
       </div>
       <div className="flex min-h-0 flex-1 bg-[#f7f7f7] p-2 md:p-3">
-        <div className="flex min-h-[34rem]  w-full min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
+        <div className="flex h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
           <Chat client={client}>
             <Channel channel={streamChannel}>
               <Window>

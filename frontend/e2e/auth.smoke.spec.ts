@@ -493,4 +493,116 @@ test.describe('auth smoke', () => {
     await expect(page.getByLabel('设置 标签')).toHaveAttribute('href', '/app/settings');
     expect(consoleErrors).toEqual([]);
   });
+
+  test('keeps the English mobile friends card actions inside the card', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        'synctalk-locale',
+        JSON.stringify({ state: { locale: 'en' }, version: 0 }),
+      );
+    });
+    await page.route('**/api/auth/me', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: { id: 'user-1', username: 'mei', email: 'mei@example.com' },
+        }),
+      });
+    });
+    await page.route('**/api/profile/me', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          profile: {
+            id: 'user-1',
+            username: 'mei',
+            email: 'mei@example.com',
+            avatar: '',
+            nativeLanguage: 'Japanese',
+            targetLanguage: 'English',
+            languageLevel: 'B1',
+            learningGoal: 'Daily conversation',
+            bio: 'Coffee chats welcome.',
+            timezone: 'Asia/Tokyo',
+            isProfileComplete: true,
+          },
+        }),
+      });
+    });
+    await page.route('**/api/friends', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          friends: [
+            {
+              id: 'user-2',
+              username: 'sam',
+              avatar: '',
+              nativeLanguage: 'Korean',
+              targetLanguage: 'Chinese',
+              languageLevel: 'A2',
+              learningGoal: 'Travel practice',
+              bio: '',
+              timezone: 'America/New_York',
+            },
+          ],
+        }),
+      });
+    });
+    await page.route('**/api/notifications', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          notifications: [],
+          unreadCount: 0,
+        }),
+      });
+    });
+
+    await page.goto('/app/friends');
+
+    await expect(page.getByRole('heading', { name: /your language friends/i })).toBeVisible();
+
+    const card = page.getByRole('article').filter({ hasText: /ready for a language exchange/i });
+    const chatAction = page.getByRole('link', { name: /chat with sam/i });
+    const callAction = page.getByRole('link', { name: /call sam/i });
+    const manageAction = page.getByRole('button', { name: /manage sam/i });
+    const actionGroup = chatAction.locator('xpath=..');
+    const cta = page.getByRole('link', { name: /find more language partners/i });
+
+    const metrics = await page.evaluate(
+      ([cardElement, chatElement, callElement, manageElement, ctaElement, actionGroupElement]) => {
+        const cardRect = cardElement.getBoundingClientRect();
+        const actionBottom = Math.max(
+          chatElement.getBoundingClientRect().bottom,
+          callElement.getBoundingClientRect().bottom,
+          manageElement.getBoundingClientRect().bottom,
+        );
+        const ctaRect = ctaElement.getBoundingClientRect();
+
+        return {
+          actionBottom,
+          borderTopWidth: getComputedStyle(actionGroupElement).borderTopWidth,
+          cardBottom: cardRect.bottom,
+          ctaTop: ctaRect.top,
+          hasHorizontalOverflow:
+            document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      },
+      [
+        await card.elementHandle(),
+        await chatAction.elementHandle(),
+        await callAction.elementHandle(),
+        await manageAction.elementHandle(),
+        await cta.elementHandle(),
+        await actionGroup.elementHandle(),
+      ],
+    );
+
+    expect(metrics.hasHorizontalOverflow).toBe(false);
+    expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.cardBottom);
+    expect(metrics.ctaTop).toBeGreaterThan(metrics.actionBottom);
+    expect(metrics.borderTopWidth).toBe('0px');
+  });
 });

@@ -85,7 +85,7 @@ export function SessionWorkspace({
 
   return (
     <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f4f7fb] px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-8 lg:pb-12">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[1320px] overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_8px_0_#e5e5e5]">
+      <div className="mx-auto flex h-[calc(100dvh-5rem)] min-h-[34rem] w-full max-w-[1320px] overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_8px_0_#e5e5e5]">
         <aside
           className={`hidden shrink-0 flex-col border-r-2 border-cloud-gray bg-snow-white transition-[width] duration-300 md:flex ${
             isSidebarCollapsed ? 'w-[5.75rem]' : 'w-[18.5rem] lg:w-[21rem]'

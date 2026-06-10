@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 
+import { createCorsOriginChecker } from './config/cors.js';
 import { env } from './config/env.js';
 import { authService as defaultAuthService } from './services/auth-service.js';
 import { callService as defaultCallService } from './services/call-service.js';
@@ -22,6 +23,7 @@ import { createUsersRouter } from './routes/users.js';
 export function createApp({
   authService = defaultAuthService,
   callService = defaultCallService,
+  clientOrigin = env.clientOrigin,
   chatService = defaultChatService,
   friendsService = defaultFriendsService,
   notificationsService = defaultNotificationsService,
@@ -32,7 +34,7 @@ export function createApp({
 
   app.use(
     cors({//允许前端跨端查询后端。
-      origin: env.clientOrigin,
+      origin: createCorsOriginChecker(clientOrigin),
       credentials: true,
     }),
   );

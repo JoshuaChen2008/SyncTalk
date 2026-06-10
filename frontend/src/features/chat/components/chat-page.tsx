@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import type { Channel as StreamChannel } from 'stream-chat';
 import { Chat, Channel, MessageComposer, MessageList, Window, useCreateChatClient } from 'stream-chat-react';
-import 'stream-chat-react/dist/css/index.css';
 
 import {
   AppStatePanel,
@@ -138,7 +137,7 @@ function StreamChatPanel({
         </span>
       </div>
       <div className="flex min-h-0 flex-1 bg-[#f7f7f7] p-2 md:p-3">
-        <div className="flex min-h-[34rem] min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
+        <div className="flex min-h-[34rem]  w-full min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
           <Chat client={client}>
             <Channel channel={streamChannel}>
               <Window>
@@ -164,12 +163,12 @@ export function ChatPage() {
   const error = tokenQuery.error ?? channelQuery.error;
   const activeFriend = channelQuery.data
     ? {
-        avatar: channelQuery.data.friend.avatar,
-        id: channelQuery.data.friend.id,
-        languageLevel: '',
-        targetLanguage: '',
-        username: channelQuery.data.friend.username,
-      }
+      avatar: channelQuery.data.friend.avatar,
+      id: channelQuery.data.friend.id,
+      languageLevel: '',
+      targetLanguage: '',
+      username: channelQuery.data.friend.username,
+    }
     : undefined;
   const title = channelQuery.data
     ? t('chat.hero.titleWithName', { name: channelQuery.data.friend.username })

@@ -1,0 +1,138 @@
+/* Stream SDK ships unlayered CSS, so overrides must stay unlayered too. */
+
+.session-chat-shell .str-chat,
+.session-chat-shell .str-chat__container,
+.session-chat-shell .str-chat__channel,
+.session-chat-shell .str-chat__main-panel,
+.session-chat-shell .str-chat__main-panel-inner,
+.session-chat-shell .str-chat__message-list-main-panel,
+.session-chat-shell .str-chat__window {
+  height: 100%;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.session-chat-shell .str-chat__main-panel-inner {
+  align-items: stretch;
+}
+
+.session-chat-shell .str-chat__message-list-main-panel {
+  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+.session-chat-shell .str-chat__message-list {
+  flex: 1 1 auto;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  background: var(--color-snow-white);
+}
+
+.session-chat-shell .str-chat__message-list-scroll {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.session-chat-shell .str-chat .str-chat__dropzone-root.str-chat__message-composer-container {
+  flex: 0 0 auto;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+    padding: 8px 8px !important;
+  border-top: 1px solid var(--color-cloud-gray);
+  background: var(--color-snow-white);
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer {
+  width: 100%;
+  max-width: none;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-compose-area {
+  border: 2px solid var(--color-cloud-gray);
+  border-radius: 1.5rem;
+  background: var(--color-snow-white);
+  box-shadow: 0 2px 0 #e5e5e5;
+    padding: 2px;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls {
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__textarea,
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__message-composer-controls__text-composition-controls,
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__message-composer-controls__text-composition-controls__text {
+  min-height: 0;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__textarea {
+  align-items: flex-start;
+}
+
+.session-chat-shell .str-chat__textarea__textarea,
+.session-chat-shell .str-chat__message-input-textarea textarea {
+  font-family: var(--font-din-round);
+  font-weight: 700;
+  color: var(--color-charcoal);
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__textarea textarea {
+  font-size: 15px;
+  line-height: 1.45rem;
+  min-height: 1.45rem;
+  max-height: calc(1.45rem * 4);
+  overflow-y: auto;
+  padding: 0;
+  scrollbar-width: thin;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__message-composer__actions,
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__message-composer__additional-actions {
+  height: auto;
+  align-self: flex-end;
+}
+
+.session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__send-button {
+  align-self: flex-end;
+}
+
+.session-chat-shell .str-chat__send-button {
+  color: var(--color-sky-blue);
+}
+
+.session-call-shell .str-video__speaker-layout {
+  min-height: 30rem;
+  background: #020617;
+}
+
+.session-call-shell .str-video__call-controls {
+  gap: 0.75rem;
+  background: transparent;
+  padding: 0;
+}
+
+.session-call-shell .str-video__call-controls__button {
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 0 2px 0 rgb(255 255 255 / 0.08);
+}

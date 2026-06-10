@@ -48,6 +48,40 @@ afterEach(async () => {
 });
 
 describe('auth routes', () => {
+  it('allows preflight requests from another local Vite port', async () => {
+    const authService = {};
+    const baseUrl = await startTestServer(authService);
+
+    const response = await request(baseUrl, '/api/auth/login', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'http://localhost:5174',
+        'Access-Control-Request-Method': 'POST',
+      },
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get('access-control-allow-origin')).toBe('http://localhost:5174');
+    expect(response.headers.get('access-control-allow-credentials')).toBe('true');
+  });
+
+  it('does not allow preflight requests from untrusted origins', async () => {
+    const authService = {};
+    const baseUrl = await startTestServer(authService);
+
+    const response = await request(baseUrl, '/api/auth/login', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://evil.example.com',
+        'Access-Control-Request-Method': 'POST',
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('access-control-allow-origin')).toBeNull();
+    expect(response.headers.get('access-control-allow-credentials')).toBeNull();
+  });
+
   it('registers a user and writes the JWT to an HttpOnly cookie', async () => {
     const authService = {
       register: vi.fn(async () => ({

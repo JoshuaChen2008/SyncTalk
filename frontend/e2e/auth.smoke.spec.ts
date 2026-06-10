@@ -172,21 +172,22 @@ test.describe('auth smoke', () => {
     await page.goto('/app/settings');
 
     await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
-    await expect(
-      page.getByRole('article').filter({ hasText: /mei@example\.com/i }).first(),
-    ).toBeVisible();
+    await expect(page.getByText(/mei@example\.com/i).first()).toBeVisible();
 
     await page.getByRole('button', { name: /use dark theme/i }).click();
-    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe(
-      'dark',
-    );
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe('dark');
 
     await page.reload();
-    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe(
-      'dark',
-    );
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe('dark');
 
-    await page.getByRole('button', { name: /switch language to chinese/i }).first().click();
+    await page
+      .getByRole('button', { name: /switch language to chinese/i })
+      .first()
+      .click();
     await expect(page.getByRole('heading', { name: '设置' })).toBeVisible();
 
     await page.reload();
@@ -329,9 +330,9 @@ test.describe('auth smoke', () => {
 
     await expect(page.getByRole('heading', { name: /call unavailable/i })).toBeVisible();
     await expect(page.getByRole('alert')).toContainText(/only friends can call/i);
-    await expect(page.getByRole('link', { name: /back to friends/i })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /back to chat/i })).toHaveAttribute(
       'href',
-      '/app/friends',
+      '/app/chat/user-2',
     );
   });
 

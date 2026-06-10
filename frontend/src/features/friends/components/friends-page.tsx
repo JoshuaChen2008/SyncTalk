@@ -74,7 +74,7 @@ function FriendCard({
   const statusLabel = isOnline ? t('friends.online') : t('friends.offline');
 
   return (
-    <article className="card-duo group relative flex h-[376px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <article className="card-duo group relative flex min-h-[376px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <span className="truncate rounded-full border-2 border-cloud-gray bg-snow-white px-4 py-1.5 text-xs font-black uppercase text-graphite">
           {t('friends.status.friend')}
@@ -144,10 +144,10 @@ function FriendCard({
         {friend.bio || t('friends.defaultBio')}
       </p>
 
-      <div className="relative mt-auto grid h-[92px] grid-cols-3 gap-2 border-t-2 border-cloud-gray pb-5 pt-4">
+      <div className="relative mt-auto grid grid-cols-3 gap-2 pt-5">
         <Link
           aria-label={t('friends.chatWith', { name: friend.username })}
-          className="btn-3d-base btn-3d-green h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-green h-14 min-w-0 gap-1 px-2 text-sm min-[380px]:gap-1.5 min-[380px]:px-3 min-[380px]:text-base"
           to={`/app/chat/${friend.id}`}
         >
           <MessageCircle aria-hidden="true" className="shrink-0" size={17} />
@@ -155,7 +155,7 @@ function FriendCard({
         </Link>
         <Link
           aria-label={t('friends.callName', { name: friend.username })}
-          className="btn-3d-base btn-3d-purple h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-purple h-14 min-w-0 gap-1 px-2 text-sm min-[380px]:gap-1.5 min-[380px]:px-3 min-[380px]:text-base"
           to={`/app/call/${friend.id}`}
         >
           <Phone aria-hidden="true" className="shrink-0" size={17} />
@@ -164,7 +164,7 @@ function FriendCard({
         <button
           aria-expanded={isMenuOpen}
           aria-label={t('friends.manageName', { name: friend.username })}
-          className="btn-3d-base btn-3d-yellow h-14 min-w-0 gap-1.5 px-3 text-base"
+          className="btn-3d-base btn-3d-yellow h-14 min-w-0 gap-1 px-2 text-sm min-[380px]:gap-1.5 min-[380px]:px-3 min-[380px]:text-base"
           type="button"
           onClick={() => onMenuChange(isMenuOpen ? null : friend.id)}
         >
@@ -270,7 +270,10 @@ function FriendsCta() {
           {t('friends.cta.description')}
         </p>
       </div>
-      <Link className="btn-3d-base btn-3d-sky min-h-14 shrink-0 px-6 text-base" to="/app/discover">
+      <Link
+        className="btn-3d-base btn-3d-sky min-h-14 w-full px-5 text-center text-base sm:w-auto sm:shrink-0 sm:px-6"
+        to="/app/discover"
+      >
         {t('friends.cta.action')}
       </Link>
     </section>
@@ -287,7 +290,8 @@ export function FriendsPage() {
   const [openMenuFriendId, setOpenMenuFriendId] = useState<string | null>(null);
   const [sortLabel, setSortLabel] = useState<'added' | 'language' | 'online'>('added');
   const filteredFriends = useMemo(() => {
-    const matches = friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [];
+    const matches =
+      friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [];
 
     if (sortLabel === 'language') {
       return [...matches].sort((a, b) => a.targetLanguage.localeCompare(b.targetLanguage));
@@ -366,7 +370,9 @@ export function FriendsPage() {
                 {friendFilterOptions.map(([value, labelKey]) => (
                   <button
                     className={`flex min-h-11 w-full cursor-pointer items-center justify-between rounded-xl px-3 text-left text-sm font-black ${
-                      sortLabel === value ? 'bg-[#ddf4ff] text-sky-blue' : 'text-charcoal hover:bg-cloud-gray/40'
+                      sortLabel === value
+                        ? 'bg-[#ddf4ff] text-sky-blue'
+                        : 'text-charcoal hover:bg-cloud-gray/40'
                     }`}
                     key={value}
                     type="button"
@@ -382,8 +388,8 @@ export function FriendsPage() {
             ) : null}
           </div>
 
-          <div className="grid h-14 min-w-0 grid-cols-2 gap-4 md:h-[72px] md:py-2">
-            <div className="card-duo flex h-full items-center justify-between gap-[12px] px-[16px] py-3">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 sm:gap-4 md:min-h-[72px] md:py-2">
+            <div className="card-duo flex min-h-14 items-center justify-between gap-[12px] px-[16px] py-3">
               <p className="shrink-0 whitespace-nowrap text-sm font-black text-charcoal">
                 {formatFriendCount(locale, totalFriends)}
               </p>
@@ -392,7 +398,7 @@ export function FriendsPage() {
               </p>
             </div>
 
-            <div className="card-duo flex h-full items-center justify-between gap-4 px-5 py-3">
+            <div className="card-duo flex min-h-14 items-center justify-between gap-4 px-5 py-3">
               <div className="min-w-0">
                 <p className="truncate text-xs font-black uppercase text-silver">
                   {t('friends.onlineSummary')}

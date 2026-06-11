@@ -168,4 +168,56 @@ describe('profile routes', () => {
     });
     expect(profileService.updateMyProfile).toHaveBeenCalledWith('user-1', input);
   });
+
+  it('returns another user public profile without private email', async () => {
+    const authService = {
+      getCurrentUser: vi.fn(async () => ({
+        id: 'user-1',
+        username: 'mei',
+        email: 'mei@example.com',
+      })),
+    };
+    const profileService = {
+      getPublicProfile: vi.fn(async () => ({
+        id: 'user-2',
+        username: 'sam',
+        avatar: '',
+        nativeLanguage: 'English',
+        targetLanguage: 'Japanese',
+        languageLevel: 'B1',
+        learningGoal: 'Daily conversation',
+        bio: 'Coffee chats welcome.',
+        timezone: 'Asia/Tokyo',
+        isProfileComplete: true,
+        relationshipStatus: 'friend',
+      })),
+    };
+    const baseUrl = await startTestServer({ authService, profileService });
+
+    const response = await request(baseUrl, '/api/profile/user-2', {
+      headers: {
+        Cookie: 'synctalk_session=valid-token',
+      },
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual({
+      profile: {
+        id: 'user-2',
+        username: 'sam',
+        avatar: '',
+        nativeLanguage: 'English',
+        targetLanguage: 'Japanese',
+        languageLevel: 'B1',
+        learningGoal: 'Daily conversation',
+        bio: 'Coffee chats welcome.',
+        timezone: 'Asia/Tokyo',
+        isProfileComplete: true,
+        relationshipStatus: 'friend',
+      },
+    });
+    expect(body.profile.email).toBeUndefined();
+    expect(profileService.getPublicProfile).toHaveBeenCalledWith('user-1', 'user-2');
+  });
 });

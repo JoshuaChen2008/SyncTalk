@@ -1,6 +1,12 @@
 import { apiClient } from '../../../lib/api-client';
 import { t } from '../../../i18n/i18n-store';
 
+export type PublicProfileRelationshipStatus =
+  | 'stranger'
+  | 'request_sent'
+  | 'request_received'
+  | 'friend';
+
 export type Profile = {
   id: string;
   username: string;
@@ -24,8 +30,16 @@ export type ProfileInput = {
   timezone: string;
 };
 
+export type PublicProfile = Omit<Profile, 'email'> & {
+  relationshipStatus: PublicProfileRelationshipStatus;
+};
+
 type ProfileResponse = {
   profile: Profile;
+};
+
+type PublicProfileResponse = {
+  profile: PublicProfile;
 };
 
 export async function getMyProfile() {
@@ -35,6 +49,11 @@ export async function getMyProfile() {
 
 export async function updateMyProfile(input: ProfileInput) {
   const response = await apiClient.patch<ProfileResponse>('/profile/me', input);
+  return response.data.profile;
+}
+
+export async function getPublicProfile(userId: string) {
+  const response = await apiClient.get<PublicProfileResponse>(`/profile/${userId}`);
   return response.data.profile;
 }
 

@@ -61,6 +61,32 @@ function mockProtectedProfile(profile = mockProfile()) {
       return { data: { profile } } as Awaited<ReturnType<typeof apiClient.get>>;
     }
 
+    if (url === '/notifications') {
+      return { data: { notifications: [], unreadCount: 0 } } as Awaited<
+        ReturnType<typeof apiClient.get>
+      >;
+    }
+
+    if (url === '/profile/user-2') {
+      return {
+        data: {
+          profile: {
+            id: 'user-2',
+            username: 'sam',
+            avatar: '',
+            nativeLanguage: 'English',
+            targetLanguage: 'Japanese',
+            languageLevel: 'B1',
+            learningGoal: 'Daily conversation',
+            bio: 'Coffee chats welcome.',
+            timezone: 'Asia/Tokyo',
+            isProfileComplete: true,
+            relationshipStatus: 'friend',
+          },
+        },
+      } as Awaited<ReturnType<typeof apiClient.get>>;
+    }
+
     throw new Error(`Unexpected GET ${url}`);
   });
 }
@@ -147,5 +173,30 @@ describe('profile page', () => {
       timezone: 'Asia/Tokyo',
     });
     expect(await screen.findByRole('heading', { name: /discover partners/i })).toBeInTheDocument();
+  });
+
+  it('renders another user public profile without private email', async () => {
+    mockProtectedProfile(
+      mockProfile({
+        nativeLanguage: 'Japanese',
+        targetLanguage: 'English',
+        languageLevel: 'B1',
+        learningGoal: 'Daily conversation',
+        timezone: 'Asia/Tokyo',
+        isProfileComplete: true,
+      }),
+    );
+
+    renderRoute('/app/profile/user-2');
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByText(/coffee chats welcome/i)).toBeInTheDocument();
+    expect(screen.getByText(/english/i)).toBeInTheDocument();
+    expect(screen.getByText(/japanese/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /chat with sam/i })).toHaveAttribute(
+      'href',
+      '/app/chat/user-2',
+    );
+    expect(screen.queryByText(/sam@example\.com/i)).not.toBeInTheDocument();
   });
 });

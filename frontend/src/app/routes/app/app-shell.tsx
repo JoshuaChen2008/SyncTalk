@@ -130,7 +130,7 @@ export function AppShell() {
 
           <Link
             className="mt-3 flex min-h-14 items-center gap-3 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-sm font-bold text-almost-black shadow-[0_3px_0_#e5e5e5] transition-colors hover:bg-cloud-gray/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
-            to="/app/settings"
+            to="/app/profile"
           >
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-cloud-gray/40 text-graphite">
               <UserCircle aria-hidden="true" size={20} strokeWidth={2.5} />

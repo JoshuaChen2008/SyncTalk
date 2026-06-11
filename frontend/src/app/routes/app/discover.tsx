@@ -142,10 +142,12 @@ function DiscoveryUserCard({
         </div>
 
         <div className="mb-5 flex items-center gap-5">
-          <div
-            className={`relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-[3px] bg-snow-white p-1 ${
+          <Link
+            aria-label={t('profile.viewProfile', { name: user.username })}
+            className={`relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-[3px] bg-snow-white p-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
               user.relationshipStatus === 'stranger' ? 'border-duo-green' : 'border-cloud-gray'
             }`}
+            to={`/app/profile/${user.id}`}
           >
             {user.avatar ? (
               <img
@@ -161,7 +163,7 @@ function DiscoveryUserCard({
             {user.relationshipStatus === 'stranger' ? (
               <span className="absolute bottom-0 right-1 h-5 w-5 rounded-full border-2 border-snow-white bg-sky-blue" />
             ) : null}
-          </div>
+          </Link>
 
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-2xl font-black text-almost-black">{user.username}</h2>

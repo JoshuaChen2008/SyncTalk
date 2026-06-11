@@ -11,7 +11,7 @@ import { FriendsPage } from '../features/friends/components/friends-page';
 import { RequestsPage } from '../features/friends/components/requests-page';
 import { NotificationsPage } from '../features/notifications/components/notifications-page';
 import { RegisterPage } from '../features/auth/components/register-page';
-import { ProfilePage } from '../features/profile/components/profile-page';
+import { ProfilePage, PublicProfilePage } from '../features/profile/components/profile-page';
 
 // 路由表是前端页面的总入口：这里先搭出 Auth 和受保护 App 区域的最小骨架。
 export const routes: RouteObject[] = [
@@ -65,6 +65,10 @@ export const routes: RouteObject[] = [
           {
             path: 'profile',
             element: <ProfilePage />,
+          },
+          {
+            path: 'profile/:userId',
+            element: <PublicProfilePage />,
           },
           {
             path: 'settings',

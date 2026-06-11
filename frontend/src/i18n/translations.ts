@@ -70,6 +70,11 @@ export const translations = {
     'profile.saving': 'Saving...',
     'profile.avatar.title': 'Avatar',
     'profile.avatar.description': 'Your profile image is shown to language partners across chat, calls, and requests.',
+    'profile.back': 'Go back',
+    'profile.detailsTitle': 'Details',
+    'profile.languagesTitle': 'Languages',
+    'profile.publicTitle': 'Friend profile',
+    'profile.viewProfile': 'View {name} profile',
 
     'option.language.English': 'English',
     'option.language.Japanese': 'Japanese',
@@ -380,6 +385,11 @@ export const translations = {
     'profile.saving': '保存中...',
     'profile.avatar.title': '头像',
     'profile.avatar.description': '你的头像会展示在聊天、通话和请求等语言伙伴场景中。',
+    'profile.back': '返回',
+    'profile.detailsTitle': '详细资料',
+    'profile.languagesTitle': '语言',
+    'profile.publicTitle': '好友资料',
+    'profile.viewProfile': '查看 {name} 的资料',
 
     'option.language.English': '英语',
     'option.language.Japanese': '日语',

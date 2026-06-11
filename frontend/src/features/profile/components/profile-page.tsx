@@ -1,6 +1,6 @@
-import { Globe2, Rocket, UserCircle } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { ArrowLeft, Clock, Globe2, Languages, MapPin, MessageCircle, Rocket, UserCircle } from 'lucide-react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
@@ -9,8 +9,16 @@ import {
   pageContainerClass,
   pageShellClass,
 } from '../../friends/components/friends-page-chrome';
-import { getProfileApiErrorMessage, type ProfileInput } from '../api/profile-api';
-import { useMyProfileQuery, useUpdateMyProfileMutation } from '../api/profile-hooks';
+import {
+  getProfileApiErrorMessage,
+  type ProfileInput,
+  type PublicProfile,
+} from '../api/profile-api';
+import {
+  useMyProfileQuery,
+  usePublicProfileQuery,
+  useUpdateMyProfileMutation,
+} from '../api/profile-hooks';
 
 const languageOptions = ['English', 'Japanese', 'Korean', 'Spanish', 'French', 'German', 'Chinese'];
 const levelOptions = [
@@ -43,6 +51,20 @@ const emptyProfileInput: ProfileInput = {
   bio: '',
   timezone: '',
 };
+
+function getRelationshipLabel(
+  relationshipStatus: PublicProfile['relationshipStatus'],
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  const labels: Record<PublicProfile['relationshipStatus'], string> = {
+    stranger: t('discover.relationship.available'),
+    request_sent: t('discover.relationship.requestSent'),
+    request_received: t('discover.relationship.replyPending'),
+    friend: t('discover.relationship.alreadyFriends'),
+  };
+
+  return labels[relationshipStatus];
+}
 
 function SelectField({
   id,
@@ -79,6 +101,184 @@ function SelectField({
         ))}
       </select>
     </div>
+  );
+}
+
+function PublicInfoTile({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] p-5 transition-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+      <p className="mb-1 text-xs font-black uppercase tracking-wide text-silver">{label}</p>
+      <div className="text-lg font-black text-graphite">{children}</div>
+    </div>
+  );
+}
+
+export function PublicProfilePage() {
+  const { locale, t } = useTranslation();
+  const navigate = useNavigate();
+  const { userId = '' } = useParams();
+  const publicProfileQuery = usePublicProfileQuery(userId);
+  const profile = publicProfileQuery.data;
+
+  if (publicProfileQuery.isPending) {
+    return (
+      <main className={pageShellClass}>
+        <div className={pageContainerClass}>
+          <AppStatePanel role="status">
+            <p className="text-sm font-bold text-graphite">{t('profile.loading')}</p>
+          </AppStatePanel>
+        </div>
+      </main>
+    );
+  }
+
+  if (publicProfileQuery.isError || !profile) {
+    return (
+      <main className={pageShellClass}>
+        <div className={pageContainerClass}>
+          <AppStatePanel role="alert">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+              <UserCircle aria-hidden="true" size={28} />
+            </div>
+            <h1 className="mt-5 text-heading-sm font-feather text-[#991b1b]">
+              {t('profile.unavailable')}
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm font-bold leading-6 text-[#b91c1c]">
+              {publicProfileQuery.isError
+                ? getProfileApiErrorMessage(publicProfileQuery.error)
+                : t('profile.unavailable')}
+            </p>
+          </AppStatePanel>
+        </div>
+      </main>
+    );
+  }
+
+  const relationshipLabel = getRelationshipLabel(profile.relationshipStatus, t);
+  const canChat = profile.relationshipStatus === 'friend';
+
+  return (
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] pb-24 text-almost-black lg:pb-12">
+      <header className="sticky top-0 z-20 flex min-h-16 items-center gap-4 border-b-2 border-cloud-gray bg-snow-white px-4 md:px-6">
+        <button
+          aria-label={t('profile.back')}
+          className="grid h-11 w-11 cursor-pointer place-items-center rounded-xl text-graphite transition-colors hover:bg-cloud-gray/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft aria-hidden="true" size={28} strokeWidth={2.6} />
+        </button>
+        <h1 className="text-2xl font-black text-graphite">{t('profile.publicTitle')}</h1>
+      </header>
+
+      <div className="px-4 py-6 md:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl">
+          <article className="overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
+            <div className="relative h-40 bg-sky-blue md:h-56">
+              <div className="absolute -bottom-16 left-6 z-10 h-32 w-32 overflow-hidden rounded-full border-[6px] border-snow-white bg-snow-white md:left-10 md:h-40 md:w-40">
+                {profile.avatar ? (
+                  <img
+                    alt={`${profile.username} avatar`}
+                    className="h-full w-full object-cover"
+                    src={profile.avatar}
+                  />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-duo-green-light text-duo-green">
+                    <UserCircle aria-hidden="true" size={64} />
+                  </div>
+                )}
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-1 right-3 h-6 w-6 rounded-full border-4 border-snow-white bg-duo-green"
+                />
+              </div>
+            </div>
+
+            <div className="px-6 pb-8 pt-20 md:px-10">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h2 className="mb-2 text-4xl font-black text-almost-black md:text-5xl">
+                    {profile.username}
+                  </h2>
+                  <p className="mb-4 text-lg font-bold text-duo-green">
+                    {relationshipLabel}
+                  </p>
+                  <p className="max-w-lg text-lg font-bold leading-relaxed text-graphite">
+                    {profile.bio || t('friends.defaultBio')}
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  {canChat ? (
+                    <Link
+                      className="btn-3d-base btn-3d-green min-h-14 gap-2 px-8 text-base"
+                      to={`/app/chat/${profile.id}`}
+                    >
+                      <MessageCircle aria-hidden="true" size={19} />
+                      {t('friends.chatWith', { name: profile.username })}
+                    </Link>
+                  ) : (
+                    <span className="btn-3d-base btn-3d-muted min-h-14 cursor-not-allowed px-6 text-base opacity-70">
+                      {relationshipLabel}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <hr className="my-8 rounded-full border-2 border-cloud-gray" />
+
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <section>
+                  <h3 className="mb-4 flex items-center gap-2 text-2xl font-black text-graphite">
+                    <Languages aria-hidden="true" className="text-sky-blue" size={24} />
+                    {t('profile.languagesTitle')}
+                  </h3>
+                  <div className="space-y-4">
+                    <PublicInfoTile label={t('profile.targetLanguage')}>
+                      <div className="flex items-center justify-between gap-4">
+                        <span>{translateDisplayValue(locale, profile.targetLanguage) || '--'}</span>
+                        <span className="rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-sm font-black text-sky-blue">
+                          {profile.languageLevel || '--'}
+                        </span>
+                      </div>
+                    </PublicInfoTile>
+                    <PublicInfoTile label={t('profile.nativeLanguage')}>
+                      {translateDisplayValue(locale, profile.nativeLanguage) || '--'}
+                    </PublicInfoTile>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="mb-4 text-2xl font-black text-graphite">
+                    {t('profile.detailsTitle')}
+                  </h3>
+                  <div className="space-y-4">
+                    <PublicInfoTile label={t('profile.timezone')}>
+                      <span className="inline-flex items-center gap-2">
+                        <MapPin aria-hidden="true" size={18} />
+                        {profile.timezone || '--'}
+                      </span>
+                    </PublicInfoTile>
+                    <PublicInfoTile label={t('profile.learningGoals')}>
+                      <span className="inline-flex items-center gap-2">
+                        <Clock aria-hidden="true" size={18} />
+                        {translateDisplayValue(locale, profile.learningGoal) || '--'}
+                      </span>
+                    </PublicInfoTile>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </main>
   );
 }
 

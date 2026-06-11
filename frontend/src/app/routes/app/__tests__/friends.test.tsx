@@ -131,6 +131,10 @@ describe('friends page', () => {
       'href',
       '/app/call/user-2',
     );
+    expect(screen.getByRole('link', { name: /view sam profile/i })).toHaveAttribute(
+      'href',
+      '/app/profile/user-2',
+    );
     await userEvent.click(screen.getByRole('button', { name: /manage sam/i }));
     expect(screen.getByRole('button', { name: /details/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove sam/i })).toBeInTheDocument();

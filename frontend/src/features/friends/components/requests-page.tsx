@@ -1,4 +1,5 @@
 import { Check, Clock, Inbox, MapPin, Search, Send, SlidersHorizontal, X } from 'lucide-react';
+import { Link } from 'react-router';
 
 import {
   featureCardClass,
@@ -36,6 +37,11 @@ function RequestCard({
   return (
     <article className={`${featureCardClass} flex flex-col gap-4 p-4 transition-transform duration-200 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:flex-row sm:items-center sm:justify-between`}>
       <div className="flex min-w-0 items-center gap-4">
+          <Link
+            aria-label={t('profile.viewProfile', { name: request.user.username })}
+            className="shrink-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+            to={`/app/profile/${request.user.id}`}
+          >
           {request.user.avatar ? (
             <img
               alt={`${request.user.username} avatar`}
@@ -47,6 +53,7 @@ function RequestCard({
               {initials}
             </div>
           )}
+          </Link>
           <div className="min-w-0">
             <h2 className="truncate text-lg font-black text-almost-black">{request.user.username}</h2>
             <div className="mt-2 flex flex-wrap gap-2">

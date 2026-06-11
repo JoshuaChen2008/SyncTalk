@@ -95,10 +95,12 @@ function FriendCard({
       </div>
 
       <div className="mt-5 flex min-w-0 items-center gap-4">
-        <div
-          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] ${
+        <Link
+          aria-label={t('profile.viewProfile', { name: friend.username })}
+          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
             isOnline ? 'border-duo-green' : 'border-cloud-gray'
           }`}
+          to={`/app/profile/${friend.id}`}
         >
           {friend.avatar ? (
             <img
@@ -115,7 +117,7 @@ function FriendCard({
               isOnline ? 'bg-duo-green' : 'bg-silver'
             }`}
           />
-        </div>
+        </Link>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-heading-sm font-feather text-almost-black">
             {friend.username}

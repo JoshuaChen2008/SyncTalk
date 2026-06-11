@@ -103,6 +103,10 @@ describe('app shell and settings', () => {
       'href',
       '/app/settings',
     );
+    expect(screen.getByRole('link', { name: /mei mei@example\.com/i })).toHaveAttribute(
+      'href',
+      '/app/profile',
+    );
   });
 
   it('persists theme selection to localStorage and document data-theme', async () => {

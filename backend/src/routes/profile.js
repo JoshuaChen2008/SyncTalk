@@ -30,5 +30,14 @@ export function createProfileRouter(authService, profileService) {
     }),
   );
 
+  router.get(
+    '/:userId',
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const profile = await profileService.getPublicProfile(req.user.id, req.params.userId);
+      res.status(200).json({ profile });
+    }),
+  );
+
   return router;
 }

@@ -1,4 +1,5 @@
 import { createUserRepository } from './user-repository.js';
+import { relationshipRepository as defaultRelationshipRepository } from './relationship-repository.js';
 import { createHttpError } from '../utils/http-error.js';
 
 const requiredFields = [
@@ -33,6 +34,22 @@ function serializeProfile(user) {
   };
 }
 
+function serializePublicProfile(user, relationshipStatus) {
+  return {
+    id: String(user.id ?? user._id),
+    username: user.username,
+    avatar: user.avatar ?? '',
+    nativeLanguage: user.nativeLanguage ?? '',
+    targetLanguage: user.targetLanguage ?? '',
+    languageLevel: user.languageLevel ?? '',
+    learningGoal: user.learningGoal ?? '',
+    bio: user.bio ?? '',
+    timezone: user.timezone ?? '',
+    isProfileComplete: isProfileComplete(user),
+    relationshipStatus,
+  };
+}
+
 function normalizeProfileInput(input) {
   return {
     nativeLanguage: normalizeText(input.nativeLanguage),
@@ -56,7 +73,10 @@ function userNotFoundError() {
   return createHttpError(404, 'User not found');
 }
 
-export function createProfileService({ userRepository = createUserRepository() } = {}) {
+export function createProfileService({
+  relationshipRepository = defaultRelationshipRepository,
+  userRepository = createUserRepository(),
+} = {}) {
   return {
     async getMyProfile(userId) {
       const user = await userRepository.findById(userId);
@@ -66,6 +86,21 @@ export function createProfileService({ userRepository = createUserRepository() }
       }
 
       return serializeProfile(user);
+    },
+
+    async getPublicProfile(currentUserId, profileUserId) {
+      const user = await userRepository.findById(profileUserId);
+
+      if (!user) {
+        throw userNotFoundError();
+      }
+
+      const statuses = await relationshipRepository.getRelationshipStatuses(currentUserId, [
+        String(user.id ?? user._id),
+      ]);
+      const relationshipStatus = statuses[String(user.id ?? user._id)] ?? 'stranger';
+
+      return serializePublicProfile(user, relationshipStatus);
     },
 
     async updateMyProfile(userId, input) {

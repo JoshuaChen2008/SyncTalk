@@ -115,6 +115,10 @@ describe('requests page', () => {
     expect(screen.getByLabelText(/search friend requests/i)).toBeInTheDocument();
     expect(screen.getByText(/received/i)).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /view sam profile/i })).toHaveAttribute(
+      'href',
+      '/app/profile/user-2',
+    );
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(
       'href',
       '/app/discover',

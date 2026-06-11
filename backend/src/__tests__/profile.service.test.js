@@ -24,9 +24,14 @@ function createService(overrides = {}) {
     updateProfile: vi.fn(async (_userId, profile) => createUser(profile)),
     ...overrides.userRepository,
   };
+  const relationshipRepository = {
+    getRelationshipStatuses: vi.fn(async () => ({ 'user-2': 'friend' })),
+    ...overrides.relationshipRepository,
+  };
 
   return {
-    service: createProfileService({ userRepository }),
+    service: createProfileService({ userRepository, relationshipRepository }),
+    relationshipRepository,
     userRepository,
   };
 }
@@ -116,5 +121,48 @@ describe('profile service', () => {
       status: 404,
       message: 'User not found',
     });
+  });
+
+  it('reads another user public profile without private email', async () => {
+    const { service, relationshipRepository, userRepository } = createService({
+      userRepository: {
+        findById: vi.fn(async (userId) =>
+          userId === 'user-2'
+            ? createUser({
+                id: 'user-2',
+                username: 'sam',
+                email: 'sam@example.com',
+                nativeLanguage: 'English',
+                targetLanguage: 'Japanese',
+                languageLevel: 'B1',
+                learningGoal: 'Daily conversation',
+                bio: 'Coffee chats welcome.',
+                timezone: 'Asia/Tokyo',
+              })
+            : createUser(),
+        ),
+      },
+      relationshipRepository: {
+        getRelationshipStatuses: vi.fn(async () => ({ 'user-2': 'friend' })),
+      },
+    });
+
+    await expect(service.getPublicProfile('user-1', 'user-2')).resolves.toEqual({
+      id: 'user-2',
+      username: 'sam',
+      avatar: '',
+      nativeLanguage: 'English',
+      targetLanguage: 'Japanese',
+      languageLevel: 'B1',
+      learningGoal: 'Daily conversation',
+      bio: 'Coffee chats welcome.',
+      timezone: 'Asia/Tokyo',
+      isProfileComplete: true,
+      relationshipStatus: 'friend',
+    });
+    expect(userRepository.findById).toHaveBeenCalledWith('user-2');
+    expect(relationshipRepository.getRelationshipStatuses).toHaveBeenCalledWith('user-1', [
+      'user-2',
+    ]);
   });
 });

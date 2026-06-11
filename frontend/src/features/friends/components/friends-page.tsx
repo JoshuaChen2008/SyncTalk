@@ -10,7 +10,7 @@ import {
   UserRound,
   UsersRound,
 } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 
 import {
@@ -291,6 +291,7 @@ export function FriendsPage() {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [openMenuFriendId, setOpenMenuFriendId] = useState<string | null>(null);
   const [sortLabel, setSortLabel] = useState<'added' | 'language' | 'online'>('added');
+  const filterMenuRef = useRef<HTMLDivElement>(null);
   const filteredFriends = useMemo(() => {
     const matches =
       friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [];
@@ -316,6 +317,27 @@ export function FriendsPage() {
         ? t('friends.filterOnlineFirst')
         : t('friends.filterByAdded');
 
+  useEffect(() => {
+    if (!isFilterMenuOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !filterMenuRef.current?.contains(event.target)
+      ) {
+        setIsFilterMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [isFilterMenuOpen]);
+
   async function handleRemove(friend: Friend) {
     setRemovedFriendName('');
 
@@ -340,9 +362,9 @@ export function FriendsPage() {
           </p>
         </header>
 
-        <section className="relative z-30 grid min-h-[72px] gap-6 xl:grid-cols-2">
+        <section className="relative z-30 grid gap-6 xl:grid-cols-2">
           <div className="relative min-w-0">
-            <label className="relative flex h-14 items-center md:h-[72px] md:py-2">
+            <label className="relative flex h-16 items-center md:h-[72px]">
               <span className="sr-only">{t('friends.search.sr')}</span>
               <Search
                 aria-hidden="true"
@@ -357,41 +379,43 @@ export function FriendsPage() {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
-              <button
-                aria-expanded={isFilterMenuOpen}
-                aria-label={t('friends.filterMenu')}
-                className="absolute right-4 top-1/2 flex -translate-y-1/2 cursor-pointer items-center justify-center p-2 text-sky-blue hover:text-[#1899d6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
-                type="button"
-                onClick={() => setIsFilterMenuOpen((isOpen) => !isOpen)}
-              >
-                <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
-              </button>
-            </label>
-            {isFilterMenuOpen ? (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-40 w-64 rounded-2xl border-2 border-cloud-gray bg-snow-white p-2 shadow-[0_8px_0_#e5e5e5]">
-                {friendFilterOptions.map(([value, labelKey]) => (
-                  <button
-                    className={`flex min-h-11 w-full cursor-pointer items-center justify-between rounded-xl px-3 text-left text-sm font-black ${
-                      sortLabel === value
-                        ? 'bg-[#ddf4ff] text-sky-blue'
-                        : 'text-charcoal hover:bg-cloud-gray/40'
-                    }`}
-                    key={value}
-                    type="button"
-                    onClick={() => {
-                      setSortLabel(value);
-                      setIsFilterMenuOpen(false);
-                    }}
-                  >
-                    {t(labelKey)}
-                  </button>
-                ))}
+              <div className="absolute right-4 top-1/2 -translate-y-1/2" ref={filterMenuRef}>
+                <button
+                  aria-expanded={isFilterMenuOpen}
+                  aria-label={t('friends.filterMenu')}
+                  className="flex cursor-pointer items-center justify-center p-2 text-sky-blue hover:text-[#1899d6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+                  type="button"
+                  onClick={() => setIsFilterMenuOpen((isOpen) => !isOpen)}
+                >
+                  <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
+                </button>
+                {isFilterMenuOpen ? (
+                  <div className="absolute right-0 top-full z-40 mt-3 w-56 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                    {friendFilterOptions.map(([value, labelKey]) => (
+                      <button
+                        className={`block min-h-11 w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold last:border-b-0 ${
+                          sortLabel === value
+                            ? 'bg-[#ddf4ff] text-sky-blue'
+                            : 'text-graphite hover:bg-gray-100'
+                        }`}
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          setSortLabel(value);
+                          setIsFilterMenuOpen(false);
+                        }}
+                      >
+                        <span className="block whitespace-nowrap">{t(labelKey)}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </label>
           </div>
 
-          <div className="grid min-w-0 gap-3 sm:grid-cols-2 sm:gap-4 md:min-h-[72px] md:py-2">
-            <div className="card-duo flex min-h-14 items-center justify-between gap-[12px] px-[16px] py-3">
+          <div className="grid h-16 min-w-0 grid-cols-2 gap-4 md:h-[72px]">
+            <div className="card-duo flex h-full items-center justify-between gap-[12px] px-[16px] py-3">
               <p className="shrink-0 whitespace-nowrap text-sm font-black text-charcoal">
                 {formatFriendCount(locale, totalFriends)}
               </p>
@@ -400,7 +424,7 @@ export function FriendsPage() {
               </p>
             </div>
 
-            <div className="card-duo flex min-h-14 items-center justify-between gap-4 px-5 py-3">
+            <div className="card-duo flex h-full items-center justify-between gap-4 px-5 py-3">
               <div className="min-w-0">
                 <p className="truncate text-xs font-black uppercase text-silver">
                   {t('friends.onlineSummary')}

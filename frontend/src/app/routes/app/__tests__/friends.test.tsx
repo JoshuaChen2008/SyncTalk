@@ -177,6 +177,23 @@ describe('friends page', () => {
     expect(screen.getByText(/showing 1 of 2/i)).toBeInTheDocument();
   });
 
+  it('closes the filter menu when clicking outside it', async () => {
+    mockProtectedAppGet({ friends: [mockFriend()] });
+
+    renderFriendsRoute();
+
+    await screen.findByRole('heading', { name: /your language friends/i });
+    await userEvent.click(screen.getByRole('button', { name: /sort and filter friends/i }));
+
+    expect(screen.getByRole('button', { name: /by learning language/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('searchbox', { name: /search friends/i }));
+
+    expect(
+      screen.queryByRole('button', { name: /by learning language/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it('keeps long friend card content compact without showing timezone metadata', async () => {
     mockProtectedAppGet({
       friends: [

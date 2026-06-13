@@ -101,6 +101,7 @@ function mockProtectedDiscovery({
 
 afterEach(() => {
   vi.restoreAllMocks();
+  window.localStorage.clear();
 });
 
 describe('discover page', () => {
@@ -177,7 +178,149 @@ describe('discover page', () => {
     await userEvent.click(await screen.findByRole('button', { name: /skip sam/i }));
     await userEvent.click(screen.getByRole('button', { name: /hide this person/i }));
 
-    expect(screen.getByRole('button', { name: /undo skip sam/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-discover-skipped-users')).toContain('user-2');
+    expect(screen.getByRole('status')).toHaveTextContent(/hidden sam/i);
+
+    await userEvent.click(screen.getByRole('button', { name: /undo skip/i }));
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-discover-skipped-users')).not.toContain('user-2');
+  });
+
+  it('uses the three discover filter buttons and sort menu to filter visible cards', async () => {
+    mockProtectedDiscovery({
+      recommendations: [
+        mockDiscoveryUser({
+          id: 'demo-user-2',
+          username: 'sam',
+          targetLanguage: 'Japanese',
+          timezone: 'Asia/Tokyo',
+        }),
+        mockDiscoveryUser({
+          id: 'demo-user-3',
+          username: 'lina',
+          targetLanguage: 'English',
+          timezone: 'Asia/Shanghai',
+        }),
+        mockDiscoveryUser({
+          id: 'demo-user-5',
+          username: 'mina',
+          targetLanguage: 'English',
+          timezone: 'Asia/Seoul',
+        }),
+      ],
+    });
+
+    renderDiscoverRoute();
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /mina/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /learning japanese/i }));
+    await userEvent.click(screen.getByRole('button', { name: /learning english/i }));
+
+    expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /mina/i })).toBeInTheDocument();
+    expect(screen.getByText(/1 filter active/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /currently online/i }));
+
+    expect(screen.getByText(/2 filters active/i)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /lina/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /mina/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/no partners found yet/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /currently online/i }));
+    await userEvent.click(screen.getByRole('button', { name: /clear filters/i }));
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /mina/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /sort discovery results/i }));
+    await userEvent.click(screen.getByRole('button', { name: /nearest timezone/i }));
+
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent);
+    expect(headings[0]).toMatch(/sam/i);
+
+    await userEvent.click(screen.getByRole('button', { name: /best match/i }));
+
+    const resetHeadings = screen
+      .getAllByRole('heading', { level: 2 })
+      .map((heading) => heading.textContent);
+    expect(resetHeadings).toEqual(['sam', 'lina', 'mina']);
+  });
+
+  it('persists skipped regions and can clear skipped filters', async () => {
+    mockProtectedDiscovery({
+      recommendations: [
+        mockDiscoveryUser({
+          id: 'demo-user-2',
+          username: 'sam',
+          timezone: 'Asia/Tokyo',
+        }),
+        mockDiscoveryUser({
+          id: 'demo-user-8',
+          username: 'taro',
+          timezone: 'Asia/Tokyo',
+        }),
+        mockDiscoveryUser({
+          id: 'demo-user-3',
+          username: 'lina',
+          timezone: 'Asia/Shanghai',
+        }),
+      ],
+    });
+
+    renderDiscoverRoute();
+
+    await userEvent.click(await screen.findByRole('button', { name: /skip sam/i }));
+    await userEvent.click(screen.getByRole('button', { name: /hide this region/i }));
+
+    expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /taro/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-discover-skipped-timezones')).toContain(
+      'Asia/Tokyo',
+    );
+    expect(screen.getByText(/2 hidden/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /clear skipped/i }));
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /taro/i })).toBeInTheDocument();
+    expect(window.localStorage.getItem('synctalk-discover-skipped-timezones')).toBe('[]');
+  });
+
+  it('applies local filters to search results without changing the search API shape', async () => {
+    const getSpy = mockProtectedDiscovery({
+      recommendations: [],
+      searchResults: [
+        mockDiscoveryUser({
+          id: 'demo-user-2',
+          username: 'sam',
+          targetLanguage: 'Japanese',
+        }),
+        mockDiscoveryUser({
+          id: 'demo-user-3',
+          username: 'lina',
+          targetLanguage: 'English',
+        }),
+      ],
+    });
+
+    renderDiscoverRoute();
+
+    await userEvent.type(await screen.findByLabelText(/search partners/i), 'English');
+    await userEvent.click(await screen.findByRole('button', { name: /learning japanese/i }));
+    await userEvent.click(screen.getByRole('button', { name: /learning english/i }));
+
+    expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(getSpy).toHaveBeenCalledWith('/users/search', { params: { query: 'English' } });
   });
 
   it('sends a friend request from a stranger discovery card', async () => {

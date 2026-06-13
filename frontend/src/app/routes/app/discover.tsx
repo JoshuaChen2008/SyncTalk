@@ -25,10 +25,123 @@ import { discoveryDemoUsers } from '../../../features/discovery/demo/discovery-d
 import { getFriendsApiErrorMessage } from '../../../features/friends/api/friends-api';
 import { useSendFriendRequestMutation } from '../../../features/friends/api/friends-hooks';
 import { pageTitleClass } from '../../../features/friends/components/friends-page-chrome';
+import { useMyProfileQuery } from '../../../features/profile/api/profile-hooks';
 import { translateDisplayValue } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
 
 type DiscoverMenu = 'language' | 'sort' | `skip-${string}`;
+type DiscoverySortMode = 'best' | 'active' | 'timezone';
+type SkippedDiscoveryFilters = {
+  timezones: Set<string>;
+  userIds: Set<string>;
+};
+
+const skippedUsersStorageKey = 'synctalk-discover-skipped-users';
+const skippedTimezonesStorageKey = 'synctalk-discover-skipped-timezones';
+
+function readStoredStringArray(key: string) {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const value = window.localStorage.getItem(key);
+    const parsedValue: unknown = value ? JSON.parse(value) : [];
+
+    return Array.isArray(parsedValue)
+      ? parsedValue.filter((item): item is string => typeof item === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function createEmptySkippedDiscoveryFilters(): SkippedDiscoveryFilters {
+  return {
+    timezones: new Set(),
+    userIds: new Set(),
+  };
+}
+
+function loadSkippedDiscoveryFilters(): SkippedDiscoveryFilters {
+  return {
+    timezones: new Set(readStoredStringArray(skippedTimezonesStorageKey)),
+    userIds: new Set(readStoredStringArray(skippedUsersStorageKey)),
+  };
+}
+
+function saveSkippedDiscoveryFilters(skipped: SkippedDiscoveryFilters) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(skippedUsersStorageKey, JSON.stringify(Array.from(skipped.userIds)));
+  window.localStorage.setItem(
+    skippedTimezonesStorageKey,
+    JSON.stringify(Array.from(skipped.timezones)),
+  );
+}
+
+function isDiscoveryUserOnline(user: DiscoveryUser) {
+  const source = `${user.id}${user.username}`;
+  const checksum = Array.from(source).reduce((total, letter) => total + letter.charCodeAt(0), 0);
+
+  return checksum % 3 !== 1;
+}
+
+function applyDiscoveryFilters(
+  users: DiscoveryUser[] | undefined,
+  {
+    currentTimezone,
+    languageFilter,
+    onlineOnly,
+    skipped,
+    sortMode,
+  }: {
+    currentTimezone: string;
+    languageFilter: string;
+    onlineOnly: boolean;
+    skipped: SkippedDiscoveryFilters;
+    sortMode: DiscoverySortMode;
+  },
+) {
+  const sourceUsers = users ?? [];
+  const unskippedUsers = sourceUsers.filter(
+    (user) => !skipped.userIds.has(user.id) && !skipped.timezones.has(user.timezone),
+  );
+  const filteredUsers = unskippedUsers.filter(
+    (user) =>
+      (!languageFilter || user.targetLanguage === languageFilter) &&
+      (!onlineOnly || isDiscoveryUserOnline(user)),
+  );
+  const indexedUsers = filteredUsers.map((user, index) => ({ index, user }));
+
+  if (sortMode === 'active') {
+    indexedUsers.sort((first, second) => {
+      const onlineDifference =
+        Number(isDiscoveryUserOnline(second.user)) - Number(isDiscoveryUserOnline(first.user));
+
+      return onlineDifference || first.index - second.index;
+    });
+  }
+
+  if (sortMode === 'timezone') {
+    indexedUsers.sort((first, second) => {
+      const timezoneDifference =
+        Number(second.user.timezone === currentTimezone) -
+        Number(first.user.timezone === currentTimezone);
+
+      return timezoneDifference || first.index - second.index;
+    });
+  }
+
+  return {
+    activeFilterCount:
+      Number(Boolean(languageFilter)) + Number(onlineOnly) + Number(sortMode !== 'best'),
+    skippedCount: sourceUsers.length - unskippedUsers.length,
+    users: indexedUsers.map(({ user }) => user),
+  };
+}
 
 function getRelationshipLabel(
   status: RelationshipStatus,
@@ -96,20 +209,18 @@ function getInitials(name: string) {
 
 function DiscoveryUserCard({
   isSending,
-  isSkipped,
   onMenuChange,
   onSendRequest,
-  onSkip,
-  onUndoSkip,
+  onSkipRegion,
+  onSkipUser,
   openMenu,
   user,
 }: {
   isSending: boolean;
-  isSkipped: boolean;
   onMenuChange: (menu: DiscoverMenu | null) => void;
   onSendRequest: (user: DiscoveryUser) => void;
-  onSkip: (userId: string) => void;
-  onUndoSkip: (userId: string) => void;
+  onSkipRegion: (user: DiscoveryUser) => void;
+  onSkipUser: (user: DiscoveryUser) => void;
   openMenu: DiscoverMenu | null;
   user: DiscoveryUser;
 }) {
@@ -121,19 +232,6 @@ function DiscoveryUserCard({
 
   return (
     <article className="card-duo group relative flex min-h-[420px] flex-col overflow-hidden transition-transform duration-200 hover:-translate-y-2 motion-reduce:transform-none motion-reduce:transition-none">
-      {isSkipped ? (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-graphite/45 p-6 backdrop-blur-sm">
-          <button
-            aria-label={t('discover.undoSkipName', { name: user.username })}
-            className="btn-3d-base btn-3d-sky min-h-12 px-6 text-base"
-            type="button"
-            onClick={() => onUndoSkip(user.id)}
-          >
-            {t('discover.undoSkip')}
-          </button>
-        </div>
-      ) : null}
-
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex">
           <span className="duo-shadow-sm inline-flex items-center rounded-2xl border-2 border-cloud-gray px-4 py-1.5 text-xs font-black uppercase text-graphite">
@@ -222,14 +320,14 @@ function DiscoveryUserCard({
                 <button
                   className="text-error block w-full cursor-pointer px-3 py-3 text-left text-sm font-black hover:bg-red-500/10"
                   type="button"
-                  onClick={() => onSkip(user.id)}
+                  onClick={() => onSkipUser(user)}
                 >
                   {t('discover.skipPerson')}
                 </button>
                 <button
                   className="text-error block w-full cursor-pointer border-t-2 border-cloud-gray px-3 py-3 text-left text-sm font-black hover:bg-red-500/10"
                   type="button"
-                  onClick={() => onSkip(user.id)}
+                  onClick={() => onSkipRegion(user)}
                 >
                   {t('discover.skipRegion')}
                 </button>
@@ -282,11 +380,10 @@ function ResultsState({
   isSearch,
   onMenuChange,
   onSendRequest,
-  onSkip,
-  onUndoSkip,
+  onSkipRegion,
+  onSkipUser,
   openMenu,
   sendingUserId,
-  skippedUserIds,
   users,
 }: {
   error: unknown;
@@ -295,11 +392,10 @@ function ResultsState({
   isSearch: boolean;
   onMenuChange: (menu: DiscoverMenu | null) => void;
   onSendRequest: (user: DiscoveryUser) => void;
-  onSkip: (userId: string) => void;
-  onUndoSkip: (userId: string) => void;
+  onSkipRegion: (user: DiscoveryUser) => void;
+  onSkipUser: (user: DiscoveryUser) => void;
   openMenu: DiscoverMenu | null;
   sendingUserId: string;
-  skippedUserIds: Set<string>;
   users: DiscoveryUser[] | undefined;
 }) {
   const { t } = useTranslation();
@@ -352,14 +448,13 @@ function ResultsState({
       {users.map((user) => (
         <DiscoveryUserCard
           isSending={sendingUserId === user.id}
-          isSkipped={skippedUserIds.has(user.id)}
           key={user.id}
           openMenu={openMenu}
           user={user}
           onMenuChange={onMenuChange}
           onSendRequest={onSendRequest}
-          onSkip={onSkip}
-          onUndoSkip={onUndoSkip}
+          onSkipRegion={onSkipRegion}
+          onSkipUser={onSkipUser}
         />
       ))}
     </section>
@@ -368,11 +463,21 @@ function ResultsState({
 
 export function DiscoverPage() {
   const { locale, t } = useTranslation();
+  const profileQuery = useMyProfileQuery();
   const [searchTerm, setSearchTerm] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
   const [openMenu, setOpenMenu] = useState<DiscoverMenu | null>(null);
   const [languageFilter, setLanguageFilter] = useState('');
-  const [skippedUserIds, setSkippedUserIds] = useState<Set<string>>(() => new Set());
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [sortMode, setSortMode] = useState<DiscoverySortMode>('best');
+  const [skipFeedback, setSkipFeedback] = useState<
+    | { id: string; label: string; type: 'user'; username: string }
+    | { label: string; timezone: string; type: 'timezone'; username: string }
+    | null
+  >(null);
+  const [skippedFilters, setSkippedFilters] = useState<SkippedDiscoveryFilters>(
+    loadSkippedDiscoveryFilters,
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const normalizedSearchTerm = searchTerm.trim();
   const isSearch = normalizedSearchTerm.length > 0;
@@ -385,12 +490,36 @@ export function DiscoverPage() {
     searchTerm: normalizedSearchTerm,
   });
   const languageOptions = useMemo(() => {
-    const languages = new Set((visibleUsers ?? []).map((user) => user.targetLanguage));
+    const languages = new Set(
+      (visibleUsers ?? [])
+        .filter(
+          (user) =>
+            !skippedFilters.userIds.has(user.id) && !skippedFilters.timezones.has(user.timezone),
+        )
+        .map((user) => user.targetLanguage),
+    );
     return Array.from(languages).slice(0, 4);
-  }, [visibleUsers]);
-  const selectedLanguage =
-    languageFilter || languageOptions[0] || 'English';
-  const selectedLanguageLabel = translateDisplayValue(locale, selectedLanguage);
+  }, [skippedFilters.timezones, skippedFilters.userIds, visibleUsers]);
+  const selectedLanguageLabel = translateDisplayValue(locale, languageFilter || languageOptions[0] || 'English');
+  const filteredDiscovery = useMemo(
+    () =>
+      applyDiscoveryFilters(visibleUsers, {
+        currentTimezone: profileQuery.data?.timezone ?? '',
+        languageFilter,
+        onlineOnly,
+        skipped: skippedFilters,
+        sortMode,
+      }),
+    [languageFilter, onlineOnly, profileQuery.data?.timezone, skippedFilters, sortMode, visibleUsers],
+  );
+  const hasActiveFilters = filteredDiscovery.activeFilterCount > 0;
+  const hasSkippedFilters =
+    skippedFilters.userIds.size > 0 || skippedFilters.timezones.size > 0;
+  const sortOptions: { label: string; mode: DiscoverySortMode }[] = [
+    { label: t('discover.controls.comprehensive'), mode: 'best' },
+    { label: t('discover.controls.recentlyActive'), mode: 'active' },
+    { label: t('discover.controls.nearest'), mode: 'timezone' },
+  ];
 
   async function handleSendRequest(user: DiscoveryUser) {
     setRequestFeedback('');
@@ -403,17 +532,85 @@ export function DiscoverPage() {
     }
   }
 
-  function handleSkip(userId: string) {
-    setSkippedUserIds((current) => new Set(current).add(userId));
+  function updateSkippedFilters(
+    updater: (current: SkippedDiscoveryFilters) => SkippedDiscoveryFilters,
+  ) {
+    setSkippedFilters((current) => {
+      const next = updater(current);
+      saveSkippedDiscoveryFilters(next);
+      return next;
+    });
+  }
+
+  function handleSkipUser(user: DiscoveryUser) {
+    updateSkippedFilters((current) => {
+      const next = {
+        timezones: new Set(current.timezones),
+        userIds: new Set(current.userIds),
+      };
+      next.userIds.add(user.id);
+      return next;
+    });
+    setSkipFeedback({
+      id: user.id,
+      label: t('discover.hiddenUser', { name: user.username }),
+      type: 'user',
+      username: user.username,
+    });
     setOpenMenu(null);
   }
 
-  function handleUndoSkip(userId: string) {
-    setSkippedUserIds((current) => {
-      const next = new Set(current);
-      next.delete(userId);
+  function handleSkipRegion(user: DiscoveryUser) {
+    updateSkippedFilters((current) => {
+      const next = {
+        timezones: new Set(current.timezones),
+        userIds: new Set(current.userIds),
+      };
+      next.timezones.add(user.timezone);
       return next;
     });
+    setSkipFeedback({
+      label: t('discover.hiddenRegion', { name: user.username, timezone: user.timezone }),
+      timezone: user.timezone,
+      type: 'timezone',
+      username: user.username,
+    });
+    setOpenMenu(null);
+  }
+
+  function handleUndoSkip() {
+    if (!skipFeedback) {
+      return;
+    }
+
+    updateSkippedFilters((current) => {
+      const next = {
+        timezones: new Set(current.timezones),
+        userIds: new Set(current.userIds),
+      };
+
+      if (skipFeedback.type === 'user') {
+        next.userIds.delete(skipFeedback.id);
+      } else {
+        next.timezones.delete(skipFeedback.timezone);
+      }
+
+      return next;
+    });
+    setSkipFeedback(null);
+  }
+
+  function handleClearFilters() {
+    setLanguageFilter('');
+    setOnlineOnly(false);
+    setSortMode('best');
+  }
+
+  function handleClearSkipped() {
+    const emptyFilters = createEmptySkippedDiscoveryFilters();
+    saveSkippedDiscoveryFilters(emptyFilters);
+    setSkippedFilters(emptyFilters);
+    setSkipFeedback(null);
   }
 
   return (
@@ -464,14 +661,17 @@ export function DiscoverPage() {
               </button>
               {openMenu === 'sort' ? (
                 <div className="duo-shadow absolute right-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
-                  {[t('discover.controls.comprehensive'), t('discover.controls.recentlyActive'), t('discover.controls.nearest')].map((label) => (
+                  {sortOptions.map((option) => (
                     <button
                       className="surface-hover block w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0"
-                      key={label}
+                      key={option.mode}
                       type="button"
-                      onClick={() => setOpenMenu(null)}
+                      onClick={() => {
+                        setSortMode(option.mode);
+                        setOpenMenu(null);
+                      }}
                     >
-                      {label}
+                      {option.label}
                     </button>
                   ))}
                 </div>
@@ -481,10 +681,12 @@ export function DiscoverPage() {
 
           <div className="grid h-14 flex-1 grid-cols-3 items-center gap-3 md:h-[72px]">
             <button
-              aria-pressed={!isSearch}
-              className="btn-3d-base btn-filter-active h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base"
+              aria-pressed={sortMode === 'best'}
+              className={`btn-3d-base h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base ${
+                sortMode === 'best' ? 'btn-filter-active' : 'btn-filter'
+              }`}
               type="button"
-              onClick={() => setSearchTerm('')}
+              onClick={() => setSortMode('best')}
             >
               <span className="truncate whitespace-nowrap">
                 {t('discover.controls.bestMatch')}
@@ -494,7 +696,9 @@ export function DiscoverPage() {
             <div className="relative h-14 min-w-0">
               <button
                 aria-expanded={openMenu === 'language'}
-                className="btn-3d-base btn-filter h-full w-full min-w-0 gap-1 overflow-hidden px-3 py-3.5 text-sm leading-none sm:gap-2 sm:px-4 sm:text-base"
+                className={`btn-3d-base h-full w-full min-w-0 gap-1 overflow-hidden px-3 py-3.5 text-sm leading-none sm:gap-2 sm:px-4 sm:text-base ${
+                  languageFilter ? 'btn-filter-active' : 'btn-filter'
+                }`}
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
@@ -508,6 +712,16 @@ export function DiscoverPage() {
               </button>
               {openMenu === 'language' ? (
                 <div className="duo-shadow absolute left-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
+                  <button
+                    className="surface-hover block w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold text-graphite"
+                    type="button"
+                    onClick={() => {
+                      setLanguageFilter('');
+                      setOpenMenu(null);
+                    }}
+                  >
+                    {t('discover.controls.allLanguages')}
+                  </button>
                   {(languageOptions.length > 0 ? languageOptions : ['English', 'Japanese', 'Korean', 'French']).map((language) => (
                     <button
                       className="surface-hover block w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0"
@@ -528,9 +742,12 @@ export function DiscoverPage() {
             </div>
 
             <button
-              className="btn-3d-base btn-filter h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base"
+              aria-pressed={onlineOnly}
+              className={`btn-3d-base h-14 w-full min-w-0 overflow-hidden px-3 py-3.5 text-sm leading-none sm:px-4 sm:text-base ${
+                onlineOnly ? 'btn-filter-active' : 'btn-filter'
+              }`}
               type="button"
-              onClick={() => searchInputRef.current?.focus()}
+              onClick={() => setOnlineOnly((current) => !current)}
             >
               <span className="truncate whitespace-nowrap">
                 {t('discover.controls.currentlyOnline')}
@@ -538,6 +755,63 @@ export function DiscoverPage() {
             </button>
           </div>
         </section>
+
+        {hasActiveFilters || hasSkippedFilters ? (
+          <section className="card-duo mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              {hasActiveFilters ? (
+                <p className="text-sm font-black text-sky-blue">
+                  {filteredDiscovery.activeFilterCount === 1
+                    ? t('discover.filters.active.one', {
+                        count: filteredDiscovery.activeFilterCount,
+                      })
+                    : t('discover.filters.active.other', {
+                        count: filteredDiscovery.activeFilterCount,
+                      })}
+                </p>
+              ) : null}
+              {hasSkippedFilters ? (
+                <p className="mt-1 text-sm font-bold text-graphite">
+                  {t('discover.filters.hidden', { count: filteredDiscovery.skippedCount })}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {hasActiveFilters ? (
+                <button
+                  className="btn-3d-base btn-3d-muted min-h-11 px-4 text-sm"
+                  type="button"
+                  onClick={handleClearFilters}
+                >
+                  {t('discover.filters.clear')}
+                </button>
+              ) : null}
+              {hasSkippedFilters ? (
+                <button
+                  className="btn-3d-base btn-3d-sky min-h-11 px-4 text-sm"
+                  type="button"
+                  onClick={handleClearSkipped}
+                >
+                  {t('discover.filters.clearSkipped')}
+                </button>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {skipFeedback ? (
+          <p className="duo-shadow mb-6 flex flex-col gap-3 rounded-2xl border-2 border-sky-blue bg-sky-blue/10 p-4 text-sm font-bold text-sky-blue sm:flex-row sm:items-center sm:justify-between" role="status">
+            <span>{skipFeedback.label}</span>
+            <button
+              aria-label={t('discover.undoSkipName', { name: skipFeedback.username })}
+              className="btn-3d-base btn-3d-sky min-h-11 px-4 text-sm"
+              type="button"
+              onClick={handleUndoSkip}
+            >
+              {t('discover.undoSkip')}
+            </button>
+          </p>
+        ) : null}
 
         {requestFeedback ? (
           <p className="duo-shadow mb-6 rounded-2xl border-2 border-duo-green bg-duo-green-light p-4 text-sm font-bold text-duo-green" role="status">
@@ -562,12 +836,11 @@ export function DiscoverPage() {
               ? (sendFriendRequestMutation.variables as string | undefined) ?? ''
               : ''
           }
-          skippedUserIds={skippedUserIds}
-          users={visibleUsers}
+          users={filteredDiscovery.users}
           onMenuChange={setOpenMenu}
           onSendRequest={handleSendRequest}
-          onSkip={handleSkip}
-          onUndoSkip={handleUndoSkip}
+          onSkipRegion={handleSkipRegion}
+          onSkipUser={handleSkipUser}
         />
       </div>
     </main>

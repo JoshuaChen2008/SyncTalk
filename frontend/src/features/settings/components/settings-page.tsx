@@ -1,4 +1,4 @@
-import { Check, LogOut, Moon, Sun, type LucideIcon } from 'lucide-react';
+import { Check, LogOut, Moon, Sun, Monitor, type LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { useCurrentUserQuery, useLogoutMutation } from '../../auth/api/auth-hooks';
@@ -12,9 +12,8 @@ import { LanguageToggle } from '../../../i18n/language-toggle';
 import { useThemeStore, type AppTheme } from '../../../stores/theme-store';
 
 function getThemeOptionClass(isActive: boolean) {
-  return `theme-option-card group min-h-[13rem] text-left ${
-    isActive ? 'theme-option-card-active' : ''
-  }`;
+  return `theme-option-card group min-h-[13rem] text-left ${isActive ? 'theme-option-card-active' : ''
+    }`;
 }
 
 function ThemePreview({ variant }: { variant: AppTheme }) {
@@ -22,9 +21,8 @@ function ThemePreview({ variant }: { variant: AppTheme }) {
     <div className="mt-5 rounded-2xl border-2 border-cloud-gray bg-snow-white p-3">
       <div className="mb-3 flex items-center gap-2">
         <span
-          className={`h-8 w-8 rounded-xl shadow-[0_3px_0_#46a300] ${
-            variant === 'dark' ? 'bg-duo-green' : 'bg-sky-blue'
-          }`}
+          className={`h-8 w-8 rounded-xl shadow-[0_3px_0_#46a300] ${variant === 'dark' || variant === 'system' ? 'bg-duo-green' : 'bg-sky-blue'
+            }`}
         />
         <span className="h-3 flex-1 rounded-full bg-cloud-gray" />
       </div>
@@ -65,11 +63,10 @@ function ThemeOption({
           <Icon aria-hidden="true" size={22} strokeWidth={2.6} />
         </span>
         <span
-          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-sm transition-colors ${
-            isActive
-              ? 'border-duo-green bg-duo-green text-white'
-              : 'border-cloud-gray text-transparent'
-          }`}
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-sm transition-colors ${isActive
+            ? 'border-duo-green bg-duo-green text-white'
+            : 'border-cloud-gray text-transparent'
+            }`}
         >
           <Check aria-hidden="true" size={16} strokeWidth={3} />
         </span>
@@ -160,6 +157,17 @@ export function SettingsPage() {
                 variant="dark"
                 onSelect={() => handleThemeChange('dark')}
               />
+              <ThemeOption
+                description={t('settings.theme.systemDescription')}
+                icon={Monitor}
+                isActive={theme === 'system'}
+                label={t('settings.theme.system')}
+                title={t('settings.theme.systemTitle')}
+                variant="system"
+                onSelect={() => handleThemeChange('system')}
+              />
+
+
             </div>
           </section>
 

@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Globe2, Languages, MapPin, MessageCircle, Rocket, UserCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Globe2, Languages, MapPin, MessageCircle, Phone, Rocket, UserCircle } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
@@ -51,6 +51,25 @@ const emptyProfileInput: ProfileInput = {
   bio: '',
   timezone: '',
 };
+
+const profileCompletionFields = [
+  ['nativeLanguage', 'profile.nativeLanguage'],
+  ['targetLanguage', 'profile.targetLanguage'],
+  ['languageLevel', 'profile.currentLevel'],
+  ['learningGoal', 'profile.learningGoals'],
+  ['timezone', 'profile.timezone'],
+] as const;
+
+function getProfileCompletion(form: ProfileInput) {
+  const completeFields = profileCompletionFields.filter(([field]) => form[field].trim().length > 0);
+  const missingFields = profileCompletionFields.filter(([field]) => form[field].trim().length === 0);
+
+  return {
+    completeCount: completeFields.length,
+    missingFields,
+    totalCount: profileCompletionFields.length,
+  };
+}
 
 function getRelationshipLabel(
   relationshipStatus: PublicProfile['relationshipStatus'],
@@ -119,6 +138,48 @@ function PublicInfoTile({
   );
 }
 
+function PublicProfileActions({ profile }: { profile: PublicProfile }) {
+  const { t } = useTranslation();
+
+  if (profile.relationshipStatus === 'friend') {
+    return (
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Link
+          className="btn-3d-base btn-3d-green min-h-14 gap-2 px-6 text-base"
+          to={`/app/chat/${profile.id}`}
+        >
+          <MessageCircle aria-hidden="true" size={19} />
+          {t('friends.chatWith', { name: profile.username })}
+        </Link>
+        <Link
+          className="btn-3d-base btn-3d-purple min-h-14 gap-2 px-6 text-base"
+          to={`/app/call/${profile.id}`}
+        >
+          <Phone aria-hidden="true" size={19} />
+          {t('friends.callName', { name: profile.username })}
+        </Link>
+      </div>
+    );
+  }
+
+  const action =
+    profile.relationshipStatus === 'request_received'
+      ? {
+          href: '/app/requests',
+          label: t('profile.publicAction.reviewRequest'),
+        }
+      : {
+          href: '/app/discover',
+          label: t('profile.publicAction.findInDiscover'),
+        };
+
+  return (
+    <Link className="btn-3d-base btn-3d-sky min-h-14 px-6 text-base" to={action.href}>
+      {action.label}
+    </Link>
+  );
+}
+
 export function PublicProfilePage() {
   const { locale, t } = useTranslation();
   const navigate = useNavigate();
@@ -161,7 +222,6 @@ export function PublicProfilePage() {
   }
 
   const relationshipLabel = getRelationshipLabel(profile.relationshipStatus, t);
-  const canChat = profile.relationshipStatus === 'friend';
 
   return (
     <main className="custom-scrollbar min-h-screen overflow-y-auto bg-snow-white pb-24 text-almost-black lg:pb-12">
@@ -214,21 +274,7 @@ export function PublicProfilePage() {
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  {canChat ? (
-                    <Link
-                      className="btn-3d-base btn-3d-green min-h-14 gap-2 px-8 text-base"
-                      to={`/app/chat/${profile.id}`}
-                    >
-                      <MessageCircle aria-hidden="true" size={19} />
-                      {t('friends.chatWith', { name: profile.username })}
-                    </Link>
-                  ) : (
-                    <span className="btn-3d-base btn-3d-muted min-h-14 cursor-not-allowed px-6 text-base opacity-70">
-                      {relationshipLabel}
-                    </span>
-                  )}
-                </div>
+                <PublicProfileActions profile={profile} />
               </div>
 
               <hr className="my-8 rounded-full border-2 border-cloud-gray" />
@@ -288,6 +334,9 @@ export function ProfilePage() {
   const profileQuery = useMyProfileQuery();
   const updateProfileMutation = useUpdateMyProfileMutation();
   const [form, setForm] = useState<ProfileInput>(emptyProfileInput);
+  const [isSaved, setIsSaved] = useState(false);
+  const completion = getProfileCompletion(form);
+  const missingFieldLabels = completion.missingFields.map(([, labelKey]) => t(labelKey)).join(', ');
 
   useEffect(() => {
     if (!profileQuery.data) {
@@ -305,6 +354,7 @@ export function ProfilePage() {
   }, [profileQuery.data]);
 
   function updateField(field: keyof ProfileInput, value: string) {
+    setIsSaved(false);
     setForm((currentForm) => ({
       ...currentForm,
       [field]: value,
@@ -313,10 +363,15 @@ export function ProfilePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const wasProfileComplete = Boolean(profileQuery.data?.isProfileComplete);
 
     try {
       await updateProfileMutation.mutateAsync(form);
-      navigate('/app/discover', { replace: true });
+      setIsSaved(true);
+
+      if (!wasProfileComplete) {
+        navigate('/app/discover', { replace: true });
+      }
     } catch {
       // The mutation error is rendered below as form-level feedback.
     }
@@ -383,6 +438,40 @@ export function ProfilePage() {
                 {t('profile.incomplete')}
               </p>
             ) : null}
+
+            {isSaved ? (
+              <p className="surface-info rounded-xl border-2 border-duo-green px-4 py-3 text-sm font-bold text-duo-green shadow-[0_3px_0_var(--color-cloud-gray)]" role="status">
+                {t('profile.saved')}
+              </p>
+            ) : null}
+
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-feather text-graphite">
+                    {t('profile.completion.title')}
+                  </h2>
+                  <p className="mt-2 text-sm font-bold leading-6 text-graphite">
+                    {t('profile.completion.summary', {
+                      complete: completion.completeCount,
+                      total: completion.totalCount,
+                    })}
+                  </p>
+                </div>
+                <span className="duo-shadow-sm rounded-2xl border-2 border-cloud-gray bg-duo-green-light px-4 py-2 text-heading-sm font-feather text-duo-green">
+                  {completion.completeCount}/{completion.totalCount}
+                </span>
+              </div>
+              {completion.missingFields.length > 0 ? (
+                <p className="mt-4 rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-graphite">
+                  {t('profile.completion.missing', { fields: missingFieldLabels })}
+                </p>
+              ) : (
+                <p className="mt-4 rounded-xl border-2 border-duo-green bg-duo-green-light px-4 py-3 text-sm font-bold text-duo-green">
+                  {t('profile.completion.ready')}
+                </p>
+              )}
+            </section>
 
             <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -540,7 +629,13 @@ export function ProfilePage() {
                 type="submit"
                 disabled={updateProfileMutation.isPending}
               >
-                <span>{updateProfileMutation.isPending ? t('profile.saving') : t('profile.finish')}</span>
+                <span>
+                  {updateProfileMutation.isPending
+                    ? t('profile.saving')
+                    : profileQuery.data.isProfileComplete
+                      ? t('profile.saveChanges')
+                      : t('profile.finish')}
+                </span>
                 <Rocket aria-hidden="true" size={20} strokeWidth={2.5} />
               </button>
             </div>
@@ -586,7 +681,11 @@ export function ProfilePage() {
               <div className="surface-muted rounded-xl border-2 border-cloud-gray px-3 py-2 text-xs font-bold text-graphite">
                 <div>{t('profile.currentLevel')}: {form.languageLevel || '--'}</div>
                 <div className="mt-1">{t('profile.timezone')}: {form.timezone || '--'}</div>
+                <div className="mt-1">{t('profile.learningGoals')}: {form.learningGoal ? translateDisplayValue(locale, form.learningGoal) : '--'}</div>
               </div>
+              <p className="surface-muted rounded-xl border-2 border-cloud-gray px-3 py-2 text-xs font-bold leading-5 text-graphite">
+                {form.bio || t('friends.defaultBio')}
+              </p>
             </div>
           </div>
         </aside>

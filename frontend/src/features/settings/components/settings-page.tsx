@@ -1,7 +1,9 @@
 import { Check, LogOut, Moon, Sun, Monitor, type LucideIcon } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 
 import { useCurrentUserQuery, useLogoutMutation } from '../../auth/api/auth-hooks';
+import { useMyProfileQuery } from '../../profile/api/profile-hooks';
 import {
   pageContainerClass,
   pageShellClass,
@@ -87,10 +89,12 @@ export function SettingsPage() {
   const { locale, t } = useTranslation();
   const navigate = useNavigate();
   const currentUserQuery = useCurrentUserQuery();
+  const profileQuery = useMyProfileQuery();
   const logoutMutation = useLogoutMutation();
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
   const currentUser = currentUserQuery.data;
+  const [themeSavedMessage, setThemeSavedMessage] = useState('');
 
   async function handleLogout() {
     await logoutMutation.mutateAsync();
@@ -99,6 +103,7 @@ export function SettingsPage() {
 
   function handleThemeChange(nextTheme: AppTheme) {
     setTheme(nextTheme);
+    setThemeSavedMessage(t('settings.themeSaved'));
   }
 
   return (
@@ -129,6 +134,24 @@ export function SettingsPage() {
                 {currentUser?.email ?? t('settings.account.loading')}
               </span>
             </div>
+            <div className="flex flex-col justify-between gap-4 py-4 sm:flex-row sm:items-center">
+              <div>
+                <span className="text-base font-bold text-graphite">
+                  {t('settings.profile.title')}
+                </span>
+                <p className="mt-1 text-sm font-bold text-graphite">
+                  {profileQuery.data?.isProfileComplete
+                    ? t('settings.profile.complete')
+                    : t('settings.profile.incomplete')}
+                </p>
+              </div>
+              <Link
+                className="btn-3d-base btn-3d-sky min-h-12 px-5 text-sm"
+                to="/app/profile"
+              >
+                {t('settings.profile.edit')}
+              </Link>
+            </div>
           </section>
 
           <section className="mb-10">
@@ -138,6 +161,11 @@ export function SettingsPage() {
             <p className="mb-3 text-sm font-bold leading-6 text-graphite">
               {t('settings.theme.description')}
             </p>
+            {themeSavedMessage ? (
+              <p className="surface-info mb-4 rounded-xl border-2 border-sky-blue px-4 py-3 text-sm font-bold text-sky-blue" role="status">
+                {themeSavedMessage}
+              </p>
+            ) : null}
             <div className="grid gap-4 sm:grid-cols-2">
               <ThemeOption
                 description={t('settings.theme.lightDescription')}
@@ -187,6 +215,33 @@ export function SettingsPage() {
                   {locale === 'en' ? t('settings.language.english') : t('settings.language.chinese')}
                 </span>
                 <LanguageToggle />
+              </div>
+            </div>
+          </section>
+
+          <section className="mb-10">
+            <h2 className="mb-4 border-b-2 border-cloud-gray pb-2 text-xl font-feather text-graphite">
+              {t('settings.notifications.title')}
+            </h2>
+            <p className="text-sm font-bold leading-6 text-graphite">
+              {t('settings.notifications.description')}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="card-duo p-4">
+                <p className="text-sm font-black text-duo-green">
+                  {t('settings.notifications.inAppOn')}
+                </p>
+                <p className="mt-2 text-xs font-bold leading-5 text-graphite">
+                  {t('settings.notifications.mode')}
+                </p>
+              </div>
+              <div className="card-duo p-4">
+                <p className="text-sm font-black text-silver">
+                  {t('settings.notifications.disabled')}
+                </p>
+                <p className="mt-2 text-xs font-bold leading-5 text-graphite">
+                  {t('settings.notifications.mvpOnly')}
+                </p>
               </div>
             </div>
           </section>

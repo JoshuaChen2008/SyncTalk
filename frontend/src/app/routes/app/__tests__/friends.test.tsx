@@ -177,6 +177,62 @@ describe('friends page', () => {
     expect(screen.getByText(/showing 1 of 2/i)).toBeInTheDocument();
   });
 
+  it('combines language, goal, and availability filters and can clear them', async () => {
+    mockProtectedAppGet({
+      friends: [
+        mockFriend({
+          id: 'user-2',
+          username: 'sam',
+          targetLanguage: 'Japanese',
+          learningGoal: 'Daily conversation',
+        }),
+        mockFriend({
+          friendshipId: 'friendship-2',
+          id: 'user-3',
+          username: 'lina',
+          targetLanguage: 'Spanish',
+          learningGoal: 'Business communication',
+        }),
+        mockFriend({
+          friendshipId: 'friendship-3',
+          id: 'user-5',
+          username: 'ivy',
+          targetLanguage: 'Spanish',
+          learningGoal: 'Daily conversation',
+        }),
+      ],
+    });
+
+    renderFriendsRoute();
+
+    await screen.findByRole('heading', { name: /your language friends/i });
+    await userEvent.selectOptions(
+      await screen.findByRole('combobox', { name: /learning language/i }),
+      'Spanish',
+    );
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: /learning goal/i }),
+      'Business communication',
+    );
+
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /sam/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /ivy/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/showing 1 of 3/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 filters active/i)).toBeInTheDocument();
+
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: /availability/i }), 'online');
+
+    expect(screen.getByText(/3 filters active/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /clear filters/i }));
+
+    expect(screen.getByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lina/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /ivy/i })).toBeInTheDocument();
+    expect(screen.getByText(/showing 3 of 3/i)).toBeInTheDocument();
+  });
+
   it('closes the filter menu when clicking outside it', async () => {
     mockProtectedAppGet({ friends: [mockFriend()] });
 
@@ -219,7 +275,7 @@ describe('friends page', () => {
     expect(screen.queryByText(/learning:/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/native:/i)).not.toBeInTheDocument();
     expect(screen.getByText('Portuguese')).toBeInTheDocument();
-    expect(screen.getByText('Chinese')).toBeInTheDocument();
+    expect(screen.getAllByText('Chinese')).not.toHaveLength(0);
     expect(
       screen.getByRole('link', { name: /chat with samuel-with-a-very-long-display-name/i }),
     ).toBeInTheDocument();

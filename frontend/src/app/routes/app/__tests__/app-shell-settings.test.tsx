@@ -81,7 +81,7 @@ describe('app shell and settings', () => {
     renderAppRoute();
 
     expect(await screen.findByRole('heading', { name: /settings/i })).toBeInTheDocument();
-    expect(screen.getByText(/notification preferences/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/notification preferences/i)).not.toHaveLength(0);
     expect(screen.getAllByText(/mei@example\.com/i)).toHaveLength(2);
     expect(screen.getByRole('navigation', { name: /primary app navigation/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^discover$/i })).toHaveAttribute(
@@ -107,6 +107,12 @@ describe('app shell and settings', () => {
       'href',
       '/app/profile',
     );
+    expect(screen.getByRole('link', { name: /edit language profile/i })).toHaveAttribute(
+      'href',
+      '/app/profile',
+    );
+    expect(screen.getByText(/profile complete/i)).toBeInTheDocument();
+    expect(screen.getByText(/in-app notifications are on/i)).toBeInTheDocument();
   });
 
   it('persists theme selection and marks the active theme option', async () => {
@@ -127,6 +133,7 @@ describe('app shell and settings', () => {
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"dark"');
+    expect(await screen.findByRole('status')).toHaveTextContent(/theme saved locally/i);
     expect(darkThemeOption).toHaveAttribute('aria-pressed', 'true');
     expect(lightThemeOption).toHaveAttribute('aria-pressed', 'false');
 

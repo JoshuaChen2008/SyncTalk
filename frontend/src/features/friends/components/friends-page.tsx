@@ -29,6 +29,14 @@ const friendFilterOptions = [
   ['online', 'friends.filterOnlineFirst'],
 ] as const;
 
+type AvailabilityFilter = 'all' | 'online' | 'offline';
+
+function getUniqueValues(friends: Friend[], field: 'targetLanguage' | 'learningGoal') {
+  return Array.from(new Set(friends.map((friend) => friend[field]).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
+  );
+}
+
 function isFriendOnline(friend: Friend) {
   const source = `${friend.id}${friend.username}`;
   const checksum = Array.from(source).reduce((total, letter) => total + letter.charCodeAt(0), 0);
@@ -52,6 +60,18 @@ function matchesFriendSearch(friend: Friend, query: string) {
     friend.bio,
     friend.timezone,
   ].some((value) => value.toLowerCase().includes(normalizedQuery));
+}
+
+function matchesAvailability(friend: Friend, availability: AvailabilityFilter) {
+  if (availability === 'online') {
+    return isFriendOnline(friend);
+  }
+
+  if (availability === 'offline') {
+    return !isFriendOnline(friend);
+  }
+
+  return true;
 }
 
 function FriendCard({
@@ -288,13 +308,24 @@ export function FriendsPage() {
   const removeFriendMutation = useRemoveFriendMutation();
   const [removedFriendName, setRemovedFriendName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [languageFilter, setLanguageFilter] = useState('');
+  const [goalFilter, setGoalFilter] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>('all');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [openMenuFriendId, setOpenMenuFriendId] = useState<string | null>(null);
   const [sortLabel, setSortLabel] = useState<'added' | 'language' | 'online'>('added');
   const filterMenuRef = useRef<HTMLDivElement>(null);
+  const allFriends = useMemo(() => friendsQuery.data ?? [], [friendsQuery.data]);
+  const languageOptions = useMemo(() => getUniqueValues(allFriends, 'targetLanguage'), [allFriends]);
+  const goalOptions = useMemo(() => getUniqueValues(allFriends, 'learningGoal'), [allFriends]);
   const filteredFriends = useMemo(() => {
-    const matches =
-      friendsQuery.data?.filter((friend) => matchesFriendSearch(friend, searchTerm)) ?? [];
+    const matches = allFriends.filter(
+      (friend) =>
+        matchesFriendSearch(friend, searchTerm) &&
+        (!languageFilter || friend.targetLanguage === languageFilter) &&
+        (!goalFilter || friend.learningGoal === goalFilter) &&
+        matchesAvailability(friend, availabilityFilter),
+    );
 
     if (sortLabel === 'language') {
       return [...matches].sort((a, b) => a.targetLanguage.localeCompare(b.targetLanguage));
@@ -305,10 +336,14 @@ export function FriendsPage() {
     }
 
     return matches;
-  }, [friendsQuery.data, searchTerm, sortLabel]);
+  }, [allFriends, availabilityFilter, goalFilter, languageFilter, searchTerm, sortLabel]);
   const isSearching = searchTerm.trim().length > 0;
-  const totalFriends = friendsQuery.data?.length ?? 0;
-  const onlineFriends = friendsQuery.data?.filter(isFriendOnline).length ?? 0;
+  const activeFilterCount =
+    Number(Boolean(languageFilter)) +
+    Number(Boolean(goalFilter)) +
+    Number(availabilityFilter !== 'all');
+  const totalFriends = allFriends.length;
+  const onlineFriends = allFriends.filter(isFriendOnline).length;
   const resultSummary = formatResultSummary(locale, filteredFriends.length, totalFriends);
   const filterLabel =
     sortLabel === 'language'
@@ -437,6 +472,78 @@ export function FriendsPage() {
             </div>
           </div>
         </section>
+
+        {totalFriends > 0 ? (
+          <section className="card-duo grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+            <label className="min-w-0">
+              <span className="label-gamified">{t('friends.filter.languageLabel')}</span>
+              <select
+                aria-label={t('friends.filter.languageLabel')}
+                className="input-gamified min-h-12"
+                value={languageFilter}
+                onChange={(event) => setLanguageFilter(event.target.value)}
+              >
+                <option value="">{t('friends.filter.allLanguages')}</option>
+                {languageOptions.map((language) => (
+                  <option key={language} value={language}>
+                    {translateDisplayValue(locale, language)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="min-w-0">
+              <span className="label-gamified">{t('friends.filter.goalLabel')}</span>
+              <select
+                aria-label={t('friends.filter.goalLabel')}
+                className="input-gamified min-h-12"
+                value={goalFilter}
+                onChange={(event) => setGoalFilter(event.target.value)}
+              >
+                <option value="">{t('friends.filter.allGoals')}</option>
+                {goalOptions.map((goal) => (
+                  <option key={goal} value={goal}>
+                    {translateDisplayValue(locale, goal)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="min-w-0">
+              <span className="label-gamified">{t('friends.filter.availabilityLabel')}</span>
+              <select
+                aria-label={t('friends.filter.availabilityLabel')}
+                className="input-gamified min-h-12"
+                value={availabilityFilter}
+                onChange={(event) => setAvailabilityFilter(event.target.value as AvailabilityFilter)}
+              >
+                <option value="all">{t('friends.filter.allAvailability')}</option>
+                <option value="online">{t('friends.online')}</option>
+                <option value="offline">{t('friends.offline')}</option>
+              </select>
+            </label>
+
+            <div className="flex min-w-0 flex-col justify-end gap-2">
+              <p className="text-xs font-black uppercase text-silver">
+                {activeFilterCount === 1
+                  ? t('friends.filter.active.one', { count: activeFilterCount })
+                  : t('friends.filter.active.other', { count: activeFilterCount })}
+              </p>
+              <button
+                className="btn-3d-base btn-3d-muted min-h-12 px-4 text-sm"
+                disabled={activeFilterCount === 0}
+                type="button"
+                onClick={() => {
+                  setLanguageFilter('');
+                  setGoalFilter('');
+                  setAvailabilityFilter('all');
+                }}
+              >
+                {t('friends.filter.clear')}
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         {removedFriendName ? (
           <p className="card-duo p-4 text-sm font-bold text-duo-green" role="status">

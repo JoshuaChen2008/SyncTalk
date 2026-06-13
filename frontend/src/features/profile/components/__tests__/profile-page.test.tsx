@@ -122,6 +122,8 @@ describe('profile page', () => {
     expect(screen.getByLabelText(/timezone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/short bio/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /finish setup/i })).toBeInTheDocument();
+    expect(screen.getByText(/0 of 5 required fields complete/i)).toBeInTheDocument();
+    expect(screen.getByText(/missing: native language, target language, current level, learning goals, timezone/i)).toBeInTheDocument();
   });
 
   it('shows profile validation errors returned by the API', async () => {
@@ -175,6 +177,42 @@ describe('profile page', () => {
     expect(await screen.findByRole('heading', { name: /discover partners/i })).toBeInTheDocument();
   });
 
+  it('keeps completed users on profile after saving edits and shows success feedback', async () => {
+    mockProtectedProfile(
+      mockProfile({
+        nativeLanguage: 'Japanese',
+        targetLanguage: 'English',
+        languageLevel: 'B1',
+        learningGoal: 'Daily conversation',
+        bio: 'Coffee chats welcome.',
+        timezone: 'Asia/Tokyo',
+        isProfileComplete: true,
+      }),
+    );
+    vi.spyOn(apiClient, 'patch').mockResolvedValue({
+      data: {
+        profile: mockProfile({
+          nativeLanguage: 'Japanese',
+          targetLanguage: 'Spanish',
+          languageLevel: 'B1',
+          learningGoal: 'Daily conversation',
+          bio: 'Coffee chats welcome.',
+          timezone: 'Asia/Tokyo',
+          isProfileComplete: true,
+        }),
+      },
+    } as Awaited<ReturnType<typeof apiClient.patch>>);
+
+    const router = renderRoute('/app/profile');
+
+    await userEvent.selectOptions(await screen.findByLabelText(/target language/i), 'Spanish');
+    await userEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/profile saved/i);
+    expect(router.state.location.pathname).toBe('/app/profile');
+    expect(screen.getByText(/5 of 5 required fields complete/i)).toBeInTheDocument();
+  });
+
   it('renders another user public profile without private email', async () => {
     mockProtectedProfile(
       mockProfile({
@@ -197,6 +235,80 @@ describe('profile page', () => {
       'href',
       '/app/chat/user-2',
     );
+    expect(screen.getByRole('link', { name: /call sam/i })).toHaveAttribute(
+      'href',
+      '/app/call/user-2',
+    );
     expect(screen.queryByText(/sam@example\.com/i)).not.toBeInTheDocument();
+  });
+
+  it('shows public profile relationship guidance for non-friends', async () => {
+    mockProtectedProfile(
+      mockProfile({
+        nativeLanguage: 'Japanese',
+        targetLanguage: 'English',
+        languageLevel: 'B1',
+        learningGoal: 'Daily conversation',
+        timezone: 'Asia/Tokyo',
+        isProfileComplete: true,
+      }),
+    );
+    vi.mocked(apiClient.get).mockImplementation(async (url) => {
+      if (url === '/auth/me') {
+        return { data: { user: mockCurrentUser() } } as Awaited<ReturnType<typeof apiClient.get>>;
+      }
+
+      if (url === '/profile/me') {
+        return {
+          data: {
+            profile: mockProfile({
+              nativeLanguage: 'Japanese',
+              targetLanguage: 'English',
+              languageLevel: 'B1',
+              learningGoal: 'Daily conversation',
+              timezone: 'Asia/Tokyo',
+              isProfileComplete: true,
+            }),
+          },
+        } as Awaited<ReturnType<typeof apiClient.get>>;
+      }
+
+      if (url === '/notifications') {
+        return { data: { notifications: [], unreadCount: 0 } } as Awaited<
+          ReturnType<typeof apiClient.get>
+        >;
+      }
+
+      if (url === '/profile/user-2') {
+        return {
+          data: {
+            profile: {
+              id: 'user-2',
+              username: 'sam',
+              avatar: '',
+              nativeLanguage: 'English',
+              targetLanguage: 'Japanese',
+              languageLevel: 'B1',
+              learningGoal: 'Daily conversation',
+              bio: '',
+              timezone: 'Asia/Tokyo',
+              isProfileComplete: true,
+              relationshipStatus: 'stranger',
+            },
+          },
+        } as Awaited<ReturnType<typeof apiClient.get>>;
+      }
+
+      throw new Error(`Unexpected GET ${url}`);
+    });
+
+    renderRoute('/app/profile/user-2');
+
+    expect(await screen.findByRole('heading', { name: /sam/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /chat with sam/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /find this partner in discover/i })).toHaveAttribute(
+      'href',
+      '/app/discover',
+    );
   });
 });

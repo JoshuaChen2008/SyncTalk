@@ -34,7 +34,7 @@ export const heroTitleClass =
 export const heroDescriptionClass = 'mt-4 max-w-2xl text-body font-bold leading-7 text-graphite';
 
 export const heroIconClass =
-  'grid h-10 w-10 place-items-center rounded-xl bg-duo-green text-snow-white shadow-[0_4px_0_#3f8f01]';
+  'grid h-10 w-10 place-items-center rounded-xl bg-duo-green text-white shadow-[0_4px_0_#3f8f01]';
 
 export const heroStatCardClass =
   'rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal shadow-[0_3px_0_#e5e5e5]';

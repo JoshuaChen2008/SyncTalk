@@ -109,20 +109,33 @@ describe('app shell and settings', () => {
     );
   });
 
-  it('persists theme selection to localStorage and document data-theme', async () => {
+  it('persists theme selection and marks the active theme option', async () => {
     mockProtectedShell({ unreadCount: 0 });
 
     renderAppRoute();
 
-    await userEvent.click(await screen.findByRole('button', { name: /use dark theme/i }));
+    expect(await screen.findByText(/daylight focus/i)).toBeInTheDocument();
+    expect(screen.getByText(/night study/i)).toBeInTheDocument();
+
+    const lightThemeOption = screen.getByRole('button', { name: /use light theme/i });
+    const darkThemeOption = screen.getByRole('button', { name: /use dark theme/i });
+
+    expect(lightThemeOption).toHaveAttribute('aria-pressed', 'true');
+    expect(darkThemeOption).toHaveAttribute('aria-pressed', 'false');
+
+    await userEvent.click(darkThemeOption);
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"dark"');
+    expect(darkThemeOption).toHaveAttribute('aria-pressed', 'true');
+    expect(lightThemeOption).toHaveAttribute('aria-pressed', 'false');
 
-    await userEvent.click(screen.getByRole('button', { name: /use light theme/i }));
+    await userEvent.click(lightThemeOption);
 
     expect(document.documentElement.dataset.theme).toBe('light');
     expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"light"');
+    expect(lightThemeOption).toHaveAttribute('aria-pressed', 'true');
+    expect(darkThemeOption).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('toggles app language from the shell and settings controls', async () => {

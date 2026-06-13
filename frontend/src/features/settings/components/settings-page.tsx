@@ -1,4 +1,4 @@
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { Check, LogOut, Moon, Sun, type LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { useCurrentUserQuery, useLogoutMutation } from '../../auth/api/auth-hooks';
@@ -11,10 +11,79 @@ import { useTranslation } from '../../../i18n/i18n-store';
 import { LanguageToggle } from '../../../i18n/language-toggle';
 import { useThemeStore, type AppTheme } from '../../../stores/theme-store';
 
-function getThemeButtonClass(isActive: boolean) {
-  return `btn-3d-base min-h-14 gap-2 px-5 text-base ${
-    isActive ? 'btn-3d-green' : 'btn-3d-muted'
+function getThemeOptionClass(isActive: boolean) {
+  return `theme-option-card group min-h-[13rem] text-left ${
+    isActive ? 'theme-option-card-active' : ''
   }`;
+}
+
+function ThemePreview({ variant }: { variant: AppTheme }) {
+  return (
+    <div className="mt-5 rounded-2xl border-2 border-cloud-gray bg-snow-white p-3">
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className={`h-8 w-8 rounded-xl shadow-[0_3px_0_#46a300] ${
+            variant === 'dark' ? 'bg-duo-green' : 'bg-sky-blue'
+          }`}
+        />
+        <span className="h-3 flex-1 rounded-full bg-cloud-gray" />
+      </div>
+      <div className="grid gap-2 rounded-xl bg-cloud-gray/30 p-2">
+        <span className="h-2.5 rounded-full bg-silver/50" />
+        <span className="h-2.5 w-2/3 rounded-full bg-silver/50" />
+      </div>
+    </div>
+  );
+}
+
+function ThemeOption({
+  description,
+  icon: Icon,
+  isActive,
+  label,
+  onSelect,
+  title,
+  variant,
+}: {
+  description: string;
+  icon: LucideIcon;
+  isActive: boolean;
+  label: string;
+  onSelect: () => void;
+  title: string;
+  variant: AppTheme;
+}) {
+  return (
+    <button
+      aria-pressed={isActive}
+      className={getThemeOptionClass(isActive)}
+      type="button"
+      onClick={onSelect}
+    >
+      <span className="flex items-start justify-between gap-4">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-sky-blue shadow-[0_2px_0_var(--color-cloud-gray)]">
+          <Icon aria-hidden="true" size={22} strokeWidth={2.6} />
+        </span>
+        <span
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-sm transition-colors ${
+            isActive
+              ? 'border-duo-green bg-duo-green text-white'
+              : 'border-cloud-gray text-transparent'
+          }`}
+        >
+          <Check aria-hidden="true" size={16} strokeWidth={3} />
+        </span>
+      </span>
+      <span className="mt-4 block text-lg font-black text-almost-black">
+        {title}
+      </span>
+      <span className="mt-2 block text-sm font-bold leading-6 text-graphite">
+        {description}
+      </span>
+      <span className="sr-only">{label}</span>
+      <ThemePreview variant={variant} />
+    </button>
+  );
 }
 
 export function SettingsPage() {
@@ -72,25 +141,25 @@ export function SettingsPage() {
             <p className="mb-3 text-sm font-bold leading-6 text-graphite">
               {t('settings.theme.description')}
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                aria-pressed={theme === 'light'}
-                className={getThemeButtonClass(theme === 'light')}
-                type="button"
-                onClick={() => handleThemeChange('light')}
-              >
-                <Sun aria-hidden="true" size={18} />
-                {t('settings.theme.light')}
-              </button>
-              <button
-                aria-pressed={theme === 'dark'}
-                className={getThemeButtonClass(theme === 'dark')}
-                type="button"
-                onClick={() => handleThemeChange('dark')}
-              >
-                <Moon aria-hidden="true" size={18} />
-                {t('settings.theme.dark')}
-              </button>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ThemeOption
+                description={t('settings.theme.lightDescription')}
+                icon={Sun}
+                isActive={theme === 'light'}
+                label={t('settings.theme.light')}
+                title={t('settings.theme.lightTitle')}
+                variant="light"
+                onSelect={() => handleThemeChange('light')}
+              />
+              <ThemeOption
+                description={t('settings.theme.darkDescription')}
+                icon={Moon}
+                isActive={theme === 'dark'}
+                label={t('settings.theme.dark')}
+                title={t('settings.theme.darkTitle')}
+                variant="dark"
+                onSelect={() => handleThemeChange('dark')}
+              />
             </div>
           </section>
 
@@ -123,7 +192,7 @@ export function SettingsPage() {
             </p>
             <div className="py-4">
               <button
-                className="btn-3d-base min-h-14 w-full max-w-xs gap-2 bg-[#dc2626] px-6 text-base text-snow-white shadow-[0_4px_0_#991b1b] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                className="btn-3d-base min-h-14 w-full max-w-xs gap-2 bg-[#dc2626] px-6 text-base text-white shadow-[0_4px_0_#991b1b] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 disabled={logoutMutation.isPending}
                 type="button"
                 onClick={handleLogout}

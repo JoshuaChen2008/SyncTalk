@@ -169,7 +169,7 @@ export function NotificationsPage() {
             </button>
             <button
               aria-label={t('notifications.deleteVisibleName')}
-              className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-[#ff4b4b] px-5 text-sm font-black text-snow-white opacity-60 shadow-[0_4px_0_#ea2b2b]"
+              className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-[#ff4b4b] px-5 text-sm font-black text-white opacity-60 shadow-[0_4px_0_#ea2b2b]"
               disabled
               type="button"
             >

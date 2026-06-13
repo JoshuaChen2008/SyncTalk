@@ -364,7 +364,7 @@ export function FriendsPage() {
 
         <section className="relative z-30 grid gap-6 xl:grid-cols-2">
           <div className="relative min-w-0">
-            <label className="relative flex h-16 items-center md:h-[72px]">
+            <label className="relative flex h-[64px] items-center md:h-[72px]">
               <span className="sr-only">{t('friends.search.sr')}</span>
               <Search
                 aria-hidden="true"
@@ -414,8 +414,8 @@ export function FriendsPage() {
             </label>
           </div>
 
-          <div className="grid h-16 min-w-0 grid-cols-2 gap-4 md:h-[72px]">
-            <div className="card-duo flex h-full items-center justify-between gap-[12px] px-[16px] py-3">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2 md:h-[72px]">
+            <div className="card-duo flex min-h-[64px] items-center justify-between gap-[12px] px-[16px] py-3 md:h-full">
               <p className="shrink-0 whitespace-nowrap text-sm font-black text-charcoal">
                 {formatFriendCount(locale, totalFriends)}
               </p>
@@ -424,7 +424,7 @@ export function FriendsPage() {
               </p>
             </div>
 
-            <div className="card-duo flex h-full items-center justify-between gap-4 px-5 py-3">
+            <div className="card-duo flex min-h-[64px] items-center justify-between gap-4 px-5 py-3 md:h-full">
               <div className="min-w-0">
                 <p className="truncate text-xs font-black uppercase text-silver">
                   {t('friends.onlineSummary')}

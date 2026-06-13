@@ -51,7 +51,7 @@ function AppShellNav({ variant }: { variant: 'desktop' | 'mobile' }) {
       className={
         isDesktop
           ? 'hidden flex-col gap-2 md:flex'
-          : 'fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-2xl border-2 border-cloud-gray bg-snow-white p-1.5 shadow-[0_4px_0_#e5e5e5] md:hidden'
+          : 'fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-2xl border-2 border-cloud-gray bg-snow-white p-1.5 shadow-[0_4px_0_var(--color-cloud-gray)] md:hidden'
       }
     >
       {navItems.map(({ icon: Icon, iconClass, labelKey, to }) => {
@@ -66,11 +66,11 @@ function AppShellNav({ variant }: { variant: 'desktop' | 'mobile' }) {
               isDesktop
                 ? `group flex min-h-14 items-center gap-4 rounded-xl border-2 px-4 text-lg font-black transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
                     isActive
-                      ? 'border-[#84d8ff] bg-[#ddf4ff] text-sky-blue'
+                      ? 'border-sky-blue/45 bg-sky-blue/15 text-sky-blue'
                       : 'border-transparent text-graphite hover:bg-cloud-gray/30 hover:text-almost-black'
                   }`
                 : `relative grid min-h-12 place-items-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
-                    isActive ? 'bg-[#ddf4ff] text-sky-blue' : 'text-graphite hover:bg-cloud-gray/30'
+                    isActive ? 'bg-sky-blue/15 text-sky-blue' : 'text-graphite hover:bg-cloud-gray/30'
                   }`
             }
             key={to}
@@ -110,7 +110,7 @@ export function AppShell() {
   const currentUser = currentUserQuery.data;
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] text-almost-black">
+    <div className="min-h-screen bg-cloud-gray/20 text-almost-black">
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1400px]">
         <aside className="sticky top-0 z-30 hidden h-screen w-[250px] shrink-0 border-r-2 border-cloud-gray bg-snow-white p-4 pt-8 md:flex md:flex-col">
           <Link className="px-4 text-heading font-feather text-duo-green transition-all hover:brightness-110" to="/app/discover">
@@ -129,7 +129,7 @@ export function AppShell() {
           </div>
 
           <Link
-            className="mt-3 flex min-h-14 items-center gap-3 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-sm font-bold text-almost-black shadow-[0_3px_0_#e5e5e5] transition-colors hover:bg-cloud-gray/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
+            className="mt-3 flex min-h-14 items-center gap-3 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 text-sm font-bold text-almost-black shadow-[0_3px_0_var(--color-cloud-gray)] transition-colors hover:bg-cloud-gray/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30"
             to="/app/profile"
           >
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-cloud-gray/40 text-graphite">

@@ -25,6 +25,12 @@ export type NotificationsResponse = {
   unreadCount: number;
 };
 
+export type CreateUnreadMessageNotificationInput = {
+  messageId?: string;
+  preview: string;
+  senderId: string;
+};
+
 export async function getNotifications() {
   const response = await apiClient.get<NotificationsResponse>('/notifications');
   return response.data;
@@ -33,6 +39,16 @@ export async function getNotifications() {
 export async function markNotificationAsRead(notificationId: string) {
   const response = await apiClient.patch<{ notification: AppNotification }>(
     `/notifications/${notificationId}/read`,
+  );
+  return response.data.notification;
+}
+
+export async function createUnreadMessageNotification(
+  input: CreateUnreadMessageNotificationInput,
+) {
+  const response = await apiClient.post<{ notification: AppNotification }>(
+    '/notifications/unread-message',
+    input,
   );
   return response.data.notification;
 }

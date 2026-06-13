@@ -18,11 +18,11 @@ import {
 import { formatDateTime } from '../../../i18n/format';
 import { useTranslation } from '../../../i18n/i18n-store';
 
-const safeNotificationTargets = new Set(['/app/requests', '/app/friends']);
+const safeNotificationTargets = [/^\/app\/requests$/, /^\/app\/friends$/, /^\/app\/chat\/[^/]+$/, /^\/app\/call\/[^/]+$/];
 
 function getSafeHref(notification: AppNotification) {
   const href = notification.metadata.href;
-  return href && safeNotificationTargets.has(href) ? href : '';
+  return href && safeNotificationTargets.some((target) => target.test(href)) ? href : '';
 }
 
 function getNotificationIcon(notification: AppNotification) {

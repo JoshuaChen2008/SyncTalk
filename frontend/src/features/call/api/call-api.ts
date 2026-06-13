@@ -29,6 +29,11 @@ export async function getCallSession(friendId: string) {
   return response.data;
 }
 
+export async function ringCallSession(friendId: string) {
+  const response = await apiClient.post<CallSession>(`/call/session/${friendId}/ring`);
+  return response.data;
+}
+
 export function getCallApiErrorMessage(error: unknown) {
   if (
     error &&

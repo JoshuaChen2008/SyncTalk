@@ -12,6 +12,7 @@ function createUser(overrides = {}) {
 }
 
 function createService({
+  notificationsService: notificationsServiceOverrides = {},
   userRepository: userRepositoryOverrides = {},
   relationshipRepository: relationshipRepositoryOverrides = {},
   streamVideoClient: streamVideoClientOverrides = {},
@@ -29,10 +30,20 @@ function createService({
     upsertUsers: vi.fn(async () => undefined),
     ...streamVideoClientOverrides,
   };
+  const notificationsService = {
+    createIncomingCallNotification: vi.fn(async () => undefined),
+    ...notificationsServiceOverrides,
+  };
 
   return {
+    notificationsService,
     relationshipRepository,
-    service: createCallService({ userRepository, relationshipRepository, streamVideoClient }),
+    service: createCallService({
+      notificationsService,
+      userRepository,
+      relationshipRepository,
+      streamVideoClient,
+    }),
     streamVideoClient,
     userRepository,
   };
@@ -115,5 +126,30 @@ describe('call service', () => {
       message: 'User not found',
     });
     expect(relationshipRepository.findFriendshipBetween).not.toHaveBeenCalled();
+  });
+
+  it('returns a ringing session and creates an incoming call notification', async () => {
+    const { notificationsService, service } = createService({
+      userRepository: {
+        findById: vi.fn(async () => createUser({ id: 'user-2', username: 'sam' })),
+      },
+    });
+
+    const result = await service.getRingingSession('user-1', 'user-2');
+
+    expect(result).toMatchObject({
+      callId: 'user-1-user-2',
+      callType: 'default',
+      friend: {
+        id: 'user-2',
+        username: 'sam',
+        avatar: '',
+      },
+      members: ['user-1', 'user-2'],
+    });
+    expect(notificationsService.createIncomingCallNotification).toHaveBeenCalledWith({
+      callerId: 'user-1',
+      receiverId: 'user-2',
+    });
   });
 });

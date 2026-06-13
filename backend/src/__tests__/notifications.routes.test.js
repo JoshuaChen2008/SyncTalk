@@ -133,4 +133,53 @@ describe('notifications routes', () => {
       'notification-1',
     );
   });
+
+  it('creates an unread message notification for the current user', async () => {
+    const authService = createAuthService();
+    const notificationsService = {
+      createOrUpdateUnreadMessageNotification: vi.fn(async () =>
+        createNotification({
+          type: 'unread_message',
+          title: 'New message from sam',
+          content: 'Hi there',
+          metadata: {
+            href: '/app/chat/user-2',
+            messageId: 'message-1',
+            senderId: 'user-2',
+          },
+        }),
+      ),
+    };
+    const baseUrl = await startTestServer({ authService, notificationsService });
+
+    const response = await request(baseUrl, '/api/notifications/unread-message', {
+      method: 'POST',
+      headers: { Cookie: 'synctalk_session=valid-token' },
+      body: JSON.stringify({
+        messageId: 'message-1',
+        preview: 'Hi there',
+        senderId: 'user-2',
+      }),
+    });
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toEqual({
+      notification: createNotification({
+        type: 'unread_message',
+        title: 'New message from sam',
+        content: 'Hi there',
+        metadata: {
+          href: '/app/chat/user-2',
+          messageId: 'message-1',
+          senderId: 'user-2',
+        },
+      }),
+    });
+    expect(notificationsService.createOrUpdateUnreadMessageNotification).toHaveBeenCalledWith({
+      messageId: 'message-1',
+      preview: 'Hi there',
+      receiverId: 'user-1',
+      senderId: 'user-2',
+    });
+  });
 });

@@ -65,6 +65,7 @@ vi.mock('@stream-io/video-client', () => ({
 }));
 
 vi.mock('@stream-io/video-react-sdk', () => ({
+  CallingState: { RINGING: 'ringing' },
   CallControls: ({ onLeave }: { onLeave?: () => void }) => (
     <button type="button" onClick={onLeave}>
       Leave call
@@ -86,6 +87,7 @@ vi.mock('@stream-io/video-react-sdk', () => ({
     <section aria-label="Stream video">{children}</section>
   ),
   StreamVideoClient: createMockVideoClient,
+  useCalls: () => [],
   useCallStateHooks: () => ({
     useCameraState: () => ({ camera: { toggle: mockCameraToggle }, isMute: false }),
     useLocalParticipant: () => mockLocalParticipant.current,
@@ -93,6 +95,14 @@ vi.mock('@stream-io/video-react-sdk', () => ({
     useParticipants: () => mockParticipants,
     useRemoteParticipants: () => mockParticipants.filter((participant) => !participant.isLocalParticipant),
   }),
+}));
+
+vi.mock('stream-chat', () => ({
+  StreamChat: vi.fn(() => ({
+    connectUser: vi.fn(async () => undefined),
+    disconnectUser: vi.fn(async () => undefined),
+    on: vi.fn(() => ({ unsubscribe: vi.fn() })),
+  })),
 }));
 
 function createTestQueryClient() {
@@ -106,7 +116,7 @@ function createTestQueryClient() {
 
 function renderCallRoute() {
   const router = createMemoryRouter(routes, {
-    initialEntries: ['/app/call/user-2'],
+    initialEntries: [{ pathname: '/app/call/user-2', state: { skipRing: true } }],
   });
 
   render(
@@ -162,6 +172,15 @@ function mockProtectedCall({
       return {
         data: {
           token: 'video-token',
+          user: { id: 'user-1', username: 'mei', avatar: '' },
+        },
+      } as Awaited<ReturnType<typeof apiClient.get>>;
+    }
+
+    if (url === '/chat/token') {
+      return {
+        data: {
+          token: 'chat-token',
           user: { id: 'user-1', username: 'mei', avatar: '' },
         },
       } as Awaited<ReturnType<typeof apiClient.get>>;
@@ -271,8 +290,8 @@ describe('call page', () => {
     fireEvent.click(await screen.findByRole('button', { name: /leave call/i }));
 
     await waitFor(() => {
-      expect(mockCalls.at(-1)?.leave).toHaveBeenCalled();
-      expect(mockVideoClients.at(-1)?.disconnectUser).toHaveBeenCalled();
+      expect(mockCalls.some((call) => call.leave.mock.calls.length > 0)).toBe(true);
+      expect(mockVideoClients.some((client) => client.disconnectUser.mock.calls.length > 0)).toBe(true);
     });
   });
 

@@ -18,10 +18,12 @@ function createNotification(overrides = {}) {
 
 function createService({
   notificationsRepository: notificationsRepositoryOverrides = {},
+  relationshipRepository: relationshipRepositoryOverrides = {},
   userRepository: userRepositoryOverrides = {},
 } = {}) {
   const notificationsRepository = {
     create: vi.fn(async (notification) => createNotification(notification)),
+    findUnreadMessageForSender: vi.fn(async () => null),
     findForUser: vi.fn(async () => [
       createNotification({ id: 'notification-2', createdAt: '2026-06-02T00:00:00.000Z' }),
       createNotification({ id: 'notification-1', createdAt: '2026-06-01T00:00:00.000Z' }),
@@ -30,7 +32,20 @@ function createService({
     markAsReadForUser: vi.fn(async () =>
       createNotification({ readAt: '2026-06-02T08:00:00.000Z' }),
     ),
+    updateUnreadMessageForSender: vi.fn(async (userId, senderId, notification) =>
+      createNotification({
+        ...notification,
+        id: 'notification-3',
+        metadata: { senderId, ...notification.metadata },
+        type: 'unread_message',
+        userId,
+      }),
+    ),
     ...notificationsRepositoryOverrides,
+  };
+  const relationshipRepository = {
+    findFriendshipBetween: vi.fn(async () => ({ id: 'friendship-1' })),
+    ...relationshipRepositoryOverrides,
   };
   const userRepository = {
     findById: vi.fn(async (userId) => ({
@@ -41,7 +56,12 @@ function createService({
   };
 
   return {
-    service: createNotificationsService({ notificationsRepository, userRepository }),
+    relationshipRepository,
+    service: createNotificationsService({
+      notificationsRepository,
+      relationshipRepository,
+      userRepository,
+    }),
     notificationsRepository,
     userRepository,
   };
@@ -115,5 +135,82 @@ describe('notifications service', () => {
       content: 'sam accepted your friend request.',
       metadata: { href: '/app/friends' },
     });
+  });
+
+  it('creates an unread message notification for a friend', async () => {
+    const { relationshipRepository, service, notificationsRepository } = createService();
+
+    await service.createOrUpdateUnreadMessageNotification({
+      messageId: 'message-1',
+      preview: 'Hello from Stream',
+      receiverId: 'user-1',
+      senderId: 'user-2',
+    });
+
+    expect(relationshipRepository.findFriendshipBetween).toHaveBeenCalledWith('user-1', 'user-2');
+    expect(notificationsRepository.create).toHaveBeenCalledWith({
+      userId: 'user-1',
+      type: 'unread_message',
+      title: 'New message from sam',
+      content: 'Hello from Stream',
+      metadata: {
+        href: '/app/chat/user-2',
+        messageId: 'message-1',
+        senderId: 'user-2',
+      },
+    });
+  });
+
+  it('updates an existing unread message notification for the same sender', async () => {
+    const { service, notificationsRepository } = createService({
+      notificationsRepository: {
+        findUnreadMessageForSender: vi.fn(async () =>
+          createNotification({
+            id: 'notification-3',
+            metadata: { href: '/app/chat/user-2', senderId: 'user-2' },
+            type: 'unread_message',
+          }),
+        ),
+      },
+    });
+
+    await service.createOrUpdateUnreadMessageNotification({
+      preview: '',
+      receiverId: 'user-1',
+      senderId: 'user-2',
+    });
+
+    expect(notificationsRepository.updateUnreadMessageForSender).toHaveBeenCalledWith(
+      'user-1',
+      'user-2',
+      {
+        title: 'New message from sam',
+        content: 'sam sent you a message.',
+        metadata: {
+          href: '/app/chat/user-2',
+          senderId: 'user-2',
+        },
+      },
+    );
+    expect(notificationsRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects unread message notifications from non-friends', async () => {
+    const { service, notificationsRepository } = createService({
+      relationshipRepository: {
+        findFriendshipBetween: vi.fn(async () => null),
+      },
+    });
+
+    await expect(
+      service.createOrUpdateUnreadMessageNotification({
+        receiverId: 'user-1',
+        senderId: 'user-2',
+      }),
+    ).rejects.toMatchObject({
+      status: 403,
+      message: 'Only friends can create message notifications',
+    });
+    expect(notificationsRepository.create).not.toHaveBeenCalled();
   });
 });

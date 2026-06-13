@@ -55,9 +55,17 @@ function mockProtectedNotifications({
     }),
     mockNotification({
       id: 'notification-3',
-      title: 'Unsupported target',
-      content: 'This notification points somewhere unavailable.',
+      type: 'unread_message',
+      title: 'New message from sam',
+      content: 'sam sent you a message.',
       metadata: { href: '/app/chat/user-2' },
+    }),
+    mockNotification({
+      id: 'notification-4',
+      type: 'incoming_call',
+      title: 'Incoming call from sam',
+      content: 'sam is calling you.',
+      metadata: { href: '/app/call/user-2' },
     }),
   ],
   unreadCount = 2,
@@ -133,7 +141,14 @@ describe('notifications page', () => {
       'href',
       '/app/friends',
     );
-    expect(screen.getByText(/invalid notification target/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open new message from sam/i })).toHaveAttribute(
+      'href',
+      '/app/chat/user-2',
+    );
+    expect(screen.getByRole('link', { name: /open incoming call from sam/i })).toHaveAttribute(
+      'href',
+      '/app/call/user-2',
+    );
   });
 
   it('marks an unread notification as read', async () => {

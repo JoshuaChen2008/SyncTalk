@@ -12,7 +12,7 @@ import '@stream-io/video-react-sdk/dist/css/styles.css';
 import { ArrowLeft, MessageCircle, Mic, MicOff, ShieldAlert, Video, VideoOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 
 import {
   AppStatePanel,
@@ -21,7 +21,7 @@ import { SessionWorkspace } from '../../friends/components/session-workspace';
 import { useFriendsQuery } from '../../friends/api/friends-hooks';
 import { useTranslation } from '../../../i18n/i18n-store';
 import { getCallApiErrorMessage, type CallSession, type CallToken } from '../api/call-api';
-import { useCallSessionQuery, useCallTokenQuery } from '../api/call-hooks';
+import { useCallSessionQuery, useCallTokenQuery, useRingCallSessionMutation } from '../api/call-hooks';
 
 function getStreamApiKey() {
   return import.meta.env.VITE_STREAM_API_KEY ?? '';
@@ -185,10 +185,12 @@ function OneOnOneCallLayout({
 }
 
 function StreamCallPanel({
+  shouldRing,
   sessionData,
   streamApiKey,
   tokenData,
 }: {
+  shouldRing?: boolean;
   sessionData: CallSession;
   streamApiKey: string;
   tokenData: CallToken;
@@ -222,6 +224,22 @@ function StreamCallPanel({
 
     async function joinCall() {
       try {
+        if (shouldRing) {
+          await (nextCall as Call & {
+            getOrCreate?: (input: {
+              data: { members: Array<{ user_id: string }> };
+              ring: boolean;
+              video: boolean;
+            }) => Promise<unknown>;
+          }).getOrCreate?.({
+            ring: true,
+            video: true,
+            data: {
+              members: sessionData.members.map((memberId) => ({ user_id: memberId })),
+            },
+          });
+        }
+
         await nextCall.join({ create: true });
 
         if (isActive) {
@@ -247,7 +265,7 @@ function StreamCallPanel({
       void nextCall.leave().catch(() => undefined);
       void nextClient.disconnectUser().catch(() => undefined);
     };
-  }, [sessionData.callId, sessionData.callType, streamApiKey, t, tokenData]);
+  }, [sessionData.callId, sessionData.callType, sessionData.members, shouldRing, streamApiKey, t, tokenData]);
 
   async function handleLeave() {
     try {
@@ -319,32 +337,49 @@ function StreamCallPanel({
 
 export function CallPage() {
   const { t } = useTranslation();
+  const location = useLocation();
   const { friendId = '' } = useParams();
+  const routeState = location.state as { ring?: boolean; skipRing?: boolean } | null;
+  const shouldRing = routeState?.ring === true && !routeState.skipRing;
   const streamApiKey = getStreamApiKey();
   const friendsQuery = useFriendsQuery();
   const tokenQuery = useCallTokenQuery();
-  const sessionQuery = useCallSessionQuery(friendId);
-  const isLoading = tokenQuery.isPending || sessionQuery.isPending;
-  const error = tokenQuery.error ?? sessionQuery.error;
-  const activeFriend = sessionQuery.data
+  const sessionQuery = useCallSessionQuery(friendId, { enabled: !shouldRing });
+  const ringSessionMutation = useRingCallSessionMutation();
+  const sessionData = shouldRing ? ringSessionMutation.data : sessionQuery.data;
+  const sessionError = shouldRing ? ringSessionMutation.error : sessionQuery.error;
+  const isSessionPending = shouldRing
+    ? ringSessionMutation.isIdle || ringSessionMutation.isPending
+    : sessionQuery.isPending;
+  const isLoading = tokenQuery.isPending || isSessionPending;
+  const error = tokenQuery.error ?? sessionError;
+  const activeFriend = sessionData
     ? {
-        avatar: sessionQuery.data.friend.avatar,
-        id: sessionQuery.data.friend.id,
+        avatar: sessionData.friend.avatar,
+        id: sessionData.friend.id,
         languageLevel: '',
         targetLanguage: '',
-        username: sessionQuery.data.friend.username,
+        username: sessionData.friend.username,
       }
     : undefined;
-  const title = sessionQuery.data
-    ? t('call.hero.titleWithName', { name: sessionQuery.data.friend.username })
+  const title = sessionData
+    ? t('call.hero.titleWithName', { name: sessionData.friend.username })
     : t('call.hero.title');
+
+  useEffect(() => {
+    if (!shouldRing || !friendId || ringSessionMutation.data || ringSessionMutation.isPending) {
+      return;
+    }
+
+    ringSessionMutation.mutate(friendId);
+  }, [friendId, ringSessionMutation, shouldRing]);
 
   return (
     <SessionWorkspace
       activeFriend={activeFriend}
       friends={friendsQuery.data ?? []}
       mode="call"
-      statusText={sessionQuery.data ? t('session.status.livePractice') : t('call.badge')}
+      statusText={sessionData ? t('session.status.livePractice') : t('call.badge')}
       title={title}
     >
       <div className="mx-auto flex h-full w-full max-w-[1040px] flex-col gap-4">
@@ -363,9 +398,10 @@ export function CallPage() {
           <CallErrorPanel friendId={friendId} message={getCallApiErrorMessage(error)} />
         ) : null}
 
-        {streamApiKey && tokenQuery.data && sessionQuery.data && !error ? (
+        {streamApiKey && tokenQuery.data && sessionData && !error ? (
           <StreamCallPanel
-            sessionData={sessionQuery.data}
+            sessionData={sessionData}
+            shouldRing={shouldRing}
             streamApiKey={streamApiKey}
             tokenData={tokenQuery.data}
           />

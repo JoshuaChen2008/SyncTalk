@@ -190,6 +190,7 @@ export function SessionWorkspace({
                           : 'surface-hover border-transparent text-charcoal'
                       }`}
                       key={friend.id}
+                      state={isChat ? undefined : { ring: true }}
                       title={friend.username}
                       to={`${basePath}/${friend.id}`}
                     >
@@ -263,6 +264,7 @@ export function SessionWorkspace({
               <Link
                 aria-label={isChat ? `Call ${activeFriend.username}` : `Chat with ${activeFriend.username}`}
                 className="btn-3d-base btn-3d-green mb-0 h-10 w-10 rounded-full"
+                state={isChat ? { ring: true } : undefined}
                 to={`${isChat ? '/app/call' : '/app/chat'}/${activeFriend.id}`}
               >
                 {isChat ? (

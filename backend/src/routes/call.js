@@ -30,5 +30,14 @@ export function createCallRouter(authService, callService) {
     }),
   );
 
+  router.post(
+    '/session/:friendId/ring',
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const session = await callService.getRingingSession(req.user.id, req.params.friendId);
+      res.status(201).json(session);
+    }),
+  );
+
   return router;
 }

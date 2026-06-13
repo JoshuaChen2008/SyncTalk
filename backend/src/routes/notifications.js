@@ -21,6 +21,21 @@ export function createNotificationsRouter(authService, notificationsService) {
     }),
   );
 
+  router.post(
+    '/unread-message',
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const notification = await notificationsService.createOrUpdateUnreadMessageNotification({
+        messageId: req.body.messageId,
+        preview: req.body.preview,
+        receiverId: req.user.id,
+        senderId: req.body.senderId,
+      });
+
+      res.status(201).json({ notification });
+    }),
+  );
+
   router.patch(
     '/:notificationId/read',
     requireAuth,

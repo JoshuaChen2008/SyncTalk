@@ -127,4 +127,31 @@ describe('call routes', () => {
     });
     expect(callService.getSession).toHaveBeenCalledWith('user-1', 'user-2');
   });
+
+  it('starts a ringing call session for a friend', async () => {
+    const authService = createAuthService();
+    const callService = {
+      getRingingSession: vi.fn(async () => ({
+        callId: 'user-1-user-2',
+        callType: 'default',
+        friend: { id: 'user-2', username: 'sam', avatar: '' },
+        members: ['user-1', 'user-2'],
+      })),
+    };
+    const baseUrl = await startTestServer({ authService, callService });
+
+    const response = await request(baseUrl, '/api/call/session/user-2/ring', {
+      method: 'POST',
+      headers: { Cookie: 'synctalk_session=valid-token' },
+    });
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toEqual({
+      callId: 'user-1-user-2',
+      callType: 'default',
+      friend: { id: 'user-2', username: 'sam', avatar: '' },
+      members: ['user-1', 'user-2'],
+    });
+    expect(callService.getRingingSession).toHaveBeenCalledWith('user-1', 'user-2');
+  });
 });

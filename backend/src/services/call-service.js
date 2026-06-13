@@ -3,6 +3,7 @@ import { StreamClient } from '@stream-io/node-sdk';
 import { env } from '../config/env.js';
 import { createHttpError } from '../utils/http-error.js';
 import { relationshipRepository as defaultRelationshipRepository } from './relationship-repository.js';
+import { notificationsService as defaultNotificationsService } from './notifications-service.js';
 import { createUserRepository } from './user-repository.js';
 
 const TOKEN_VALIDITY_SECONDS = 60 * 60;
@@ -43,6 +44,7 @@ function createDefaultStreamVideoClient() {
 }
 
 export function createCallService({
+  notificationsService = defaultNotificationsService,
   userRepository = createUserRepository(),
   relationshipRepository = defaultRelationshipRepository,
   streamVideoClient,
@@ -105,6 +107,17 @@ export function createCallService({
         friend: friendUser,
         members: [userId, normalizedFriendId],
       };
+    },
+
+    async getRingingSession(userId, friendId) {
+      const session = await this.getSession(userId, friendId);
+
+      await notificationsService.createIncomingCallNotification({
+        callerId: userId,
+        receiverId: session.friend.id,
+      });
+
+      return session;
     },
   };
 }

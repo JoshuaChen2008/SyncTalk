@@ -178,6 +178,7 @@ function FriendCard({
         <Link
           aria-label={t('friends.callName', { name: friend.username })}
           className="btn-3d-base btn-3d-purple h-14 min-w-0 gap-1 px-2 text-sm min-[380px]:gap-1.5 min-[380px]:px-3 min-[380px]:text-base"
+          state={{ ring: true }}
           to={`/app/call/${friend.id}`}
         >
           <Phone aria-hidden="true" className="shrink-0" size={17} />

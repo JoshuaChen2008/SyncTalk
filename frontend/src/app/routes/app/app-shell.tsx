@@ -11,6 +11,7 @@ import { Link, NavLink, Outlet } from 'react-router';
 import { ThemeModeToggle } from '../../components/theme-mode-toggle';
 import { useCurrentUserQuery } from '../../../features/auth/api/auth-hooks';
 import { useNotificationsQuery } from '../../../features/notifications/api/notifications-hooks';
+import { AppRealtimeNotifications } from '../../../features/realtime/components/app-realtime-notifications';
 import { useTranslation } from '../../../i18n/i18n-store';
 import { LanguageToggle } from '../../../i18n/language-toggle';
 
@@ -174,6 +175,7 @@ export function AppShell() {
         </div>
       </div>
       <AppShellNav variant="mobile" />
+      <AppRealtimeNotifications currentUser={currentUser} />
     </div>
   );
 }

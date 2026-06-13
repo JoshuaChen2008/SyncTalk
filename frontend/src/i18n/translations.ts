@@ -261,6 +261,11 @@ export const translations = {
     'notifications.deleteVisibleName': 'Delete visible notifications',
     'notifications.deleteVisible': 'Delete all',
     'notifications.error.fallback': 'Could not load notifications. Please try again.',
+    'realtime.dismiss': 'Dismiss notification',
+    'realtime.call.title': 'Incoming call',
+    'realtime.call.description': 'A language partner is calling you now.',
+    'realtime.call.accept': 'Accept',
+    'realtime.call.decline': 'Decline',
 
     'settings.badge': 'Account controls',
     'settings.title': 'Settings',
@@ -618,6 +623,11 @@ export const translations = {
     'notifications.deleteVisibleName': '删除可见通知',
     'notifications.deleteVisible': '全部删除',
     'notifications.error.fallback': '无法加载通知，请重试。',
+    'realtime.dismiss': '关闭提醒',
+    'realtime.call.title': '来电',
+    'realtime.call.description': '一位语言伙伴正在呼叫你。',
+    'realtime.call.accept': '接听',
+    'realtime.call.decline': '拒绝',
 
     'settings.badge': '账号控制',
     'settings.title': '设置',

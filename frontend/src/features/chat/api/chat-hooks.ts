@@ -8,10 +8,11 @@ export function chatChannelQueryKey(friendId: string) {
   return ['chat', 'channel', friendId] as const;
 }
 
-export function useChatTokenQuery() {
+export function useChatTokenQuery({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: chatTokenQueryKey,
     queryFn: getChatToken,
+    enabled,
   });
 }
 

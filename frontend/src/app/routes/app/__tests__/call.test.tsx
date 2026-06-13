@@ -7,12 +7,29 @@ import type { ReactNode } from 'react';
 import { routes } from '../../../router';
 import { apiClient } from '../../../../lib/api-client';
 
-const { createMockVideoClient, mockCalls, mockCameraToggle, mockMicrophoneToggle, mockVideoClients } =
+const {
+  createMockVideoClient,
+  mockCalls,
+  mockCameraToggle,
+  mockLocalParticipant,
+  mockMicrophoneToggle,
+  mockParticipants,
+  mockVideoClients,
+} =
   vi.hoisted(() => {
   const mockCalls: Array<{
     join: ReturnType<typeof vi.fn>;
     leave: ReturnType<typeof vi.fn>;
   }> = [];
+  const mockLocalParticipant = {
+    current: { isLocalParticipant: true, sessionId: 'local-session', userId: 'user-1' } as
+      | { isLocalParticipant: boolean; sessionId: string; userId: string }
+      | undefined,
+  };
+  const mockParticipants: Array<{ isLocalParticipant: boolean; sessionId: string; userId: string }> = [
+    { isLocalParticipant: true, sessionId: 'local-session', userId: 'user-1' },
+    { isLocalParticipant: false, sessionId: 'remote-session', userId: 'user-2' },
+  ];
   const mockVideoClients: Array<{
     call: ReturnType<typeof vi.fn>;
     disconnectUser: ReturnType<typeof vi.fn>;
@@ -21,7 +38,9 @@ const { createMockVideoClient, mockCalls, mockCameraToggle, mockMicrophoneToggle
     return {
       mockCalls,
       mockCameraToggle: vi.fn(),
+      mockLocalParticipant,
       mockMicrophoneToggle: vi.fn(),
+      mockParticipants,
       mockVideoClients,
       createMockVideoClient: vi.fn(() => {
         const mockCall = {
@@ -51,17 +70,28 @@ vi.mock('@stream-io/video-react-sdk', () => ({
       Leave call
     </button>
   ),
+  ParticipantView: ({ participant }: { participant: { isLocalParticipant?: boolean; userId: string } }) => (
+    <div data-testid={participant.isLocalParticipant ? 'stream-local-participant' : 'stream-remote-participant'}>
+      Participant {participant.userId}
+    </div>
+  ),
   SpeakerLayout: () => <div>Stream speaker layout</div>,
   StreamCall: ({ children }: { children: ReactNode }) => <section>{children}</section>,
-  StreamTheme: ({ children }: { children: ReactNode }) => <section>{children}</section>,
+  StreamTheme: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <section className={className} data-testid="stream-theme">
+      {children}
+    </section>
+  ),
   StreamVideo: ({ children }: { children: ReactNode }) => (
     <section aria-label="Stream video">{children}</section>
   ),
   StreamVideoClient: createMockVideoClient,
   useCallStateHooks: () => ({
     useCameraState: () => ({ camera: { toggle: mockCameraToggle }, isMute: false }),
+    useLocalParticipant: () => mockLocalParticipant.current,
     useMicrophoneState: () => ({ microphone: { toggle: mockMicrophoneToggle }, isMute: false }),
-    useParticipants: () => [{ userId: 'user-1' }, { userId: 'user-2' }],
+    useParticipants: () => mockParticipants,
+    useRemoteParticipants: () => mockParticipants.filter((participant) => !participant.isLocalParticipant),
   }),
 }));
 
@@ -164,7 +194,14 @@ beforeEach(() => {
   vi.stubEnv('VITE_STREAM_API_KEY', 'test-stream-key');
   mockCalls.length = 0;
   mockCameraToggle.mockClear();
+  mockLocalParticipant.current = { isLocalParticipant: true, sessionId: 'local-session', userId: 'user-1' };
   mockMicrophoneToggle.mockClear();
+  mockParticipants.splice(
+    0,
+    mockParticipants.length,
+    { isLocalParticipant: true, sessionId: 'local-session', userId: 'user-1' },
+    { isLocalParticipant: false, sessionId: 'remote-session', userId: 'user-2' },
+  );
   mockVideoClients.length = 0;
 });
 
@@ -192,12 +229,26 @@ describe('call page', () => {
     expect(screen.getByRole('region', { name: /active call workspace/i })).toBeInTheDocument();
     expect(screen.getByText(/call user-1-user-2/i)).toBeInTheDocument();
     expect(screen.getByText(/live with 1 partner/i)).toBeInTheDocument();
-    expect(screen.getByText(/stream speaker layout/i)).toBeInTheDocument();
+    expect(screen.queryByText(/stream speaker layout/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('stream-theme')).toHaveClass('flex', 'h-full', 'min-h-0', 'flex-col');
+    expect(screen.getByTestId('call-main-participant')).toHaveTextContent(/participant user-2/i);
+    expect(screen.getByTestId('call-self-preview')).toHaveTextContent(/participant user-1/i);
     expect(screen.getByRole('button', { name: /leave call/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to chat/i })).toHaveAttribute(
       'href',
       '/app/chat/user-2',
     );
+  });
+
+  it('renders the local participant while the participant list is still warming up', async () => {
+    mockParticipants.splice(0, mockParticipants.length);
+    mockProtectedCall();
+
+    renderCallRoute();
+
+    expect(await screen.findByRole('heading', { name: /call with sam/i })).toBeInTheDocument();
+    expect(screen.getByTestId('call-main-participant')).toHaveTextContent(/participant user-1/i);
+    expect(screen.getByTestId('call-main-participant')).not.toHaveTextContent(/waiting for sam/i);
   });
 
   it('renders microphone and camera controls for an active call', async () => {

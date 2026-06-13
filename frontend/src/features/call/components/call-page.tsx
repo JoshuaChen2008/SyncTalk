@@ -1,6 +1,6 @@
 import {
   CallControls,
-  SpeakerLayout,
+  ParticipantView,
   StreamCall,
   StreamTheme,
   StreamVideo,
@@ -78,9 +78,8 @@ function CallPresenceStatus({
   currentUserId: string;
 }) {
   const { t } = useTranslation();
-  const { useParticipants } = useCallStateHooks();
-  const participants = useParticipants();
-  const remoteParticipantCount = participants.filter(
+  const { useRemoteParticipants } = useCallStateHooks();
+  const remoteParticipantCount = useRemoteParticipants().filter(
     (participant) => participant.userId !== currentUserId,
   ).length;
 
@@ -139,6 +138,48 @@ function CallMediaControls() {
           <Video aria-hidden="true" size={19} />
         )}
       </button>
+    </div>
+  );
+}
+
+function OneOnOneCallLayout({
+  currentUserId,
+  friendName,
+}: {
+  currentUserId: string;
+  friendName: string;
+}) {
+  const { t } = useTranslation();
+  const { useLocalParticipant, useParticipants, useRemoteParticipants } = useCallStateHooks();
+  const participants = useParticipants();
+  const localParticipantFromState = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
+  const localParticipant = localParticipantFromState ?? participants.find(
+    (participant) => participant.isLocalParticipant || participant.userId === currentUserId,
+  );
+  const remoteParticipant = remoteParticipants.find(
+    (participant) => participant.userId !== currentUserId,
+  ) ?? participants.find(
+    (participant) => !participant.isLocalParticipant && participant.userId !== currentUserId,
+  );
+  const mainParticipant = remoteParticipant ?? localParticipant;
+
+  return (
+    <div className="session-call-stage" data-testid="call-stage">
+      <div className="session-call-main" data-testid="call-main-participant">
+        {mainParticipant ? (
+          <ParticipantView participant={mainParticipant} />
+        ) : (
+          <p className="px-4 text-center text-sm font-black text-teal-100">
+            {t('call.waitingFor', { name: friendName })}
+          </p>
+        )}
+      </div>
+      {localParticipant && remoteParticipant ? (
+        <div className="session-call-self-preview" data-testid="call-self-preview">
+          <ParticipantView participant={localParticipant} muteAudio />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -230,7 +271,7 @@ function StreamCallPanel({
   }
 
   return (
-    <section className="session-call-shell duo-shadow overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white">
+    <section className="session-call-shell duo-shadow flex h-full min-h-0 flex-col overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-duo-green">
@@ -248,13 +289,16 @@ function StreamCallPanel({
           {t('call.backToChat')}
         </Link>
       </div>
-      <div className="surface-muted p-2 md:p-3">
-        <div className="min-h-[34rem] overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white">
+      <div className="surface-muted min-h-0 flex-1 p-2 md:p-3">
+        <div className="flex h-full min-h-[28rem] flex-col overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white">
           <StreamVideo client={videoClient}>
             <StreamCall call={activeCall}>
-              <StreamTheme>
-                <div className="min-h-[30rem] bg-slate-950">
-                  <SpeakerLayout participantsBarPosition="bottom" />
+              <StreamTheme className="flex h-full min-h-0 flex-col">
+                <div className="min-h-0 flex-1 bg-slate-950">
+                  <OneOnOneCallLayout
+                    currentUserId={tokenData.user.id}
+                    friendName={sessionData.friend.username}
+                  />
                 </div>
                 <CallPresenceStatus
                   currentUserId={tokenData.user.id}

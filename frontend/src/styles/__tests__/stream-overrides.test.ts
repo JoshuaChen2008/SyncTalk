@@ -29,3 +29,23 @@ describe('Stream chat style overrides', () => {
     expect(scrollRule).not.toContain('justify-content: flex-end');
   });
 });
+
+describe('Stream call style overrides', () => {
+  it('keeps the custom call stage as the clipped positioning context', () => {
+    const stageRule = getCssRule('.session-call-stage');
+
+    expect(stageRule).toContain('position: relative');
+    expect(stageRule).toContain('height: 100%');
+    expect(stageRule).toContain('min-height: 0');
+    expect(stageRule).toContain('overflow: hidden');
+  });
+
+  it('renders the local preview as a top-right overlay', () => {
+    const previewRule = getCssRule('.session-call-self-preview');
+
+    expect(previewRule).toContain('position: absolute');
+    expect(previewRule).toContain('top: 1rem');
+    expect(previewRule).toContain('right: 1rem');
+    expect(previewRule).toContain('z-index: 20');
+  });
+});

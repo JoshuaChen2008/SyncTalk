@@ -138,6 +138,39 @@ describe('app shell and settings', () => {
     expect(darkThemeOption).toHaveAttribute('aria-pressed', 'false');
   });
 
+  it('cycles theme preference from the app shell control', async () => {
+    mockProtectedShell({ unreadCount: 0 });
+
+    renderAppRoute('/app/discover');
+
+    const displayControls = await screen.findByRole('group', {
+      name: /display preferences/i,
+    });
+    const themeToggle = (await screen.findAllByRole('button', { name: /switch theme to dark/i }))[0];
+
+    expect(displayControls).toHaveClass('gap-4');
+    expect(themeToggle).toHaveClass('h-14', 'w-14', 'rounded-[1.25rem]');
+    expect(themeToggle).toHaveAttribute('aria-pressed', 'false');
+
+    await userEvent.click(themeToggle);
+
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"dark"');
+    expect(themeToggle).toHaveAccessibleName(/switch theme to system/i);
+    expect(themeToggle).toHaveAttribute('aria-pressed', 'true');
+
+    await userEvent.click(themeToggle);
+
+    expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"system"');
+    expect(themeToggle).toHaveAccessibleName(/switch theme to light/i);
+
+    await userEvent.click(themeToggle);
+
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(window.localStorage.getItem('synctalk-theme')).toContain('"theme":"light"');
+    expect(themeToggle).toHaveAccessibleName(/switch theme to dark/i);
+  });
+
   it('toggles app language from the shell and settings controls', async () => {
     mockProtectedShell({ unreadCount: 1 });
 
@@ -156,6 +189,8 @@ describe('app shell and settings', () => {
 
     expect(await screen.findByRole('heading', { name: /^settings$/i })).toBeInTheDocument();
     expect(window.localStorage.getItem('synctalk-locale')).toContain('"locale":"en"');
+    expect(screen.getAllByRole('button', { name: /switch language to chinese/i })[0]).toHaveTextContent('中');
+    expect(screen.getAllByRole('button', { name: /switch language to chinese/i })[0]).toHaveClass('h-14', 'w-14', 'rounded-[1.25rem]');
   });
 
   it('logs out and sends the user back to login', async () => {

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router';
 
+import { ThemeModeToggle } from '../../components/theme-mode-toggle';
 import { useCurrentUserQuery } from '../../../features/auth/api/auth-hooks';
 import { useNotificationsQuery } from '../../../features/notifications/api/notifications-hooks';
 import { useTranslation } from '../../../i18n/i18n-store';
@@ -124,7 +125,12 @@ export function AppShell() {
             <AppShellNav variant="desktop" />
           </div>
 
-          <div className="mt-auto">
+          <div
+            aria-label={t('app.controls.displayPreferences')}
+            className="mt-auto flex items-center gap-4"
+            role="group"
+          >
+            <ThemeModeToggle />
             <LanguageToggle />
           </div>
 
@@ -152,6 +158,7 @@ export function AppShell() {
               SyncTalk
             </Link>
             <div className="flex items-center gap-2">
+              <ThemeModeToggle compact />
               <LanguageToggle compact />
               <Link
                 aria-label={t('app.settings.open')}

@@ -10,7 +10,7 @@ type ThemeState = {
 };
 
 function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return 'light';
   }
 
@@ -31,7 +31,7 @@ export function watchSystemTheme(theme: AppTheme) {
   removeSystemThemeListener?.();
   removeSystemThemeListener = null;
 
-  if (theme !== 'system' || typeof window === 'undefined') {
+  if (theme !== 'system' || typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return;
   }
 

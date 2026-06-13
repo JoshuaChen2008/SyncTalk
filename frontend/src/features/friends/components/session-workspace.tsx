@@ -31,11 +31,11 @@ function SessionAvatar({
       {avatar ? (
         <img
           alt={`${name} avatar`}
-          className="h-12 w-12 rounded-full border-2 border-snow-white object-cover shadow-[0_2px_0_#e5e5e5]"
+          className="duo-shadow-sm h-12 w-12 rounded-full border-2 border-snow-white object-cover"
           src={avatar}
         />
       ) : (
-        <div className="grid h-12 w-12 place-items-center rounded-full border-2 border-snow-white bg-sunshine-yellow text-sm font-feather text-almost-black shadow-[0_2px_0_#e5e5e5]">
+        <div className="duo-shadow-sm grid h-12 w-12 place-items-center rounded-full border-2 border-snow-white bg-sunshine-yellow text-sm font-feather text-almost-black">
           {getInitials(name)}
         </div>
       )}
@@ -84,8 +84,8 @@ export function SessionWorkspace({
     : t('session.sidebar.collapse');
 
   return (
-    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f4f7fb] px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-8 lg:pb-12">
-      <div className="mx-auto flex h-[calc(100dvh-5rem)] min-h-[34rem] w-full max-w-[1320px] overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_8px_0_#e5e5e5]">
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-snow-white px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-8 lg:pb-12">
+      <div className="duo-shadow-lg mx-auto flex h-[calc(100dvh-5rem)] min-h-[34rem] w-full max-w-[1320px] overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white">
         <aside
           className={`hidden shrink-0 flex-col border-r-2 border-cloud-gray bg-snow-white transition-[width] duration-300 md:flex ${
             isSidebarCollapsed ? 'w-[5.75rem]' : 'w-[18.5rem] lg:w-[21rem]'
@@ -114,14 +114,14 @@ export function SessionWorkspace({
 
               {!isSidebarCollapsed ? (
                 <div className="flex items-center gap-2">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] text-sky-blue shadow-[0_2px_0_#e5e5e5]">
+                  <span className="duo-shadow-sm surface-muted grid h-10 w-10 shrink-0 place-items-center rounded-2xl border-2 border-cloud-gray text-sky-blue">
                     <HeaderIcon aria-hidden="true" size={18} />
                   </span>
                   <button
                     aria-controls={`${mode}-conversation-list`}
                     aria-expanded={!isSidebarCollapsed}
                     aria-label={toggleLabel}
-                    className="grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite shadow-[0_2px_0_#e5e5e5] transition hover:bg-[#f7f7f7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
+                    className="duo-shadow-sm surface-hover grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
                     onClick={() => setIsSidebarCollapsed(true)}
                     type="button"
                   >
@@ -133,7 +133,7 @@ export function SessionWorkspace({
                   aria-controls={`${mode}-conversation-list`}
                   aria-expanded={!isSidebarCollapsed}
                   aria-label={toggleLabel}
-                  className="grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite shadow-[0_2px_0_#e5e5e5] transition hover:bg-[#f7f7f7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
+                  className="duo-shadow-sm surface-hover grid h-10 w-10 place-items-center rounded-2xl border-2 border-cloud-gray bg-snow-white text-graphite transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/20"
                   onClick={() => setIsSidebarCollapsed(false)}
                   type="button"
                 >
@@ -155,7 +155,7 @@ export function SessionWorkspace({
                     size={18}
                   />
                   <input
-                    className="h-11 w-full rounded-xl border-2 border-transparent bg-[#f3f4f6] pl-10 pr-4 text-sm font-bold text-charcoal outline-none transition-colors placeholder:text-silver focus:border-[#84d8ff] focus:bg-snow-white"
+                    className="surface-muted h-11 w-full rounded-xl border-2 border-transparent pl-10 pr-4 text-sm font-bold text-charcoal outline-none transition-colors placeholder:text-silver focus:border-sky-blue focus:bg-snow-white"
                     id={`${mode}-friend-search`}
                     placeholder={isChat ? t('session.chat.search') : t('session.call.search')}
                     type="search"
@@ -186,8 +186,8 @@ export function SessionWorkspace({
                           : 'gap-3 p-3'
                       } ${
                         isActive
-                          ? 'border-[#84d8ff] bg-[#ddf4ff] text-sky-blue'
-                          : 'border-transparent text-charcoal hover:bg-[#f7f7f7]'
+                          ? 'border-sky-blue surface-info text-sky-blue'
+                          : 'surface-hover border-transparent text-charcoal'
                       }`}
                       key={friend.id}
                       title={friend.username}
@@ -224,7 +224,7 @@ export function SessionWorkspace({
               </div>
             ) : (
               <p
-                className={`rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] font-bold text-graphite ${
+                className={`surface-muted rounded-2xl border-2 border-cloud-gray font-bold text-graphite ${
                   isSidebarCollapsed ? 'p-3 text-center text-xs' : 'p-4 text-sm'
                 }`}
               >
@@ -274,7 +274,7 @@ export function SessionWorkspace({
             ) : null}
           </header>
 
-          <div className="min-h-0 flex-1 bg-[#f7f7f7] p-3 md:p-4 lg:p-5">{children}</div>
+          <div className="surface-muted min-h-0 flex-1 p-3 md:p-4 lg:p-5">{children}</div>
         </section>
       </div>
     </main>

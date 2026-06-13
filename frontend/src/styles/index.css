@@ -142,7 +142,7 @@
   }
 
   .btn-outline:hover {
-    background-color: rgba(229, 229, 229, 0.4);
+    background-color: color-mix(in srgb, var(--color-cloud-gray) 40%, transparent);
   }
 
   .input-gamified {
@@ -258,12 +258,12 @@
 
   .btn-filter {
     background-color: var(--color-snow-white);
-    color: #9ca3af;
+    color: var(--color-silver);
     border: 2px solid var(--color-cloud-gray);
   }
 
   .btn-filter:hover {
-    background-color: #f9fafb;
+    background-color: color-mix(in srgb, var(--color-cloud-gray) 35%, var(--color-snow-white));
   }
 
   .card-duo {
@@ -303,6 +303,50 @@
     border-color: var(--color-sky-blue);
     background-color: color-mix(in srgb, var(--color-sky-blue) 12%, var(--color-snow-white));
     box-shadow: 0 4px 0 #1899d6;
+  }
+
+  .surface-muted {
+    background-color: color-mix(in srgb, var(--color-cloud-gray) 36%, var(--color-snow-white));
+  }
+
+  .surface-info {
+    background-color: color-mix(in srgb, var(--color-sky-blue) 14%, var(--color-snow-white));
+  }
+
+  .surface-hover:hover {
+    background-color: color-mix(in srgb, var(--color-cloud-gray) 42%, var(--color-snow-white));
+  }
+
+  .surface-error {
+    border-color: #fecaca;
+    background-color: #fef2f2;
+    color: #991b1b;
+  }
+
+  [data-theme="dark"] .surface-error {
+    border-color: rgb(248 113 113 / 0.45);
+    background-color: rgb(127 29 29 / 0.28);
+    color: #fecaca;
+  }
+
+  .text-error {
+    color: #b91c1c;
+  }
+
+  [data-theme="dark"] .text-error {
+    color: #fecaca;
+  }
+
+  .duo-shadow-sm {
+    box-shadow: 0 2px 0 var(--color-cloud-gray);
+  }
+
+  .duo-shadow {
+    box-shadow: 0 4px 0 var(--color-cloud-gray);
+  }
+
+  .duo-shadow-lg {
+    box-shadow: 0 8px 0 var(--color-cloud-gray);
   }
 
   .custom-scrollbar {

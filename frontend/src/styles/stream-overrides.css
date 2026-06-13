@@ -58,7 +58,7 @@
   align-items: stretch;
   justify-content: flex-start;
   gap: 0;
-    padding: 8px 8px !important;
+  padding: 8px 8px !important;
   border-top: 1px solid var(--color-cloud-gray);
   background: var(--color-snow-white);
 }
@@ -72,8 +72,8 @@
   border: 2px solid var(--color-cloud-gray);
   border-radius: 1.5rem;
   background: var(--color-snow-white);
-  box-shadow: 0 2px 0 #e5e5e5;
-    padding: 2px;
+  box-shadow: 0 2px 0 var(--color-cloud-gray);
+  padding: 2px;
 }
 
 .session-chat-shell .str-chat .str-chat__message-composer-controls {
@@ -97,6 +97,12 @@
   font-family: var(--font-din-round);
   font-weight: 700;
   color: var(--color-charcoal);
+  background: transparent;
+}
+
+.session-chat-shell .str-chat__textarea__textarea::placeholder,
+.session-chat-shell .str-chat__message-input-textarea textarea::placeholder {
+  color: var(--color-silver);
 }
 
 .session-chat-shell .str-chat .str-chat__message-composer-controls .str-chat__textarea textarea {

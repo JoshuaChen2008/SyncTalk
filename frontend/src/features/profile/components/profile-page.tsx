@@ -112,7 +112,7 @@ function PublicInfoTile({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] p-5 transition-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <div className="surface-muted rounded-2xl border-2 border-cloud-gray p-5 transition-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <p className="mb-1 text-xs font-black uppercase tracking-wide text-silver">{label}</p>
       <div className="text-lg font-black text-graphite">{children}</div>
     </div>
@@ -143,13 +143,13 @@ export function PublicProfilePage() {
       <main className={pageShellClass}>
         <div className={pageContainerClass}>
           <AppStatePanel role="alert">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+            <div className="surface-error mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 shadow-[0_4px_0_rgb(254_202_202_/_0.75)]">
               <UserCircle aria-hidden="true" size={28} />
             </div>
-            <h1 className="mt-5 text-heading-sm font-feather text-[#991b1b]">
+            <h1 className="text-error mt-5 text-heading-sm font-feather">
               {t('profile.unavailable')}
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm font-bold leading-6 text-[#b91c1c]">
+            <p className="text-error mx-auto mt-2 max-w-md text-sm font-bold leading-6">
               {publicProfileQuery.isError
                 ? getProfileApiErrorMessage(publicProfileQuery.error)
                 : t('profile.unavailable')}
@@ -164,7 +164,7 @@ export function PublicProfilePage() {
   const canChat = profile.relationshipStatus === 'friend';
 
   return (
-    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] pb-24 text-almost-black lg:pb-12">
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-snow-white pb-24 text-almost-black lg:pb-12">
       <header className="sticky top-0 z-20 flex min-h-16 items-center gap-4 border-b-2 border-cloud-gray bg-snow-white px-4 md:px-6">
         <button
           aria-label={t('profile.back')}
@@ -179,7 +179,7 @@ export function PublicProfilePage() {
 
       <div className="px-4 py-6 md:px-8 lg:px-12">
         <div className="mx-auto max-w-4xl">
-          <article className="overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
+          <article className="duo-shadow overflow-hidden rounded-[2rem] border-2 border-cloud-gray bg-snow-white">
             <div className="relative h-40 bg-sky-blue md:h-56">
               <div className="absolute -bottom-16 left-6 z-10 h-32 w-32 overflow-hidden rounded-full border-[6px] border-snow-white bg-snow-white md:left-10 md:h-40 md:w-40">
                 {profile.avatar ? (
@@ -339,13 +339,13 @@ export function ProfilePage() {
       <main className={pageShellClass}>
         <div className={pageContainerClass}>
           <AppStatePanel role="alert">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+            <div className="surface-error mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 shadow-[0_4px_0_rgb(254_202_202_/_0.75)]">
               <UserCircle aria-hidden="true" size={28} />
             </div>
-            <h1 className="mt-5 text-heading-sm font-feather text-[#991b1b]">
+            <h1 className="text-error mt-5 text-heading-sm font-feather">
               {t('profile.unavailable')}
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm font-bold leading-6 text-[#b91c1c]">
+            <p className="text-error mx-auto mt-2 max-w-md text-sm font-bold leading-6">
               {getProfileApiErrorMessage(profileQuery.error)}
             </p>
           </AppStatePanel>
@@ -359,7 +359,7 @@ export function ProfilePage() {
       <div className={`${pageContainerClass} max-w-[1040px] gap-10 md:grid md:grid-cols-[minmax(0,1fr)_16rem] md:items-start md:gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-20`}>
         <section className="min-w-0">
           <header className="mb-8 border-b-2 border-cloud-gray pb-5">
-            <div className="inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-sm font-black text-graphite shadow-[0_2px_0_#e5e5e5]">
+            <div className="duo-shadow-sm inline-flex items-center gap-2 rounded-xl border-2 border-cloud-gray bg-snow-white px-3 py-1.5 text-sm font-black text-graphite">
               <Globe2 aria-hidden="true" className="text-sky-blue" size={16} />
               {profileQuery.data.isProfileComplete ? t('profile.finish') : t('profile.incomplete')}
             </div>
@@ -373,18 +373,18 @@ export function ProfilePage() {
 
           <form aria-labelledby="profile-title" className="space-y-6" onSubmit={handleSubmit}>
             {updateProfileMutation.isError ? (
-              <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-bold text-[#b91c1c]" role="alert">
+              <p className="surface-error rounded-xl border-2 px-4 py-3 text-sm font-bold" role="alert">
                 {getProfileApiErrorMessage(updateProfileMutation.error)}
               </p>
             ) : null}
 
             {!profileQuery.data.isProfileComplete ? (
-              <p className="rounded-xl border-2 border-sky-blue bg-sky-blue/10 px-4 py-3 text-sm font-bold text-sky-blue shadow-[0_3px_0_#ddf4ff]">
+              <p className="surface-info rounded-xl border-2 border-sky-blue px-4 py-3 text-sm font-bold text-sky-blue shadow-[0_3px_0_var(--color-cloud-gray)]">
                 {t('profile.incomplete')}
               </p>
             ) : null}
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                 {profileQuery.data.avatar ? (
                   <img
@@ -412,11 +412,11 @@ export function ProfilePage() {
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <h2 className="border-b-2 border-cloud-gray pb-2 text-xl font-feather text-graphite">
                 {t('profile.menu')}
               </h2>
-              <div className="divide-y-2 divide-gray-100">
+              <div className="divide-y-2 divide-cloud-gray">
                 <div className="flex flex-col justify-between gap-2 py-4 sm:flex-row sm:items-center">
                   <span className="text-sm font-bold text-graphite">{t('auth.register.username')}</span>
                   <span className="text-sm font-bold text-almost-black">{profileQuery.data.username}</span>
@@ -428,7 +428,7 @@ export function ProfilePage() {
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <h2 className="border-b-2 border-cloud-gray pb-2 text-xl font-feather text-graphite">
                 {t('profile.nativeLanguage')} / {t('profile.targetLanguage')}
               </h2>
@@ -450,7 +450,7 @@ export function ProfilePage() {
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <fieldset aria-labelledby="profile-level-label">
                 <legend id="profile-level-label" className="border-b-2 border-cloud-gray pb-2 text-xl font-feather text-graphite">
                   {t('profile.currentLevel')}
@@ -475,7 +475,7 @@ export function ProfilePage() {
               </fieldset>
             </section>
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <fieldset aria-labelledby="profile-goal-label">
                 <legend id="profile-goal-label" className="border-b-2 border-cloud-gray pb-2 text-xl font-feather text-graphite">
                   {t('profile.learningGoals')}
@@ -508,7 +508,7 @@ export function ProfilePage() {
               </fieldset>
             </section>
 
-            <section className="rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5]">
+            <section className="duo-shadow rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white p-6">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <SelectField
                   id="timezone"
@@ -548,11 +548,11 @@ export function ProfilePage() {
         </section>
 
         <aside className="hidden shrink-0 md:block">
-          <div className="rounded-2xl border-2 border-cloud-gray bg-snow-white p-4 shadow-[0_4px_0_#e5e5e5]">
+          <div className="duo-shadow rounded-2xl border-2 border-cloud-gray bg-snow-white p-4">
             <h2 className="mb-3 px-4 text-sm font-bold text-graphite">{t('profile.menu')}</h2>
             <ul className="flex flex-col gap-1">
               <li>
-                <div className="rounded-xl bg-[#ddf4ff] px-4 py-3 text-sm font-bold text-sky-blue">
+                <div className="surface-info rounded-xl px-4 py-3 text-sm font-bold text-sky-blue">
                   {t('settings.signedIn')}
                 </div>
               </li>
@@ -574,7 +574,7 @@ export function ProfilePage() {
             </ul>
           </div>
 
-          <div className="mt-6 rounded-2xl border-2 border-cloud-gray bg-snow-white p-4 shadow-[0_4px_0_#e5e5e5]">
+          <div className="duo-shadow mt-6 rounded-2xl border-2 border-cloud-gray bg-snow-white p-4">
             <h3 className="mb-3 px-4 text-sm font-bold text-graphite">{t('profile.avatar.title')}</h3>
             <div className="space-y-3 px-4 py-2">
               <p className="text-heading-sm font-feather text-duo-green">
@@ -583,7 +583,7 @@ export function ProfilePage() {
               <p className="text-sm font-bold text-graphite">
                 {form.nativeLanguage ? translateDisplayValue(locale, form.nativeLanguage) : '--'}
               </p>
-              <div className="rounded-xl border-2 border-cloud-gray bg-[#f7f7f7] px-3 py-2 text-xs font-bold text-graphite">
+              <div className="surface-muted rounded-xl border-2 border-cloud-gray px-3 py-2 text-xs font-bold text-graphite">
                 <div>{t('profile.currentLevel')}: {form.languageLevel || '--'}</div>
                 <div className="mt-1">{t('profile.timezone')}: {form.timezone || '--'}</div>
               </div>

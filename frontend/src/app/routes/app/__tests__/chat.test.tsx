@@ -174,6 +174,24 @@ describe('chat page', () => {
     expect(screen.getByText(/stream message input/i)).toBeInTheDocument();
   });
 
+  it('uses theme tokens for chat surfaces instead of fixed light backgrounds', async () => {
+    mockProtectedChat();
+
+    renderChatRoute();
+
+    expect(await screen.findByRole('heading', { name: /chat with sam/i })).toBeInTheDocument();
+    const shell = document.querySelector('.session-chat-shell');
+    expect(shell).not.toBeNull();
+    const shellElement = shell as Element;
+
+    const chatSurfaceClasses = [shellElement, ...Array.from(shellElement.querySelectorAll('*'))]
+      .map((element) => ('className' in element && typeof element.className === 'string' ? element.className : ''))
+      .join(' ');
+
+    expect(chatSurfaceClasses).not.toContain('bg-white');
+    expect(chatSurfaceClasses).not.toContain('bg-[#f7f7f7]');
+  });
+
   it('defaults to an expanded conversations rail and toggles to avatar-only mode', async () => {
     mockProtectedChat();
 

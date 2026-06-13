@@ -20,7 +20,7 @@ export const pageTitleClass =
   'text-heading font-feather leading-tight sm:text-heading-lg';
 
 export const heroHeaderClass =
-  'grid overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5] lg:grid-cols-[1.05fr_0.95fr]';
+  'duo-shadow grid overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white lg:grid-cols-[1.05fr_0.95fr]';
 
 export const heroContentClass =
   'flex min-h-[20rem] flex-col justify-between gap-8 p-6 sm:p-8';
@@ -37,7 +37,7 @@ export const heroIconClass =
   'grid h-10 w-10 place-items-center rounded-xl bg-duo-green text-white shadow-[0_4px_0_#3f8f01]';
 
 export const heroStatCardClass =
-  'rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal shadow-[0_3px_0_#e5e5e5]';
+  'duo-shadow rounded-xl border-2 border-cloud-gray bg-snow-white px-4 py-3 text-sm font-bold text-charcoal';
 
 export const sectionTitleClass =
   'flex items-center gap-2 text-heading-sm font-feather text-almost-black';
@@ -53,7 +53,7 @@ export function DiscoverStyleBackground() {
 
 export function DiscoverStyleVisualPanel() {
   return (
-    <section className="relative hidden min-h-[20rem] border-l-2 border-cloud-gray bg-[#fff9db] p-5 lg:block">
+    <section className="surface-muted relative hidden min-h-[20rem] border-l-2 border-cloud-gray p-5 lg:block">
       <div className="absolute right-8 top-8 h-20 w-20 rounded-full bg-duo-green-light" />
       <div className="absolute bottom-10 left-10 h-16 w-16 rounded-full bg-bubblegum-pink/20" />
       <img
@@ -107,7 +107,7 @@ export function FriendsFeatureBackground() {
 
 export function HeroGlassPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl border-2 border-cloud-gray bg-snow-white p-6 shadow-[0_4px_0_#e5e5e5] sm:p-8">
+    <div className="duo-shadow rounded-2xl border-2 border-cloud-gray bg-snow-white p-6 sm:p-8">
       {children}
     </div>
   );

@@ -37,11 +37,11 @@ function ChatErrorPanel({ message }: { message: string }) {
 
   return (
     <ChatStatePanel role="alert">
-      <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+      <div className="surface-error mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 shadow-[0_4px_0_rgb(254_202_202_/_0.75)]">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
       <h2 className="mt-5 text-heading-sm font-feather text-almost-black">{t('chat.unavailable')}</h2>
-      <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
+      <p className="text-error mx-auto mt-3 max-w-md text-sm font-bold leading-6">{message}</p>
       <Link
         className="btn-3d-base btn-3d-sky mt-5 min-h-11 gap-2 px-5 text-sm"
         to="/app/friends"
@@ -122,7 +122,7 @@ function StreamChatPanel({
   }
 
   return (
-    <section className="session-chat-shell flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
+    <section className="session-chat-shell duo-shadow flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-sky-blue">
@@ -132,12 +132,12 @@ function StreamChatPanel({
             {friendName}
           </p>
         </div>
-        <span className="rounded-full border-2 border-[#84d8ff] bg-[#ddf4ff] px-3 py-1 text-xs font-black text-sky-blue">
+        <span className="surface-info rounded-full border-2 border-sky-blue px-3 py-1 text-xs font-black text-sky-blue">
           {t('session.status.online')}
         </span>
       </div>
-      <div className="flex min-h-0 flex-1 bg-[#f7f7f7] p-2 md:p-3">
-        <div className="flex h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-white">
+      <div className="surface-muted flex min-h-0 flex-1 p-2 md:p-3">
+        <div className="flex h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden rounded-[1.5rem] border-2 border-cloud-gray bg-snow-white">
           <Chat client={client}>
             <Channel channel={streamChannel}>
               <Window>

@@ -1,6 +1,121 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { discoveryDemoUsers } from '../src/features/discovery/demo/discovery-demo-users';
+
+const forbiddenDarkBackgrounds = [
+  'rgb(255, 255, 255)',
+  'rgb(249, 250, 251)',
+  'rgb(247, 247, 247)',
+  'rgb(243, 244, 246)',
+];
+
+async function expectDarkSurface(locator: Locator, label: string) {
+  await expect(locator).toBeVisible();
+  const background = await locator.evaluate((element) => getComputedStyle(element).backgroundColor);
+
+  expect(forbiddenDarkBackgrounds, `${label} uses ${background}`).not.toContain(background);
+}
+
+async function mockCompleteAppSession(page: Page) {
+  await page.route('**/api/auth/me', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        user: { id: 'user-1', username: 'mei', email: 'mei@example.com' },
+      }),
+    });
+  });
+  await page.route('**/api/profile/me', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        profile: {
+          id: 'user-1',
+          username: 'mei',
+          email: 'mei@example.com',
+          avatar: '',
+          nativeLanguage: 'Japanese',
+          targetLanguage: 'English',
+          languageLevel: 'B1',
+          learningGoal: 'Daily conversation',
+          bio: 'Coffee chats welcome.',
+          timezone: 'Asia/Tokyo',
+          isProfileComplete: true,
+        },
+      }),
+    });
+  });
+  await page.route('**/api/profile/user-2', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        profile: {
+          id: 'user-2',
+          username: 'sam',
+          avatar: '',
+          nativeLanguage: 'Korean',
+          targetLanguage: 'Chinese',
+          languageLevel: 'A2',
+          learningGoal: 'Travel practice',
+          bio: 'Already ready for a language exchange.',
+          timezone: 'Asia/Tokyo',
+          relationshipStatus: 'friend',
+        },
+      }),
+    });
+  });
+  await page.route('**/api/users/recommendations', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ users: discoveryDemoUsers }),
+    });
+  });
+  await page.route('**/api/friends', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        friends: [
+          {
+            id: 'user-2',
+            username: 'sam',
+            avatar: '',
+            nativeLanguage: 'Korean',
+            targetLanguage: 'Chinese',
+            languageLevel: 'A2',
+            learningGoal: 'Travel practice',
+            bio: 'Evening practice works best.',
+            timezone: 'America/New_York',
+          },
+        ],
+      }),
+    });
+  });
+  await page.route('**/api/notifications', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        notifications: [],
+        unreadCount: 0,
+      }),
+    });
+  });
+  await page.route('**/api/chat/token', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        token: 'stream-token',
+        user: { id: 'user-1', username: 'mei', avatar: '' },
+      }),
+    });
+  });
+  await page.route('**/api/chat/channel/user-2', async (route) => {
+    await route.fulfill({
+      status: 403,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Only friends can chat' }),
+    });
+  });
+}
 
 test.describe('auth smoke', () => {
   test('renders the login page', async ({ page }) => {
@@ -267,6 +382,44 @@ test.describe('auth smoke', () => {
       'href',
       '/app/friends',
     );
+  });
+
+  test('uses dark theme surfaces on core app pages', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        'synctalk-theme',
+        JSON.stringify({ state: { theme: 'dark' }, version: 0 }),
+      );
+    });
+    await mockCompleteAppSession(page);
+
+    await page.goto('/app/friends');
+    await expect(page.getByRole('heading', { name: /your language friends/i })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
+    await expectDarkSurface(page.locator('main').last(), 'Friends page shell');
+    await expectDarkSurface(page.getByText('Evening practice works best.').locator('xpath=..'), 'Friends bio');
+
+    await page.goto('/app/discover');
+    await expect(page.getByRole('heading', { name: /discover partners/i })).toBeVisible();
+    await expectDarkSurface(
+      page.getByText('Morning language swaps with coffee and casual news topics.').locator('xpath=..'),
+      'Discover bio',
+    );
+
+    await page.goto('/app/profile/user-2');
+    await expect(page.getByRole('heading', { name: /sam/i })).toBeVisible();
+    await expectDarkSurface(
+      page.getByText('Asia/Tokyo').locator('xpath=ancestor::div[contains(@class,"rounded-2xl")][1]'),
+      'Public profile detail tile',
+    );
+
+    await page.goto('/app/settings');
+    await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
+    await expectDarkSurface(page.getByRole('button', { name: /use dark theme/i }), 'Settings dark theme option');
+
+    await page.goto('/app/chat/user-2');
+    await expect(page.getByRole('heading', { name: /chat unavailable/i })).toBeVisible();
+    await expectDarkSurface(page.getByRole('region', { name: /active chat workspace/i }), 'Chat workspace');
   });
 
   test('shows a permission error when a signed-in user opens call with a non-friend', async ({

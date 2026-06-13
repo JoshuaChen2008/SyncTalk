@@ -136,7 +136,7 @@ function DiscoveryUserCard({
 
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex">
-          <span className="inline-flex items-center rounded-2xl border-2 border-cloud-gray px-4 py-1.5 text-xs font-black uppercase text-graphite shadow-[0_2px_0_#e5e5e5]">
+          <span className="duo-shadow-sm inline-flex items-center rounded-2xl border-2 border-cloud-gray px-4 py-1.5 text-xs font-black uppercase text-graphite">
             {primaryMatchReason}
           </span>
         </div>
@@ -186,7 +186,7 @@ function DiscoveryUserCard({
           </span>
         </div>
 
-        <div className="custom-scrollbar mb-5 min-h-0 flex-1 overflow-y-auto rounded-2xl border-2 border-gray-100 bg-gray-50 p-4">
+        <div className="surface-muted custom-scrollbar mb-5 min-h-0 flex-1 overflow-y-auto rounded-2xl border-2 border-cloud-gray p-4">
           <p className="text-sm font-bold leading-6 text-charcoal">
             {user.bio || t('friends.defaultBio')}
           </p>
@@ -218,16 +218,16 @@ function DiscoveryUserCard({
               {t('discover.skip')}
             </button>
             {openMenu === skipMenuId ? (
-              <div className="absolute bottom-[130%] left-0 z-20 mb-2 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+              <div className="duo-shadow absolute bottom-[130%] left-0 z-20 mb-2 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
                 <button
-                  className="block w-full cursor-pointer px-3 py-3 text-left text-sm font-black text-[#ef4444] hover:bg-[#fef2f2]"
+                  className="text-error block w-full cursor-pointer px-3 py-3 text-left text-sm font-black hover:bg-red-500/10"
                   type="button"
                   onClick={() => onSkip(user.id)}
                 >
                   {t('discover.skipPerson')}
                 </button>
                 <button
-                  className="block w-full cursor-pointer border-t-2 border-gray-100 px-3 py-3 text-left text-sm font-black text-[#ef4444] hover:bg-[#fef2f2]"
+                  className="text-error block w-full cursor-pointer border-t-2 border-cloud-gray px-3 py-3 text-left text-sm font-black hover:bg-red-500/10"
                   type="button"
                   onClick={() => onSkip(user.id)}
                 >
@@ -318,7 +318,7 @@ function ResultsState({
   if (isError) {
     return (
       <section
-        className="rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] p-6 text-center text-body font-bold text-[#b91c1c] shadow-[0_4px_0_#fecaca]"
+        className="surface-error rounded-2xl border-2 p-6 text-center text-body font-bold shadow-[0_4px_0_rgb(254_202_202_/_0.75)]"
         role="alert"
       >
         {getDiscoveryApiErrorMessage(error)}
@@ -329,7 +329,7 @@ function ResultsState({
   if (!users || users.length === 0) {
     return (
       <section className="card-duo flex flex-col items-center p-12 text-center">
-        <div className="grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-sunshine-yellow text-almost-black shadow-[0_4px_0_#e5e5e5]">
+        <div className="duo-shadow grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-sunshine-yellow text-almost-black">
           <Globe2 aria-hidden="true" size={28} strokeWidth={3} />
         </div>
         <h2 className="mt-6 text-heading-sm font-feather text-almost-black">
@@ -422,7 +422,7 @@ export function DiscoverPage() {
       onClick={() => setOpenMenu(null)}
     >
       <div className="mx-auto max-w-5xl">
-        <header className="mb-10 flex min-h-[104px] items-end justify-between border-b-2 border-gray-100 pb-6">
+        <header className="mb-10 flex min-h-[104px] items-end justify-between border-b-2 border-cloud-gray pb-6">
           <div>
             <h1 className={`mb-4 ${pageTitleClass} text-sky-blue [text-shadow:2px_2px_0_#1899d6]`}>
               {t('discover.title')}
@@ -443,7 +443,7 @@ export function DiscoverPage() {
             />
             <input
               ref={searchInputRef}
-              className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
+              className="duo-shadow h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite transition-colors focus:border-sky-blue focus:outline-none"
               placeholder={t('discover.search.placeholder')}
               type="search"
               value={searchTerm}
@@ -463,10 +463,10 @@ export function DiscoverPage() {
                 <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
               </button>
               {openMenu === 'sort' ? (
-                <div className="absolute right-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                <div className="duo-shadow absolute right-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
                   {[t('discover.controls.comprehensive'), t('discover.controls.recentlyActive'), t('discover.controls.nearest')].map((label) => (
                     <button
-                      className="block w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0 hover:bg-gray-100"
+                      className="surface-hover block w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0"
                       key={label}
                       type="button"
                       onClick={() => setOpenMenu(null)}
@@ -507,10 +507,10 @@ export function DiscoverPage() {
                 <ChevronDown aria-hidden="true" className="shrink-0" size={16} strokeWidth={3} />
               </button>
               {openMenu === 'language' ? (
-                <div className="absolute left-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                <div className="duo-shadow absolute left-0 top-full z-40 mt-3 w-44 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
                   {(languageOptions.length > 0 ? languageOptions : ['English', 'Japanese', 'Korean', 'French']).map((language) => (
                     <button
-                      className="block w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0 hover:bg-gray-50"
+                      className="surface-hover block w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold text-graphite last:border-b-0"
                       key={language}
                       type="button"
                       onClick={() => {
@@ -540,13 +540,13 @@ export function DiscoverPage() {
         </section>
 
         {requestFeedback ? (
-          <p className="mb-6 rounded-2xl border-2 border-duo-green bg-duo-green-light p-4 text-sm font-bold text-duo-green shadow-[0_4px_0_#d7ffb8]" role="status">
+          <p className="duo-shadow mb-6 rounded-2xl border-2 border-duo-green bg-duo-green-light p-4 text-sm font-bold text-duo-green" role="status">
             {requestFeedback}
           </p>
         ) : null}
 
         {sendFriendRequestMutation.isError ? (
-          <p className="mb-6 rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c] shadow-[0_4px_0_#fecaca]" role="alert">
+          <p className="surface-error mb-6 rounded-2xl border-2 p-4 text-sm font-bold shadow-[0_4px_0_rgb(254_202_202_/_0.75)]" role="alert">
             {getFriendsApiErrorMessage(sendFriendRequestMutation.error)}
           </p>
         ) : null}

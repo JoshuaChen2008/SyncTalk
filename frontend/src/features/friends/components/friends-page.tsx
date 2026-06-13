@@ -74,7 +74,7 @@ function FriendCard({
   const statusLabel = isOnline ? t('friends.online') : t('friends.offline');
 
   return (
-    <article className="card-duo group relative flex min-h-[376px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_#e5e5e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <article className="card-duo group relative flex min-h-[376px] min-w-0 flex-col overflow-visible p-5 transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_var(--color-cloud-gray)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <span className="truncate rounded-full border-2 border-cloud-gray bg-snow-white px-4 py-1.5 text-xs font-black uppercase text-graphite">
           {t('friends.status.friend')}
@@ -97,7 +97,7 @@ function FriendCard({
       <div className="mt-5 flex min-w-0 items-center gap-4">
         <Link
           aria-label={t('profile.viewProfile', { name: friend.username })}
-          className={`relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black shadow-[0_4px_0_#e5e5e5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
+          className={`duo-shadow relative grid h-20 w-20 shrink-0 place-items-center rounded-full border-[3px] bg-sunshine-yellow text-xl font-feather text-almost-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-blue/30 ${
             isOnline ? 'border-duo-green' : 'border-cloud-gray'
           }`}
           to={`/app/profile/${friend.id}`}
@@ -142,7 +142,7 @@ function FriendCard({
         </span>
       </div>
 
-      <p className="mt-4 min-h-[58px] overflow-hidden rounded-2xl border-2 border-cloud-gray bg-[#f7f7f7] px-4 py-3 text-sm font-bold leading-6 text-charcoal [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+      <p className="surface-muted mt-4 min-h-[58px] overflow-hidden rounded-2xl border-2 border-cloud-gray px-4 py-3 text-sm font-bold leading-6 text-charcoal [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
         {friend.bio || t('friends.defaultBio')}
       </p>
 
@@ -175,9 +175,9 @@ function FriendCard({
         </button>
 
         {isMenuOpen ? (
-          <div className="absolute bottom-[calc(100%+0.75rem)] right-0 z-40 w-56 rounded-2xl border-2 border-cloud-gray bg-snow-white p-2 shadow-[0_8px_0_#e5e5e5]">
+          <div className="duo-shadow-lg absolute bottom-[calc(100%+0.75rem)] right-0 z-40 w-56 rounded-2xl border-2 border-cloud-gray bg-snow-white p-2">
             <button
-              className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black text-charcoal hover:bg-cloud-gray/40"
+              className="surface-hover flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black text-charcoal"
               type="button"
               onClick={() => onMenuChange(null)}
             >
@@ -186,7 +186,7 @@ function FriendCard({
             </button>
             <button
               aria-label={t('friends.removeName', { name: friend.username })}
-              className="mt-1 flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black text-[#b91c1c] hover:bg-[#fef2f2] disabled:cursor-not-allowed disabled:opacity-60"
+              className="text-error mt-1 flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-sm font-black hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isRemoving}
               type="button"
               onClick={() => onRemove(friend)}
@@ -229,7 +229,7 @@ function FriendsResults({
   if (friends.length === 0) {
     return (
       <FriendsStatePanel>
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-cloud-gray bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
+        <div className="duo-shadow mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-cloud-gray bg-duo-green-light text-duo-green">
           <UsersRound aria-hidden="true" size={26} />
         </div>
         <h2 className="mt-5 text-heading-sm font-feather text-almost-black">
@@ -351,7 +351,7 @@ export function FriendsPage() {
   }
 
   return (
-    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-[#f9fafb] px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-10 lg:pb-12">
+    <main className="custom-scrollbar min-h-screen overflow-y-auto bg-snow-white px-4 py-6 pb-24 text-almost-black sm:px-8 md:px-12 md:py-10 lg:pb-12">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <header className="border-b-2 border-cloud-gray pb-6">
           <h1 className={`${pageTitleClass} text-duo-green [text-shadow:2px_2px_0_#46a300]`}>
@@ -373,7 +373,7 @@ export function FriendsPage() {
               />
               <input
                 aria-label={t('friends.search.sr')}
-                className="h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite shadow-[0_4px_0_#e5e5e5] transition-colors focus:border-sky-blue focus:outline-none"
+                className="duo-shadow h-full w-full rounded-2xl border-2 border-cloud-gray bg-snow-white py-2 pl-[64px] pr-[64px] text-lg font-bold text-graphite transition-colors focus:border-sky-blue focus:outline-none"
                 placeholder={t('friends.search.placeholder')}
                 type="search"
                 value={searchTerm}
@@ -390,13 +390,13 @@ export function FriendsPage() {
                   <SlidersHorizontal aria-hidden="true" size={24} strokeWidth={3} />
                 </button>
                 {isFilterMenuOpen ? (
-                  <div className="absolute right-0 top-full z-40 mt-3 w-56 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left shadow-[0_4px_0_#e5e5e5]">
+                  <div className="duo-shadow absolute right-0 top-full z-40 mt-3 w-56 overflow-hidden rounded-2xl border-2 border-cloud-gray bg-snow-white text-left">
                     {friendFilterOptions.map(([value, labelKey]) => (
                       <button
-                        className={`block min-h-11 w-full cursor-pointer border-b-2 border-gray-100 px-3 py-3 text-left text-sm font-bold last:border-b-0 ${
+                        className={`block min-h-11 w-full cursor-pointer border-b-2 border-cloud-gray px-3 py-3 text-left text-sm font-bold last:border-b-0 ${
                           sortLabel === value
-                            ? 'bg-[#ddf4ff] text-sky-blue'
-                            : 'text-graphite hover:bg-gray-100'
+                            ? 'surface-info text-sky-blue'
+                            : 'surface-hover text-graphite'
                         }`}
                         key={value}
                         type="button"
@@ -446,7 +446,7 @@ export function FriendsPage() {
 
         {removeFriendMutation.isError ? (
           <p
-            className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] p-4 text-sm font-bold text-[#b91c1c]"
+            className="surface-error rounded-xl border-2 p-4 text-sm font-bold"
             role="alert"
           >
             {getFriendsApiErrorMessage(removeFriendMutation.error)}
@@ -461,7 +461,7 @@ export function FriendsPage() {
 
         {friendsQuery.isError ? (
           <FriendsStatePanel role="alert">
-            <p className="text-sm font-bold text-[#b91c1c]">
+            <p className="text-error text-sm font-bold">
               {getFriendsApiErrorMessage(friendsQuery.error)}
             </p>
           </FriendsStatePanel>

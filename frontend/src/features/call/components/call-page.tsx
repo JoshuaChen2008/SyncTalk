@@ -54,11 +54,11 @@ function CallErrorPanel({
 
   return (
     <CallStatePanel role="alert">
-      <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-[#fecaca] bg-[#fef2f2] text-[#b91c1c] shadow-[0_4px_0_#fecaca]">
+      <div className="surface-error mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 shadow-[0_4px_0_rgb(254_202_202_/_0.75)]">
         <ShieldAlert aria-hidden="true" size={26} />
       </div>
       <h2 className="mt-5 text-heading-sm font-feather text-almost-black">{t('call.unavailable')}</h2>
-      <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-red-800">{message}</p>
+      <p className="text-error mx-auto mt-3 max-w-md text-sm font-bold leading-6">{message}</p>
       <Link
         className="btn-3d-base btn-3d-sky mt-5 min-h-11 gap-2 px-5 text-sm"
         to={backTo}
@@ -230,7 +230,7 @@ function StreamCallPanel({
   }
 
   return (
-    <section className="session-call-shell overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white shadow-[0_4px_0_#e5e5e5]">
+    <section className="session-call-shell duo-shadow overflow-hidden rounded-[1.75rem] border-2 border-cloud-gray bg-snow-white">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-duo-green">
@@ -248,7 +248,7 @@ function StreamCallPanel({
           {t('call.backToChat')}
         </Link>
       </div>
-      <div className="bg-[#f7f7f7] p-2 md:p-3">
+      <div className="surface-muted p-2 md:p-3">
         <div className="min-h-[34rem] overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white">
           <StreamVideo client={videoClient}>
             <StreamCall call={activeCall}>
@@ -308,7 +308,7 @@ export function CallPage() {
 
         {streamApiKey && isLoading ? (
           <CallStatePanel role="status">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-duo-green-light text-duo-green shadow-[0_4px_0_#e5e5e5]">
+            <div className="duo-shadow mx-auto grid h-16 w-16 place-items-center rounded-2xl border-2 border-cloud-gray bg-duo-green-light text-duo-green">
               <Video aria-hidden="true" size={26} />
             </div>
             <p className="mt-5 text-sm font-black text-graphite">{t('call.loading')}</p>

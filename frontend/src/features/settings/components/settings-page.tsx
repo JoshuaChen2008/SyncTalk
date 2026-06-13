@@ -202,7 +202,7 @@ export function SettingsPage() {
               </button>
             </div>
             {logoutMutation.isError ? (
-              <p className="rounded-xl border-2 border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-bold text-[#991b1b]" role="alert">
+              <p className="surface-error rounded-xl border-2 px-4 py-3 text-sm font-bold" role="alert">
                 {t('settings.logout.error')}
               </p>
             ) : null}
@@ -218,7 +218,7 @@ export function SettingsPage() {
                 </div>
               </li>
               <li>
-                <div className="rounded-xl bg-[#ddf4ff] px-4 py-3 text-sm font-bold text-sky-blue">
+                <div className="surface-info rounded-xl px-4 py-3 text-sm font-bold text-sky-blue">
                   {t('settings.title')}
                 </div>
               </li>

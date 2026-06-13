@@ -126,7 +126,7 @@ function StreamChatPanel({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cloud-gray bg-snow-white px-5 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-normal text-sky-blue">
-            {t('chat.channelLabel', { id: channelData.channelId })}
+            {t('chat.channelLabel')}
           </p>
           <p className="mt-1 text-sm font-bold text-graphite">
             {friendName}

@@ -169,7 +169,8 @@ describe('chat page', () => {
     expect(await screen.findByRole('heading', { name: /chat with sam/i })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: /chat conversations/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /active chat workspace/i })).toBeInTheDocument();
-    expect(screen.getByText(/channel user-1-user-2/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^sam$/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/user-1-user-2/i)).not.toBeInTheDocument();
     expect(screen.getByText(/stream message list/i)).toBeInTheDocument();
     expect(screen.getByText(/stream message input/i)).toBeInTheDocument();
   });
